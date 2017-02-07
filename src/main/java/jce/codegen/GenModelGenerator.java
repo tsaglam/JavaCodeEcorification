@@ -14,10 +14,11 @@ import org.eclipse.emf.codegen.ecore.genmodel.GenJDKLevel;
 import org.eclipse.emf.codegen.ecore.genmodel.GenModel;
 import org.eclipse.emf.codegen.ecore.genmodel.GenModelFactory;
 import org.eclipse.emf.common.util.URI;
-import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.xmi.XMLResource;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
-import eme.generator.saving.*;
+
+import eme.generator.GeneratedEcoreMetamodel;
+import eme.generator.saving.SavingInformation;
 
 /**
  * Creates generation models from Ecore metamodels.
@@ -60,24 +61,28 @@ public class GenModelGenerator {
      * @param information is the saving information object. It contains information about the location of the metamodel.
      * @return the generator model, a GenModel object.
      */
-    public GenModel generate(EPackage ecoreMetamodel, SavingInformation information) {
-        String modelName = information.getFileName();
-        String modelPath = information.getFilePath(); // TODO (MEDIUM) replace slashes with File.separator
-        String projectPath = modelPath.substring(0, modelPath.lastIndexOf('/', modelPath.lastIndexOf('/') - 1));
-        String projectName = projectPath.substring(projectPath.lastIndexOf('/'));
-        GenModel genModel = GenModelFactory.eINSTANCE.createGenModel();
-        genModel.setModelDirectory(projectName + "/src");
-        genModel.setModelPluginID(projectName.substring(1));
-        genModel.setModelName(modelName);
-        genModel.setRootExtendsClass(rootExtendsClass);
-        genModel.setImporterID(importerID);
-        genModel.setComplianceLevel(complianceLevel);
-        genModel.setOperationReflection(true);
-        genModel.setImportOrganizing(true);
-        genModel.getForeignModel().add(modelName + ".ecore");
-        genModel.initialize(Collections.singleton(ecoreMetamodel));
-        saveGenModel(genModel, modelPath, modelName);
-        return genModel;
+    public GenModel generate(GeneratedEcoreMetamodel metamodel) {
+        if (metamodel.isSaved()) {
+            SavingInformation information = metamodel.getSavingInformation();
+            String modelName = information.getFileName();
+            String modelPath = information.getFilePath(); // TODO (MEDIUM) replace slashes with File.separator
+            String projectPath = modelPath.substring(0, modelPath.lastIndexOf('/', modelPath.lastIndexOf('/') - 1));
+            String projectName = projectPath.substring(projectPath.lastIndexOf('/'));
+            GenModel genModel = GenModelFactory.eINSTANCE.createGenModel();
+            genModel.setModelDirectory(projectName + "/src");
+            genModel.setModelPluginID(projectName.substring(1));
+            genModel.setModelName(modelName);
+            genModel.setRootExtendsClass(rootExtendsClass);
+            genModel.setImporterID(importerID);
+            genModel.setComplianceLevel(complianceLevel);
+            genModel.setOperationReflection(true);
+            genModel.setImportOrganizing(true);
+            genModel.getForeignModel().add(modelName + ".ecore");
+            genModel.initialize(Collections.singleton(metamodel.getRoot()));
+            saveGenModel(genModel, modelPath, modelName);
+            return genModel;
+        }
+        throw new IllegalArgumentException("Can create GenModel only from saved metamodels!");
     }
 
     /**

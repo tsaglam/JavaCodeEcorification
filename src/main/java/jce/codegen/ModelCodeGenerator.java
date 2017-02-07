@@ -9,8 +9,8 @@ import org.eclipse.emf.codegen.ecore.genmodel.generator.GenBaseGeneratorAdapter;
 /**
  * Class for code generation (e.g generating Java code from Ecore GenModels).
  */
-public final class CodeGenerator {
-    private static final Logger logger = LogManager.getLogger(CodeGenerator.class.getName());
+public final class ModelCodeGenerator {
+    private static final Logger logger = LogManager.getLogger(ModelCodeGenerator.class.getName());
 
     /**
      * Uses a specific GenModel to generate Java Code.
