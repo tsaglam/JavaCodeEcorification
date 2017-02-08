@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.commands">
+      <category
+            name="JavaCodeEcorification"
+            id="JavaCodeEcorification.commands.category">
+      </category>
+      <command
+            name="Ecorify From..."
+            categoryId="JavaCodeEcorification.commands.category"
+            id="JavaCodeEcorification.commands.ecorifyCommand">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            commandId="JavaCodeEcorification.commands.ecorifyCommand"
+            class="jce.handlers.EcorificationHandler">
+      </handler>
+   </extension>
+   <extension
+         point="org.eclipse.ui.bindings">
+      <key
+            commandId="JavaCodeEcorification.commands.ecorifyCommand"
+            contextId="org.eclipse.ui.contexts.window"
+            sequence="M1+3"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </key>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            locationURI="menu:org.eclipse.ui.main.menu?after=additions">
+         <menu
+               label="JCE"
+               mnemonic="M"
+               id="JavaCodeEcorification.menus.sampleMenu">
+            <command
+                  commandId="JavaCodeEcorification.commands.ecorifyCommand"
+                  mnemonic="S"
+                  id="JavaCodeEcorification.menus.ecorifyCommand">
+            </command>
+         </menu>
+      </menuContribution>
+   </extension>
+
+</plugin>
