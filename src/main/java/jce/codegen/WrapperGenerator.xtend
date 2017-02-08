@@ -2,12 +2,12 @@ package jce.codegen
 
 class WrapperGenerator {
 
-	def String generate(String className, String factoryName, String packagePath) '''
-		package «packagePath»
+	def String generate(String className, String factoryName, String wrapperPackage, String ecorePackage) '''
+		package «wrapperPackage»
 		
 		import org.eclipse.xtend.lib.annotations.Delegate
-		import «packagePath».«className»
-		import «packagePath».«factoryName»
+		import «ecorePackage».«className»
+		import «ecorePackage».«factoryName»
 		
 		/**
 		 * Wrapper class for the class «className»
