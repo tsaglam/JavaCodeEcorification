@@ -7,6 +7,7 @@ import org.eclipse.emf.codegen.ecore.genmodel.GenModel;
 
 import eme.EcoreMetamodelExtraction;
 import eme.generator.GeneratedEcoreMetamodel;
+import eme.properties.ExtractionProperties;
 import eme.properties.TextProperty;
 import jce.codegen.GenModelGenerator;
 import jce.codegen.ModelCodeGenerator;
@@ -20,6 +21,7 @@ public class JavaCodeEcorification {
     private static final Logger logger = LogManager.getLogger(JavaCodeEcorification.class.getName());
     private final GenModelGenerator genModelGenerator;
     private final EcoreMetamodelExtraction metamodelGenerator;
+    private final ExtractionProperties extractionProperties;
 
     /**
      * Basic constructor.
@@ -27,12 +29,14 @@ public class JavaCodeEcorification {
     public JavaCodeEcorification() {
         metamodelGenerator = new EcoreMetamodelExtraction();
         genModelGenerator = new GenModelGenerator();
+        extractionProperties = metamodelGenerator.getProperties();
+        extractionProperties.set(TextProperty.SAVING_STRATEGY, "SameProject");
+        extractionProperties.set(TextProperty.DEFAULT_PACKAGE, "ecore");
     }
 
     public void start(IProject project) {
         check(project);
         logger.info("Starting Ecorification...");
-        metamodelGenerator.getProperties().set(TextProperty.SAVING_STRATEGY, "SameProject");
         GeneratedEcoreMetamodel metamodel = metamodelGenerator.extractAndSaveFrom(project);
         GenModel genModel = genModelGenerator.generate(metamodel);
         ModelCodeGenerator.generate(genModel);
