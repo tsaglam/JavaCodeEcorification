@@ -29,6 +29,7 @@ public class WrapperManager {
     private final PathHelper pathHelper;
     private final PathHelper packageHelper;
 
+    // TODO (HIGH) comment class.
     public WrapperManager(GeneratedEcoreMetamodel metamodel, GenModel genModel) {
         this.metamodel = metamodel;
         pathHelper = new PathHelper(SLASH);
@@ -57,10 +58,12 @@ public class WrapperManager {
 
     private void createXtendWrapper(String packagePath, String name) {
         System.err.println("path = " + packagePath);
-        String filePath = '/' + pathHelper.append(sourcePath, "wrappers", packagePath, name + "Wrapper.xtend");
-        String codePackage = packagePath.replace(SLASH, '.');
-        String wrapperPackage = packageHelper.append("wrappers", codePackage);
-        String ecorePackage = packageHelper.append("ecore", codePackage);
+        String filePath = pathHelper.append(sourcePath, "wrappers", packagePath, name + "Wrapper.xtend");
+        String currentPackage = packagePath.replace(SLASH, '.');
+        String wrapperPackage = packageHelper.append("wrappers", currentPackage);
+        String ecorePackage = packageHelper.append("ecore", currentPackage);
+        String factoryName = packageHelper.nameOf(currentPackage) + "Factory";
+        factoryName = factoryName.substring(0, 1).toUpperCase() + factoryName.substring(1);
         File file = new File(filePath);
         if (file.exists()) {
             throw new IllegalArgumentException("File already exists: " + filePath);
@@ -69,7 +72,7 @@ public class WrapperManager {
         try {
             file.createNewFile();
             FileWriter fileWriter = new FileWriter(file); // TODO (HIGH) Factory name
-            fileWriter.write(wrapperGenerator.generate(name, "", wrapperPackage, ecorePackage));
+            fileWriter.write(wrapperGenerator.generate(name, factoryName, wrapperPackage, ecorePackage));
             fileWriter.flush();
             fileWriter.close();
         } catch (IOException exception) {

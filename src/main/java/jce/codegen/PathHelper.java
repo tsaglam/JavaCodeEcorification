@@ -4,7 +4,7 @@ package jce.codegen;
  * Class that helps to work with paths (file paths, package paths).
  * @author Timur Saglam
  */
-public class PathHelper {
+public class PathHelper { // TODO (HIGH) comment class.
     private final char separator;
 
     /**
@@ -17,6 +17,10 @@ public class PathHelper {
 
     public String parentOf(String path) {
         return path.substring(0, path.lastIndexOf(separator));
+    }
+
+    public String nameOf(String path) {
+        return path.substring(path.lastIndexOf(separator) + 1);
     }
 
     public String nthParentOf(String path, int n) {
@@ -52,10 +56,14 @@ public class PathHelper {
                 }
                 result = result + separator + paths[i];
             }
-            if (result.startsWith(Character.toString(separator))) {
+            if (startsWithSeparator(result) && !startsWithSeparator(paths[0])) {
                 return result.substring(1);
             }
             return result;
         }
+    }
+
+    public boolean startsWithSeparator(String path) {
+        return path.startsWith(Character.toString(separator));
     }
 }
