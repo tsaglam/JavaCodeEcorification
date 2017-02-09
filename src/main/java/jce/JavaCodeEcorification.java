@@ -7,6 +7,7 @@ import org.eclipse.emf.codegen.ecore.genmodel.GenModel;
 
 import eme.EcoreMetamodelExtraction;
 import eme.generator.GeneratedEcoreMetamodel;
+import eme.properties.BinaryProperty;
 import eme.properties.ExtractionProperties;
 import eme.properties.TextProperty;
 import jce.codegen.GenModelGenerator;
@@ -32,6 +33,7 @@ public class JavaCodeEcorification {
         extractionProperties = metamodelGenerator.getProperties();
         extractionProperties.set(TextProperty.SAVING_STRATEGY, "SameProject");
         extractionProperties.set(TextProperty.DEFAULT_PACKAGE, "ecore");
+        extractionProperties.set(BinaryProperty.DUMMY_CLASS, false);
     }
 
     public void start(IProject project) {
