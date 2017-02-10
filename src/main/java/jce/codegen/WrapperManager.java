@@ -19,6 +19,10 @@ import org.eclipse.emf.ecore.EPackage;
 
 import eme.generator.GeneratedEcoreMetamodel;
 
+/**
+ * Creates and manages wrappers for the classes of the orginal Java project with is ecorified.
+ * @author Timur Saglam
+ */
 public class WrapperManager {
     private static final Logger logger = LogManager.getLogger(WrapperManager.class.getName());
     private static final char SLASH = File.separatorChar;
@@ -29,7 +33,11 @@ public class WrapperManager {
     private final PathHelper pathHelper;
     private final PathHelper packageHelper;
 
-    // TODO (HIGH) comment class.
+    /**
+     * Basic constructor.
+     * @param metamodel is the metamodel that got extracted from the original project.
+     * @param genModel is the {@link GenModel} that was build for the metamodel.
+     */
     public WrapperManager(GeneratedEcoreMetamodel metamodel, GenModel genModel) {
         this.metamodel = metamodel;
         pathHelper = new PathHelper(SLASH);
@@ -39,12 +47,20 @@ public class WrapperManager {
         wrapperGenerator = new WrapperGenerator();
     }
 
+    /**
+     * Builds the wrapper classes.
+     */
     public void buildWrappers() {
         logger.info("Starting the wrapper class generation...");
         buildWrappers(metamodel.getRoot(), "");
-        refreshSourceFolder();
+        refreshSourceFolder(); // makes wrappers visible in Eclipse
     }
 
+    /**
+     * Recursive method for the wrapper creation.
+     * @param ePackage is the current {@link EPackage} to create wrappers for.
+     * @param path is the current file path of the {@link EPackage}. Should be initially an empty string.
+     */
     private void buildWrappers(EPackage ePackage, String path) {
         for (EClassifier eClassifier : ePackage.getEClassifiers()) { // for every classifier
             if (eClassifier instanceof EClass) { // if class
@@ -56,6 +72,11 @@ public class WrapperManager {
         }
     }
 
+    /**
+     * Creates and Xtend wrapper class at a specific location with a specific name.
+     * @param packagePath is the path of the specific location.
+     * @param name is the name of the wrapper to generate.
+     */
     private void createXtendWrapper(String packagePath, String name) {
         String filePath = pathHelper.append(sourcePath, "wrappers", packagePath, name + "Wrapper.xtend");
         String currentPackage = packagePath.replace(SLASH, '.');
@@ -67,10 +88,10 @@ public class WrapperManager {
         if (file.exists()) {
             throw new IllegalArgumentException("File already exists: " + filePath);
         }
-        file.getParentFile().mkdirs();
+        file.getParentFile().mkdirs(); // ensure folder tree exists
         try {
             file.createNewFile();
-            FileWriter fileWriter = new FileWriter(file); // TODO (HIGH) Factory name
+            FileWriter fileWriter = new FileWriter(file);
             fileWriter.write(wrapperGenerator.generate(name, factoryName, wrapperPackage, ecorePackage));
             fileWriter.flush();
             fileWriter.close();
@@ -79,9 +100,12 @@ public class WrapperManager {
         }
     }
 
+    /**
+     * Refreshes the source folder where the wrappers are generated in.
+     */
     private void refreshSourceFolder() {
         IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-        IContainer folder = root.getContainerForLocation(new Path(sourcePath));
+        IContainer folder = root.getContainerForLocation(new Path(sourcePath)); // find source folder in workspace
         try {
             folder.refreshLocal(IResource.DEPTH_INFINITE, null);
         } catch (CoreException exception) {
