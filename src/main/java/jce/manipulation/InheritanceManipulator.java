@@ -7,18 +7,19 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 
+// TODO (MEDIUM) add JDoc and inline comments.
 public class InheritanceManipulator {
     private static final Logger logger = LogManager.getLogger(InheritanceManipulator.class.getName());
 
-    public void editPackages(IPackageFragment[] packages) {
+    public void manipulate(IPackageFragment[] packages) {
         try {
             for (IPackageFragment mypackage : packages) {
                 if (mypackage.getKind() == IPackageFragmentRoot.K_SOURCE) {
-                    createAST(mypackage);
+                    editTypesIn(mypackage);
                 }
             }
         } catch (JavaModelException exception) {
@@ -26,21 +27,23 @@ public class InheritanceManipulator {
         }
     }
 
-    private void createAST(IPackageFragment myPackage) throws JavaModelException {
+    /**
+     * Visits all types of all {@link ICompilationUnit}s of a {@link IPackageFragment}.
+     * @param myPackage is the {@link IPackageFragment}.
+     * @throws JavaModelException if there is a problem with the JDT API.
+     */
+    private void editTypesIn(IPackageFragment myPackage) throws JavaModelException {
+        TypeVisitor visitor = new TypeVisitor();
         for (ICompilationUnit unit : myPackage.getCompilationUnits()) {
             CompilationUnit parse = parse(unit);
-            TypeVisitor visitor = new TypeVisitor();
             parse.accept(visitor);
-            for (TypeDeclaration type : visitor.getTypes()) {
-                System.out.print("Type name: " + type.getName());
-            }
         }
     }
 
     /**
-     * Reads a ICompilationUnit and creates the AST DOM for manipulating the Java source file
-     * @param unit
-     * @return
+     * Reads a {@link ICompilationUnit} and creates the AST DOM for manipulating the Java source file.
+     * @param unit is the {@link ICompilationUnit}.
+     * @return the {@link ASTNode}.
      */
     private static CompilationUnit parse(ICompilationUnit unit) {
         ASTParser parser = ASTParser.newParser(AST.JLS8);
