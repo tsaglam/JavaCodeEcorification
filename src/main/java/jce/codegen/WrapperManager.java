@@ -57,7 +57,6 @@ public class WrapperManager {
     }
 
     private void createXtendWrapper(String packagePath, String name) {
-        System.err.println("path = " + packagePath);
         String filePath = pathHelper.append(sourcePath, "wrappers", packagePath, name + "Wrapper.xtend");
         String currentPackage = packagePath.replace(SLASH, '.');
         String wrapperPackage = packageHelper.append("wrappers", currentPackage);

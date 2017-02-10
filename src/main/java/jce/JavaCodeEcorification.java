@@ -9,6 +9,9 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.emf.codegen.ecore.genmodel.GenModel;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 
 import eme.EcoreMetamodelExtraction;
 import eme.generator.GeneratedEcoreMetamodel;
@@ -18,6 +21,7 @@ import eme.properties.TextProperty;
 import jce.codegen.GenModelGenerator;
 import jce.codegen.ModelCodeGenerator;
 import jce.codegen.WrapperManager;
+import jce.manipulation.InheritanceManipulator;
 
 /**
  * Main class for Java code ecorification.
@@ -47,11 +51,28 @@ public class JavaCodeEcorification {
      */
     public void start(IProject project) {
         check(project);
+        IProject copy = copy(project);
         logger.info("Starting Ecorification...");
-        GeneratedEcoreMetamodel metamodel = metamodelGenerator.extractAndSaveFrom(copy(project));
+        IPackageFragment[] originalPackages = getPackages(copy);
+        GeneratedEcoreMetamodel metamodel = metamodelGenerator.extractAndSaveFrom(copy);
         GenModel genModel = genModelGenerator.generate(metamodel);
         ModelCodeGenerator.generate(genModel);
         new WrapperManager(metamodel, genModel).buildWrappers();
+        new InheritanceManipulator().editPackages(originalPackages);
+    }
+
+    /**
+     * Gets packages from a specific {@link IProject}.
+     * @param project is the specific {@link IProject}.
+     * @return the array of {@link IPackageFragment}s.
+     */
+    private IPackageFragment[] getPackages(IProject project) {
+        try {
+            return JavaCore.create(project).getPackageFragments();
+        } catch (JavaModelException exception) {
+            logger.fatal(exception);
+        }
+        return null;
     }
 
     /**
@@ -73,7 +94,7 @@ public class JavaCodeEcorification {
      */
     private IProject copy(IProject project) {
         IProject copy = null;
-        try {
+        try { // TODO (HIGH) duplicate check and intelligent naming
             IPath newPath = new Path(project.getFullPath() + "Ecorified");
             project.copy(newPath, false, null);
             logger.info("Copied the project...");
