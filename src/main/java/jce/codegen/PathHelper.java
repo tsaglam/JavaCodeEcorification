@@ -4,7 +4,7 @@ package jce.codegen;
  * Class that helps to work with paths (file paths, package paths).
  * @author Timur Saglam
  */
-public class PathHelper { // TODO (HIGH) comment class.
+public class PathHelper {
     private final char separator;
 
     /**
@@ -15,14 +15,30 @@ public class PathHelper { // TODO (HIGH) comment class.
         this.separator = separator;
     }
 
+    /**
+     * Returns the parent of the original path. That is the original path without the last segment.
+     * @param path is the original path.
+     * @return the parent.
+     */
     public String parentOf(String path) {
         return path.substring(0, path.lastIndexOf(separator));
     }
 
+    /**
+     * Returns the name of the original path. That is the last segment of the original path.
+     * @param path is the original path.
+     * @return the name.
+     */
     public String nameOf(String path) {
         return path.substring(path.lastIndexOf(separator) + 1);
     }
 
+    /**
+     * Returns the n-th parent of the original path. That is the original path without the last n - 1 segments.
+     * @param path is the original path.
+     * @param n specifies the parent index.
+     * @return the parent path.
+     */
     public String nthParentOf(String path, int n) {
         String result = path;
         for (int i = 0; i < n; i++) {
@@ -31,18 +47,11 @@ public class PathHelper { // TODO (HIGH) comment class.
         return result;
     }
 
-    public static void main(String[] args) {
-        PathHelper p = new PathHelper('/');
-        System.err.println(p.append());
-        System.err.println(p.append("one"));
-        System.err.println(p.append("one", "two"));
-        System.err.println(p.append("one", "two", "three"));
-        System.err.println(p.append(""));
-        System.err.println(p.append("", "two", "three"));
-        System.err.println(p.append("one", "", "three"));
-        System.err.println(p.append("one", "two", ""));
-    }
-
+    /**
+     * Appends any number of paths with the separator.
+     * @param paths is the array of input paths.
+     * @return the new appended path.
+     */
     public String append(String... paths) {
         if (paths == null || paths.length == 0) { // if no parameters
             return ""; // return empty string
@@ -63,6 +72,11 @@ public class PathHelper { // TODO (HIGH) comment class.
         }
     }
 
+    /**
+     * Checks if a path starts with the separator character.
+     * @param path is the path.
+     * @return true if it does.
+     */
     public boolean startsWithSeparator(String path) {
         return path.startsWith(Character.toString(separator));
     }
