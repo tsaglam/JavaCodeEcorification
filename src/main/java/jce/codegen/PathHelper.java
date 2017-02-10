@@ -16,12 +16,28 @@ public class PathHelper {
     }
 
     /**
-     * Returns the parent of the original path. That is the original path without the last segment.
-     * @param path is the original path.
-     * @return the parent.
+     * Appends any number of paths with the separator.
+     * @param paths is the array of input paths.
+     * @return the new appended path.
      */
-    public String parentOf(String path) {
-        return path.substring(0, path.lastIndexOf(separator));
+    public String append(String... paths) {
+        if (paths == null || paths.length == 0) { // if no parameters
+            return ""; // return empty string
+        } else if (paths.length == 1) { // if one parameter
+            return paths[0]; // return it
+        } else { // if multiple
+            String result = paths[0]; // concatenate all:
+            for (int i = 1; i < paths.length; i++) {
+                if (paths[i].isEmpty()) {
+                    continue;
+                }
+                result = result + separator + paths[i];
+            }
+            if (startsWithSeparator(result) && !startsWithSeparator(paths[0])) {
+                return result.substring(1);
+            }
+            return result;
+        }
     }
 
     /**
@@ -48,28 +64,12 @@ public class PathHelper {
     }
 
     /**
-     * Appends any number of paths with the separator.
-     * @param paths is the array of input paths.
-     * @return the new appended path.
+     * Returns the parent of the original path. That is the original path without the last segment.
+     * @param path is the original path.
+     * @return the parent.
      */
-    public String append(String... paths) {
-        if (paths == null || paths.length == 0) { // if no parameters
-            return ""; // return empty string
-        } else if (paths.length == 1) { // if one parameter
-            return paths[0]; // return it
-        } else { // if multiple
-            String result = paths[0]; // concatenate all:
-            for (int i = 1; i < paths.length; i++) {
-                if (paths[i].isEmpty()) {
-                    continue;
-                }
-                result = result + separator + paths[i];
-            }
-            if (startsWithSeparator(result) && !startsWithSeparator(paths[0])) {
-                return result.substring(1);
-            }
-            return result;
-        }
+    public String parentOf(String path) {
+        return path.substring(0, path.lastIndexOf(separator));
     }
 
     /**

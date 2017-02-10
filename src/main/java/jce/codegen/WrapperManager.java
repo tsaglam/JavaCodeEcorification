@@ -27,11 +27,11 @@ public class WrapperManager {
     private static final Logger logger = LogManager.getLogger(WrapperManager.class.getName());
     private static final char SLASH = File.separatorChar;
     private final GeneratedEcoreMetamodel metamodel;
-    private final String workspacePath;
-    private final String sourcePath;
-    private final WrapperGenerator wrapperGenerator;
-    private final PathHelper pathHelper;
     private final PathHelper packageHelper;
+    private final PathHelper pathHelper;
+    private final String sourcePath;
+    private final String workspacePath;
+    private final WrapperGenerator wrapperGenerator;
 
     /**
      * Basic constructor.

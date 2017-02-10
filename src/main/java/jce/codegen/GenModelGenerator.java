@@ -1,5 +1,6 @@
 package jce.codegen;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 
@@ -26,6 +27,7 @@ import eme.generator.saving.SavingInformation;
  */
 public class GenModelGenerator {
     private static final Logger logger = LogManager.getLogger(GenModelGenerator.class.getName());
+    private static final char SLASH = File.separatorChar;
     private final GenJDKLevel complianceLevel;
     private final String importerID;
     private final String rootExtendsClass;
@@ -65,9 +67,9 @@ public class GenModelGenerator {
         if (metamodel.isSaved()) {
             SavingInformation information = metamodel.getSavingInformation();
             String modelName = information.getFileName();
-            String modelPath = information.getFilePath(); // TODO (MEDIUM) replace slashes with File.separator
-            String projectPath = modelPath.substring(0, modelPath.lastIndexOf('/', modelPath.lastIndexOf('/') - 1));
-            String projectName = projectPath.substring(projectPath.lastIndexOf('/'));
+            String modelPath = information.getFilePath();
+            String projectPath = modelPath.substring(0, modelPath.lastIndexOf(SLASH, modelPath.lastIndexOf(SLASH) - 1));
+            String projectName = projectPath.substring(projectPath.lastIndexOf(SLASH));
             GenModel genModel = GenModelFactory.eINSTANCE.createGenModel();
             genModel.setModelDirectory(projectName + "/src");
             genModel.setModelPluginID(projectName.substring(1));

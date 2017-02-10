@@ -58,21 +58,7 @@ public class JavaCodeEcorification {
         GenModel genModel = genModelGenerator.generate(metamodel);
         ModelCodeGenerator.generate(genModel);
         new WrapperManager(metamodel, genModel).buildWrappers();
-        new InheritanceManipulator().editPackages(originalPackages);
-    }
-
-    /**
-     * Gets packages from a specific {@link IProject}.
-     * @param project is the specific {@link IProject}.
-     * @return the array of {@link IPackageFragment}s.
-     */
-    private IPackageFragment[] getPackages(IProject project) {
-        try {
-            return JavaCore.create(project).getPackageFragments();
-        } catch (JavaModelException exception) {
-            logger.fatal(exception);
-        }
-        return null;
+        new InheritanceManipulator().manipulate(originalPackages);
     }
 
     /**
@@ -94,7 +80,7 @@ public class JavaCodeEcorification {
      */
     private IProject copy(IProject project) {
         IProject copy = null;
-        try { // TODO (HIGH) duplicate check and intelligent naming
+        try { // TODO (MEDIUM) duplicate check and intelligent naming
             IPath newPath = new Path(project.getFullPath() + "Ecorified");
             project.copy(newPath, false, null);
             logger.info("Copied the project...");
@@ -104,5 +90,19 @@ public class JavaCodeEcorification {
             logger.fatal(exception);
         }
         return copy;
+    }
+
+    /**
+     * Gets packages from a specific {@link IProject}.
+     * @param project is the specific {@link IProject}.
+     * @return the array of {@link IPackageFragment}s.
+     */
+    private IPackageFragment[] getPackages(IProject project) {
+        try {
+            return JavaCore.create(project).getPackageFragments();
+        } catch (JavaModelException exception) {
+            logger.fatal(exception);
+        }
+        return null;
     }
 }
