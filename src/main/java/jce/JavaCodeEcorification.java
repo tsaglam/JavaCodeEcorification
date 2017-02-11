@@ -9,6 +9,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.emf.codegen.ecore.genmodel.GenModel;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -21,6 +22,7 @@ import eme.properties.TextProperty;
 import jce.codegen.GenModelGenerator;
 import jce.codegen.ModelCodeGenerator;
 import jce.codegen.WrapperManager;
+import jce.codegen.XtendLibraryHelper;
 import jce.manipulation.InheritanceManipulator;
 
 /**
@@ -53,11 +55,13 @@ public class JavaCodeEcorification {
         check(project);
         IProject copy = copy(project);
         logger.info("Starting Ecorification...");
-        IPackageFragment[] originalPackages = getPackages(copy);
+        IJavaProject javaProject = JavaCore.create(copy);
+        IPackageFragment[] originalPackages = getPackages(javaProject);
         GeneratedEcoreMetamodel metamodel = metamodelGenerator.extractAndSaveFrom(copy);
         GenModel genModel = genModelGenerator.generate(metamodel);
         ModelCodeGenerator.generate(genModel);
         new WrapperManager(metamodel, genModel).buildWrappers();
+        XtendLibraryHelper.addXtendLibs(javaProject);
         new InheritanceManipulator().manipulate(originalPackages);
     }
 
@@ -93,13 +97,13 @@ public class JavaCodeEcorification {
     }
 
     /**
-     * Gets packages from a specific {@link IProject}.
-     * @param project is the specific {@link IProject}.
+     * Gets packages from a specific {@link IJavaProject}.
+     * @param project is the specific {@link IJavaProject}.
      * @return the array of {@link IPackageFragment}s.
      */
-    private IPackageFragment[] getPackages(IProject project) {
+    private IPackageFragment[] getPackages(IJavaProject project) {
         try {
-            return JavaCore.create(project).getPackageFragments();
+            return project.getPackageFragments();
         } catch (JavaModelException exception) {
             logger.fatal(exception);
         }
