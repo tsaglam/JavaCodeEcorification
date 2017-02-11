@@ -33,7 +33,7 @@ public class InheritanceManipulator {
      * @throws JavaModelException if there is a problem with the JDT API.
      */
     private void editTypesIn(IPackageFragment myPackage) throws JavaModelException {
-        TypeVisitor visitor = new TypeVisitor();
+        TypeVisitor visitor = new TypeVisitor(myPackage.getJavaProject());
         for (ICompilationUnit unit : myPackage.getCompilationUnits()) {
             CompilationUnit parse = parse(unit);
             parse.accept(visitor);
