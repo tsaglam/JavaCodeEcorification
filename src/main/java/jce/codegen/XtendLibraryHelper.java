@@ -29,7 +29,9 @@ public class XtendLibraryHelper {
     private static void addClasspathEntry(IJavaProject project, ProjectDirectories directories) {
         try {
             ArrayList<IClasspathEntry> entries = new ArrayList<IClasspathEntry>(Arrays.asList(project.getRawClasspath()));
-            entries.add(JavaCore.newSourceEntry(new Path(directories.getProjectDirectory().getAbsolutePath() + File.separator + "xtend-gen")));
+            entries.add(JavaCore.newSourceEntry(new Path(directories.getProjectDirectory() + File.separator + "xtend-gen")));
+            IClasspathEntry[] entryArray = new IClasspathEntry[entries.size()];
+            project.setRawClasspath(entries.toArray(entryArray), null);
         } catch (JavaModelException exception) {
             logger.fatal(exception);
         }

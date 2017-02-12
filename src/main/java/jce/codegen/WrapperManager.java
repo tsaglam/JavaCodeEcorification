@@ -78,7 +78,7 @@ public class WrapperManager {
      * @param name is the name of the wrapper to generate.
      */
     private void createXtendWrapper(String packagePath, String name) {
-        String filePath = pathHelper.append(directories.getSourceDirectory().getAbsolutePath(), "wrappers", packagePath, name + "Wrapper.xtend");
+        String filePath = pathHelper.append(directories.getSourceDirectory(), "wrappers", packagePath, name + "Wrapper.xtend");
         String currentPackage = packagePath.replace(SLASH, '.');
         String wrapperPackage = packageHelper.append("wrappers", currentPackage);
         String ecorePackage = packageHelper.append("ecore", currentPackage);
@@ -105,7 +105,7 @@ public class WrapperManager {
      */
     private void refreshSourceFolder() {
         IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-        IContainer folder = root.getContainerForLocation(new Path(directories.getSourceDirectory().getAbsolutePath()));
+        IContainer folder = root.getContainerForLocation(new Path(directories.getSourceDirectory()));
         try {
             folder.refreshLocal(IResource.DEPTH_INFINITE, null);
         } catch (CoreException exception) {

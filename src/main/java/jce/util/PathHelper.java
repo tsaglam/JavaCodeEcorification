@@ -50,7 +50,8 @@ public class PathHelper {
     }
 
     /**
-     * Returns the n-th parent of the original path. That is the original path without the last n - 1 segments.
+     * Returns the n-th parent of the original path. That is the original path without the last n - 1 segments. If the
+     * path ends on a separator, it gets removed first.
      * @param path is the original path.
      * @param n specifies the parent index.
      * @return the parent path.
@@ -64,13 +65,14 @@ public class PathHelper {
     }
 
     /**
-     * Returns the parent of the original path. That is the original path without the last segment.
+     * Returns the parent of the original path. That is the original path without the last segment. If the path ends on
+     * a separator, it gets removed first.
      * @param path is the original path.
      * @return the parent.
      */
     public String parentOf(String path) {
         if (path.endsWith(Character.toString(separator))) {
-            path.substring(0, path.lastIndexOf(separator, path.length() - 2));
+            return path.substring(0, path.lastIndexOf(separator, path.length() - 2));
         }
         return path.substring(0, path.lastIndexOf(separator));
     }

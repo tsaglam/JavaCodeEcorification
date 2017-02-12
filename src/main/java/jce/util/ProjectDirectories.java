@@ -15,6 +15,7 @@ import eme.generator.GeneratedEcoreMetamodel;
 public class ProjectDirectories {
     private static final Logger logger = LogManager.getLogger(ProjectDirectories.class.getName());
     private static final String MANIFEST_FOLDER = "META-INF";
+    private static final String MODEL_FOLDER = "model";
     private static final char SLASH = File.separatorChar;
     private final File manifestDirectory;
     private final File modelDirectory;
@@ -37,9 +38,9 @@ public class ProjectDirectories {
         pathHelper = new PathHelper(SLASH);
         projectDirectory = new File(pathHelper.parentOf(metamodel.getSavingInformation().getFilePath()));
         workspaceDirectory = new File(pathHelper.parentOf(projectDirectory.getAbsolutePath()));
-        sourceDirectory = new File(workspaceDirectory.getAbsolutePath() + genModel.getModelDirectory());
-        modelDirectory = new File(workspaceDirectory.getAbsolutePath() + genModel.getModelProjectDirectory());
-        manifestDirectory = new File(workspaceDirectory.getAbsolutePath() + SLASH + MANIFEST_FOLDER);
+        sourceDirectory = new File(getProjectDirectory() + SLASH + pathHelper.nameOf(genModel.getModelDirectory()));
+        modelDirectory = new File(getProjectDirectory() + SLASH + MODEL_FOLDER);
+        manifestDirectory = new File(getProjectDirectory() + SLASH + MANIFEST_FOLDER);
         if (!validate()) {
             logger.error("Some directories do not exist.");
         }
@@ -55,40 +56,40 @@ public class ProjectDirectories {
      * Accessor for the manifestDirectory.
      * @return the manifestDirectory
      */
-    public File getManifestDirectory() {
-        return manifestDirectory;
+    public String getManifestDirectory() {
+        return manifestDirectory.getAbsolutePath();
     }
-    
+
     /**
      * Accessor for the modelDirectory.
      * @return the modelDirectory
      */
-    public File getModelDirectory() {
-        return modelDirectory;
+    public String getModelDirectory() {
+        return modelDirectory.getAbsolutePath();
     }
 
     /**
      * Accessor for the projectDirectory.
      * @return the projectDirectory
      */
-    public File getProjectDirectory() {
-        return projectDirectory;
+    public String getProjectDirectory() {
+        return projectDirectory.getAbsolutePath();
     }
 
     /**
      * Accessor for the sourceDirectory.
      * @return the sourceDirectory
      */
-    public File getSourceDirectory() {
-        return sourceDirectory;
+    public String getSourceDirectory() {
+        return sourceDirectory.getAbsolutePath();
     }
 
     /**
      * Accessor for the workspaceDirectory.
      * @return the workspaceDirectory
      */
-    public File getWorkspaceDirectory() {
-        return workspaceDirectory;
+    public String getWorkspaceDirectory() {
+        return workspaceDirectory.getAbsolutePath();
     }
 
     /**
@@ -97,6 +98,7 @@ public class ProjectDirectories {
      * @see File#exists()
      */
     public boolean validate() {
-        return workspaceDirectory.exists() && sourceDirectory.exists() && modelDirectory.exists() && manifestDirectory.exists();
+        return workspaceDirectory.exists() && projectDirectory.exists() && sourceDirectory.exists() && modelDirectory.exists()
+                && manifestDirectory.exists();
     }
 }
