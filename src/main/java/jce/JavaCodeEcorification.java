@@ -23,7 +23,7 @@ import eme.properties.ExtractionProperties;
 import eme.properties.TextProperty;
 import jce.codegen.GenModelGenerator;
 import jce.codegen.ModelCodeGenerator;
-import jce.codegen.WrapperManager;
+import jce.codegen.WrapperGenerator;
 import jce.codegen.XtendLibraryHelper;
 import jce.manipulation.InheritanceManipulator;
 import jce.util.ProjectDirectories;
@@ -67,7 +67,7 @@ public class JavaCodeEcorification {
         ModelCodeGenerator.generate(genModel);
         ProjectDirectories directories = new ProjectDirectories(metamodel, genModel);
         // Generate wrappers and edit classes.
-        WrapperManager.buildWrappers(metamodel, directories);
+        WrapperGenerator.buildWrappers(metamodel, directories);
         XtendLibraryHelper.addXtendLibs(javaProject, directories);
         new InheritanceManipulator().manipulate(originalPackages);
         // make changes visible in the Eclipse IDE
