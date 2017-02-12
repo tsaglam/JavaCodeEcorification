@@ -44,12 +44,6 @@ public class ProjectDirectories {
         if (!validate()) {
             logger.error("Some directories do not exist.");
         }
-        // TODO (MEDIUM) remove:
-        System.err.println(projectDirectory.exists() + " " + projectDirectory);
-        System.err.println(workspaceDirectory.exists() + " " + workspaceDirectory);
-        System.err.println(sourceDirectory.exists() + " " + sourceDirectory);
-        System.err.println(modelDirectory.exists() + " " + modelDirectory);
-        System.err.println(manifestDirectory.exists() + " " + manifestDirectory);
     }
 
     /**

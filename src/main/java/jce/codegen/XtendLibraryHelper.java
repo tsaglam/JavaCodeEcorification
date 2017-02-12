@@ -39,7 +39,7 @@ public final class XtendLibraryHelper {
      */
     public static void addXtendLibs(IJavaProject project, ProjectDirectories directories) {
         createXtendFolder(directories);
-        addClasspathEntry(project);
+        addClasspathEntry(project); // TODO (MEDIUM) add xtend-gen folder to build.properties file.
         addManifestEntries(directories);
     }
 
