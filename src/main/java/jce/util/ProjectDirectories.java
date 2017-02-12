@@ -1,4 +1,4 @@
-package jce;
+package jce.util;
 
 import java.io.File;
 
@@ -7,7 +7,6 @@ import org.apache.log4j.Logger;
 import org.eclipse.emf.codegen.ecore.genmodel.GenModel;
 
 import eme.generator.GeneratedEcoreMetamodel;
-import jce.codegen.PathHelper;
 
 /**
  * Generator and container class for project directories.

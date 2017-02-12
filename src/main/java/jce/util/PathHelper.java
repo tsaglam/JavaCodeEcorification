@@ -1,4 +1,4 @@
-package jce.codegen;
+package jce.util;
 
 /**
  * Class that helps to work with paths (file paths, package paths).

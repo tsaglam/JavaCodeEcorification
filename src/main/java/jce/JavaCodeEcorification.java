@@ -24,6 +24,7 @@ import jce.codegen.ModelCodeGenerator;
 import jce.codegen.WrapperManager;
 import jce.codegen.XtendLibraryHelper;
 import jce.manipulation.InheritanceManipulator;
+import jce.util.ProjectDirectories;
 
 /**
  * Main class for Java code ecorification.

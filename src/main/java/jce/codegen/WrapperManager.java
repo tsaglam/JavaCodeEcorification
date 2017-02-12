@@ -18,7 +18,8 @@ import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EPackage;
 
 import eme.generator.GeneratedEcoreMetamodel;
-import jce.ProjectDirectories;
+import jce.util.PathHelper;
+import jce.util.ProjectDirectories;
 
 /**
  * Creates and manages wrappers for the classes of the orginal Java project with is ecorified.

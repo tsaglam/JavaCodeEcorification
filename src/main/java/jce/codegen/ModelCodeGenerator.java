@@ -6,6 +6,8 @@ import org.eclipse.emf.codegen.ecore.generator.Generator;
 import org.eclipse.emf.codegen.ecore.genmodel.GenModel;
 import org.eclipse.emf.codegen.ecore.genmodel.generator.GenBaseGeneratorAdapter;
 
+import jce.util.MonitorToLoggerAdapter;
+
 /**
  * Class for code generation (e.g generating Java code from Ecore GenModels).
  */

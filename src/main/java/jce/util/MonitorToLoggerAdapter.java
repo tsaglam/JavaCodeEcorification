@@ -1,4 +1,4 @@
-package jce.codegen;
+package jce.util;
 
 import org.apache.log4j.Logger;
 import org.eclipse.emf.common.util.Diagnostic;

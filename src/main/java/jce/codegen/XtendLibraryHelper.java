@@ -12,7 +12,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import jce.ProjectDirectories;
+import jce.util.ProjectDirectories;
 
 /**
  * TODO (MEDIUM) Add comments.
