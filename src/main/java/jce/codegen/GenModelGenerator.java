@@ -59,8 +59,7 @@ public class GenModelGenerator {
 
     /**
      * Generates a generator model for a Ecore metamodel and saves it in the same folder as the metamodel.
-     * @param ecoreMetamodel is the Ecore metamodel, passed through its root package.
-     * @param information is the saving information object. It contains information about the location of the metamodel.
+     * @param metamodel is the Ecore metamodel, passed through its root package.
      * @return the generator model, a GenModel object.
      */
     public GenModel generate(GeneratedEcoreMetamodel metamodel) {

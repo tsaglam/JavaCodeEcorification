@@ -22,6 +22,10 @@ import org.eclipse.jdt.core.search.SearchRequestor;
 public class TypeVisitor extends ASTVisitor {
     private final IJavaProject currentProject;
 
+    /**
+     * Basic constructor.
+     * @param currentProject is the current {@link IJavaProject}.
+     */
     public TypeVisitor(IJavaProject currentProject) {
         this.currentProject = currentProject;
     }

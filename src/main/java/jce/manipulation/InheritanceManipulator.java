@@ -11,10 +11,17 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
-// TODO (MEDIUM) add JDoc and inline comments.
+/**
+ * Changes the inheritance of the original Java classes.
+ * @author Timur Saglam
+ */
 public class InheritanceManipulator {
     private static final Logger logger = LogManager.getLogger(InheritanceManipulator.class.getName());
 
+    /**
+     * Changes the inheritance for all classes of specific packages.
+     * @param packages are the specific packages.
+     */
     public void manipulate(IPackageFragment[] packages) {
         try {
             for (IPackageFragment mypackage : packages) {

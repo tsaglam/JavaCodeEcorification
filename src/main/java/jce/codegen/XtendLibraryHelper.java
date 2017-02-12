@@ -24,9 +24,13 @@ import jce.util.ProjectDirectories;
  * Helper class that edits an project do add the Xtend dependencies.
  * @author Timur Saglam
  */
-public class XtendLibraryHelper {
+public final class XtendLibraryHelper {
     private static final Logger logger = LogManager.getLogger(XtendLibraryHelper.class.getName());
     private static final char SLASH = File.separatorChar;
+
+    private XtendLibraryHelper() {
+        // private constructor.
+    }
 
     /**
      * Adds the Xtend dependencies to a project and creates the xtend-gen source folder.

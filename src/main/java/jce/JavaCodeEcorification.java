@@ -118,7 +118,7 @@ public class JavaCodeEcorification {
         }
         return null;
     }
-    
+
     /**
      * Refreshes the project folder.
      */

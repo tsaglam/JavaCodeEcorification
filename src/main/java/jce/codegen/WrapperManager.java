@@ -24,15 +24,21 @@ import jce.util.ProjectDirectories;
  * Creates and manages wrappers for the classes of the orginal Java project with is ecorified.
  * @author Timur Saglam
  */
-public class WrapperManager {
+public final class WrapperManager {
     private static ProjectDirectories directories;
     private static final Logger logger = LogManager.getLogger(WrapperManager.class.getName());
     private static final PathHelper PACKAGE = new PathHelper('.');
     private static final PathHelper PATH = new PathHelper(File.separatorChar);
     private static final WrapperGenerator WRAPPER_GENERATOR = new WrapperGenerator();
 
+    private WrapperManager() {
+        // private constructor.
+    }
+
     /**
      * Builds the wrapper classes.
+     * @param metamodel is the metamodel that got extracted from the original project.
+     * @param directories is the {@link ProjectDirectories} instance for the project.
      */
     public static void buildWrappers(GeneratedEcoreMetamodel metamodel, ProjectDirectories directories) {
         logger.info("Starting the wrapper class generation...");

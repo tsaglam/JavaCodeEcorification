@@ -14,6 +14,10 @@ import jce.util.MonitorToLoggerAdapter;
 public final class ModelCodeGenerator {
     private static final Logger logger = LogManager.getLogger(ModelCodeGenerator.class.getName());
 
+    private ModelCodeGenerator() {
+        // private constructor.
+    }
+
     /**
      * Uses a specific GenModel to generate Java Code.
      * @param genModel is the specific GenModel.
