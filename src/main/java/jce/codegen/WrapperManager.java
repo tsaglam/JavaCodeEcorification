@@ -18,6 +18,7 @@ import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EPackage;
 
 import eme.generator.GeneratedEcoreMetamodel;
+import jce.ProjectDirectories;
 
 /**
  * Creates and manages wrappers for the classes of the orginal Java project with is ecorified.
@@ -26,11 +27,10 @@ import eme.generator.GeneratedEcoreMetamodel;
 public class WrapperManager {
     private static final Logger logger = LogManager.getLogger(WrapperManager.class.getName());
     private static final char SLASH = File.separatorChar;
+    private final ProjectDirectories directories;
     private final GeneratedEcoreMetamodel metamodel;
     private final PathHelper packageHelper;
     private final PathHelper pathHelper;
-    private final String sourcePath;
-    private final String workspacePath;
     private final WrapperGenerator wrapperGenerator;
 
     /**
@@ -38,12 +38,11 @@ public class WrapperManager {
      * @param metamodel is the metamodel that got extracted from the original project.
      * @param genModel is the {@link GenModel} that was build for the metamodel.
      */
-    public WrapperManager(GeneratedEcoreMetamodel metamodel, GenModel genModel) {
+    public WrapperManager(GeneratedEcoreMetamodel metamodel, ProjectDirectories directories) {
+        this.directories = directories;
         this.metamodel = metamodel;
         pathHelper = new PathHelper(SLASH);
         packageHelper = new PathHelper('.');
-        workspacePath = pathHelper.nthParentOf(metamodel.getSavingInformation().getFilePath(), 3);
-        sourcePath = workspacePath + genModel.getModelDirectory();
         wrapperGenerator = new WrapperGenerator();
     }
 
@@ -78,7 +77,7 @@ public class WrapperManager {
      * @param name is the name of the wrapper to generate.
      */
     private void createXtendWrapper(String packagePath, String name) {
-        String filePath = pathHelper.append(sourcePath, "wrappers", packagePath, name + "Wrapper.xtend");
+        String filePath = pathHelper.append(directories.getSourceDirectory().getAbsolutePath(), "wrappers", packagePath, name + "Wrapper.xtend");
         String currentPackage = packagePath.replace(SLASH, '.');
         String wrapperPackage = packageHelper.append("wrappers", currentPackage);
         String ecorePackage = packageHelper.append("ecore", currentPackage);
@@ -105,7 +104,7 @@ public class WrapperManager {
      */
     private void refreshSourceFolder() {
         IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-        IContainer folder = root.getContainerForLocation(new Path(sourcePath)); // find source folder in workspace
+        IContainer folder = root.getContainerForLocation(new Path(directories.getSourceDirectory().getAbsolutePath()));
         try {
             folder.refreshLocal(IResource.DEPTH_INFINITE, null);
         } catch (CoreException exception) {

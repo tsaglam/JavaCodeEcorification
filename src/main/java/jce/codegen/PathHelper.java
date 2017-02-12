@@ -69,6 +69,9 @@ public class PathHelper {
      * @return the parent.
      */
     public String parentOf(String path) {
+        if (path.endsWith(Character.toString(separator))) {
+            path.substring(0, path.lastIndexOf(separator, path.length() - 2));
+        }
         return path.substring(0, path.lastIndexOf(separator));
     }
 

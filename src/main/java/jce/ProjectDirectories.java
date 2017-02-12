@@ -20,6 +20,7 @@ public class ProjectDirectories {
     private final File manifestDirectory;
     private final File modelDirectory;
     private final PathHelper pathHelper;
+    private final File projectDirectory;
     private final File sourceDirectory;
     private final File workspaceDirectory;
 
@@ -35,13 +36,20 @@ public class ProjectDirectories {
             throw new IllegalArgumentException("Metamodel has to be saved.");
         }
         pathHelper = new PathHelper(SLASH);
-        workspaceDirectory = new File(pathHelper.nthParentOf(metamodel.getSavingInformation().getFilePath(), 3));
+        projectDirectory = new File(pathHelper.parentOf(metamodel.getSavingInformation().getFilePath()));
+        workspaceDirectory = new File(pathHelper.parentOf(projectDirectory.getAbsolutePath()));
         sourceDirectory = new File(workspaceDirectory.getAbsolutePath() + genModel.getModelDirectory());
         modelDirectory = new File(workspaceDirectory.getAbsolutePath() + genModel.getModelProjectDirectory());
         manifestDirectory = new File(workspaceDirectory.getAbsolutePath() + SLASH + MANIFEST_FOLDER);
         if (!validate()) {
             logger.error("Some directories do not exist.");
         }
+        // TODO (MEDIUM) remove:
+        System.err.println(projectDirectory.exists() + " " + projectDirectory);
+        System.err.println(workspaceDirectory.exists() + " " + workspaceDirectory);
+        System.err.println(sourceDirectory.exists() + " " + sourceDirectory);
+        System.err.println(modelDirectory.exists() + " " + modelDirectory);
+        System.err.println(manifestDirectory.exists() + " " + manifestDirectory);
     }
 
     /**
@@ -51,13 +59,21 @@ public class ProjectDirectories {
     public File getManifestDirectory() {
         return manifestDirectory;
     }
-
+    
     /**
      * Accessor for the modelDirectory.
      * @return the modelDirectory
      */
     public File getModelDirectory() {
         return modelDirectory;
+    }
+
+    /**
+     * Accessor for the projectDirectory.
+     * @return the projectDirectory
+     */
+    public File getProjectDirectory() {
+        return projectDirectory;
     }
 
     /**

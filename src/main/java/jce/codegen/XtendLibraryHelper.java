@@ -1,5 +1,6 @@
 package jce.codegen;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -11,6 +12,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import jce.ProjectDirectories;
+
 /**
  * TODO (MEDIUM) Add comments.
  * @author Timur Saglam
@@ -18,22 +21,21 @@ import org.eclipse.jdt.core.JavaModelException;
 public class XtendLibraryHelper {
     private static final Logger logger = LogManager.getLogger(XtendLibraryHelper.class.getName());
 
-    public static void addXtendLibs(IJavaProject project) {
-        addClasspathEntry(project);
-        editManifest(project);
+    public static void addXtendLibs(IJavaProject project, ProjectDirectories directories) {
+        addClasspathEntry(project, directories);
+        editManifest(directories);
     }
 
-    private static void addClasspathEntry(IJavaProject project) {
+    private static void addClasspathEntry(IJavaProject project, ProjectDirectories directories) {
         try {
             ArrayList<IClasspathEntry> entries = new ArrayList<IClasspathEntry>(Arrays.asList(project.getRawClasspath()));
-            entries.add(JavaCore.newSourceEntry(new Path("xtend-gen"))); // TODO (HIGH) use absolute path
-            project.setRawClasspath(entries.toArray(new IClasspathEntry[] {}), null);
+            entries.add(JavaCore.newSourceEntry(new Path(directories.getProjectDirectory().getAbsolutePath() + File.separator + "xtend-gen")));
         } catch (JavaModelException exception) {
             logger.fatal(exception);
         }
     }
 
-    private static void editManifest(IJavaProject project) {
+    private static void editManifest(ProjectDirectories directories) {
         // TODO implement editManifest(IJavaProject project)
     }
 }

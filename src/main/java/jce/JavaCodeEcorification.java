@@ -52,16 +52,20 @@ public class JavaCodeEcorification {
      * @param project is the specific Java project as {@link IProject}.
      */
     public void start(IProject project) {
+        // Initialize:
         check(project);
         IProject copy = copy(project);
         logger.info("Starting Ecorification...");
         IJavaProject javaProject = JavaCore.create(copy);
         IPackageFragment[] originalPackages = getPackages(javaProject);
+        // Generate metamodel, GenModel and model code:
         GeneratedEcoreMetamodel metamodel = metamodelGenerator.extractAndSaveFrom(copy);
         GenModel genModel = genModelGenerator.generate(metamodel);
         ModelCodeGenerator.generate(genModel);
-        new WrapperManager(metamodel, genModel).buildWrappers();
-        XtendLibraryHelper.addXtendLibs(javaProject);
+        ProjectDirectories directories = new ProjectDirectories(metamodel, genModel);
+        // Generate wrappers and edit classes.
+        new WrapperManager(metamodel, directories).buildWrappers();
+        XtendLibraryHelper.addXtendLibs(javaProject, directories);
         new InheritanceManipulator().manipulate(originalPackages);
     }
 
