@@ -2,7 +2,9 @@ package jce;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -65,9 +67,11 @@ public class JavaCodeEcorification {
         ModelCodeGenerator.generate(genModel);
         ProjectDirectories directories = new ProjectDirectories(metamodel, genModel);
         // Generate wrappers and edit classes.
-        new WrapperManager(metamodel, directories).buildWrappers();
+        WrapperManager.buildWrappers(metamodel, directories);
         XtendLibraryHelper.addXtendLibs(javaProject, directories);
         new InheritanceManipulator().manipulate(originalPackages);
+        // make changes visible in the Eclipse IDE
+        refreshProject(directories);
     }
 
     /**
@@ -113,5 +117,18 @@ public class JavaCodeEcorification {
             logger.fatal(exception);
         }
         return null;
+    }
+    
+    /**
+     * Refreshes the project folder.
+     */
+    private void refreshProject(ProjectDirectories directories) {
+        IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+        IContainer folder = root.getContainerForLocation(new Path(directories.getProjectDirectory()));
+        try {
+            folder.refreshLocal(IResource.DEPTH_INFINITE, null);
+        } catch (CoreException exception) {
+            logger.warn("Could not refresh project folder. Try that manually.", exception);
+        }
     }
 }

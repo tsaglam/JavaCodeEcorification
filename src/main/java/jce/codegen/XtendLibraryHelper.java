@@ -29,7 +29,7 @@ public class XtendLibraryHelper {
     private static final char SLASH = File.separatorChar;
 
     /**
-     * Adds the Xtend dependencies to a project.
+     * Adds the Xtend dependencies to a project and creates the xtend-gen source folder.
      * @param project is the {@link IJavaProject} instance of the project.
      * @param directories is the {@link ProjectDirectories} instance of the project.
      */
@@ -38,7 +38,7 @@ public class XtendLibraryHelper {
         addClasspathEntry(project);
         addManifestEntries(directories);
     }
-    
+
     /**
      * Retrieves the class path file from the {@link IJavaProject}, adds an {@link IClasspathEntry} for the xtend-gen
      * source folder and sets the changed content.
