@@ -2,32 +2,27 @@ package jce.manipulation;
 
 import java.awt.Window.Type;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
-import org.eclipse.jdt.core.search.IJavaSearchConstants;
-import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.SearchEngine;
-import org.eclipse.jdt.core.search.SearchMatch;
-import org.eclipse.jdt.core.search.SearchParticipant;
-import org.eclipse.jdt.core.search.SearchPattern;
-import org.eclipse.jdt.core.search.SearchRequestor;
 
 /**
  * {@link ASTVisitor} class for {@link Type}s to the manipulate inheritance relations.
  * @author Timur Saglam
  */
 public class TypeVisitor extends ASTVisitor {
-    private final IJavaProject currentProject;
+    private final String currentPackage;
+    private final IJavaProject project;
 
     /**
      * Basic constructor.
-     * @param currentProject is the current {@link IJavaProject}.
+     * @param currentPackage is the current package.
      */
-    public TypeVisitor(IJavaProject currentProject) {
-        this.currentProject = currentProject;
+    public TypeVisitor(String currentPackage, IJavaProject project) {
+        this.currentPackage = currentPackage;
+        this.project = project;
     }
 
     @Override
@@ -36,31 +31,20 @@ public class TypeVisitor extends ASTVisitor {
             // TODO (HIGH) change inheritance if it has a ecore equivalent.
             System.err.print(node.getName().getFullyQualifiedName());
             System.err.print(" is a ");
-            System.err.println(node.getSuperclassType());
-
-            // step 1: Create a search pattern
-            // search methods having "abcde" as name
-            String name = node.getName().getFullyQualifiedName();
-            System.err.println("start search process for " + name);
-            SearchPattern pattern = SearchPattern.createPattern(name, IJavaSearchConstants.TYPE, IJavaSearchConstants.DECLARATIONS,
-                    SearchPattern.R_PREFIX_MATCH);
-            // step 2: Create search scope
-            // IJavaSearchScope scope = SearchEngine.createWorkspaceScope();
-            IJavaSearchScope scope = SearchEngine.createJavaSearchScope(new IJavaElement[] { currentProject }, false);
-            // step3: define a result collector
-            SearchRequestor requestor = new SearchRequestor() {
-                public void acceptSearchMatch(SearchMatch match) {
-                    System.err.println("FOUND: " + match.getElement());
-                }
-            };
-            // step4: start searching
-            SearchEngine searchEngine = new SearchEngine();
+            System.err.print(node.getSuperclassType());
+            System.err.print(" in ");
+            System.err.println(currentPackage);
             try {
-                searchEngine.search(pattern, new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() }, scope, requestor, null);
-            } catch (CoreException e) {
-                e.printStackTrace();
+                System.err.println("SEARCH: " + "wrappers." + currentPackage + "." + node.getName().toString() + "Wrapper");
+                IType result = project.findType("wrappers." + currentPackage + "." + node.getName().toString() + "Wrapper");
+                if (result != null) {
+                    System.err.println("   FOUND" + result.getFullyQualifiedName());
+                } else {
+                    System.err.println("   NO RESULT");
+                }
+            } catch (JavaModelException exception) {
+                exception.printStackTrace();
             }
-
         }
         return super.visit(node);
     }

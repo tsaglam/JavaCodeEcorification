@@ -2,13 +2,13 @@ package jce;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.emf.codegen.ecore.genmodel.GenModel;
 import org.eclipse.jdt.core.IJavaProject;
@@ -66,12 +66,13 @@ public class JavaCodeEcorification {
         GenModel genModel = genModelGenerator.generate(metamodel);
         ModelCodeGenerator.generate(genModel);
         ProjectDirectories directories = new ProjectDirectories(metamodel, genModel);
-        // Generate wrappers and edit classes.
-        WrapperGenerator.buildWrappers(metamodel, directories);
+        // Generate wrappers and edit classes:
         XtendLibraryHelper.addXtendLibs(javaProject, directories);
-        new InheritanceManipulator().manipulate(originalPackages);
-        // make changes visible in the Eclipse IDE
-        refreshProject(directories);
+        WrapperGenerator.buildWrappers(metamodel, directories);
+        refreshProject(copy); // TODO (MEDIUM) is this needed?
+        new InheritanceManipulator().manipulate(originalPackages, copy);
+        // make changes visible in the Eclipse IDE:
+        refreshProject(copy);
     }
 
     /**
@@ -95,7 +96,7 @@ public class JavaCodeEcorification {
         IProject copy = null;
         try { // TODO (MEDIUM) duplicate check and intelligent naming
             IPath newPath = new Path(project.getFullPath() + "Ecorified");
-            project.copy(newPath, false, null);
+            project.copy(newPath, false, new NullProgressMonitor());
             logger.info("Copied the project...");
             IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
             copy = workspaceRoot.getProject(newPath.toString());
@@ -122,11 +123,9 @@ public class JavaCodeEcorification {
     /**
      * Refreshes the project folder.
      */
-    private void refreshProject(ProjectDirectories directories) {
-        IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-        IContainer folder = root.getContainerForLocation(new Path(directories.getProjectDirectory()));
+    private void refreshProject(IProject project) {
         try {
-            folder.refreshLocal(IResource.DEPTH_INFINITE, null);
+            project.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
         } catch (CoreException exception) {
             logger.warn("Could not refresh project folder. Try that manually.", exception);
         }
