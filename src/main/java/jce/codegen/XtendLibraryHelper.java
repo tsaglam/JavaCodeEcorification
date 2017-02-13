@@ -79,9 +79,8 @@ public final class XtendLibraryHelper {
      * Creates the binary file folder for Xtend. This is the xtend-bin folder.
      */
     private static void createXtendFolder(ProjectDirectories directories) {
-        String folder = directories.getProjectDirectory() + SLASH + "xtend-gen";
-        System.err.println(folder);
-        System.err.println(new File(folder).mkdirs()); // ensure folder exists
+        String folder = directories.getProjectDirectory() + SLASH + "xtend-gen"; // TODO (MEDIUM) use IFolder
+        new File(folder).mkdirs(); // ensure folder exists
     }
 
     /**
