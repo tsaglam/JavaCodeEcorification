@@ -24,7 +24,7 @@ import org.eclipse.emf.ecore.EPackage
  */
 final class WrapperGenerator {
 	static ProjectDirectories directories
-	static final Logger logger = LogManager.getLogger(WrapperGenerator.getName())
+	static final Logger logger = LogManager.getLogger(WrapperGenerator.getName)
 	static final PathHelper PACKAGE = new PathHelper(Character.valueOf('.').charValue)
 	static final PathHelper PATH = new PathHelper(File.separatorChar)
 
@@ -40,8 +40,8 @@ final class WrapperGenerator {
 	def static void buildWrappers(GeneratedEcoreMetamodel metamodel, ProjectDirectories directories) {
 		logger.info("Starting the wrapper class generation...")
 		WrapperGenerator.directories = directories
-		buildWrappers(metamodel.getRoot(), "")
-		refreshSourceFolder() // makes wrappers visible in the Eclipse IDE
+		buildWrappers(metamodel.getRoot, "")
+		refreshSourceFolder // makes wrappers visible in the Eclipse IDE
 	}
 
 	/** 
@@ -50,13 +50,13 @@ final class WrapperGenerator {
 	 * @param path is the current file path of the {@link EPackage}. Should be initially an empty string.
 	 */
 	def private static void buildWrappers(EPackage ePackage, String path) {
-		for (EClassifier eClassifier : ePackage.getEClassifiers()) { // for every classifier
+		for (EClassifier eClassifier : ePackage.getEClassifiers) { // for every classifier
 			if (eClassifier instanceof EClass) { // if is class
-				createXtendWrapper(path, eClassifier.getName()) // create wrapper class
+				createXtendWrapper(path, eClassifier.getName) // create wrapper class
 			}
 		}
-		for (EPackage eSubpackage : ePackage.getESubpackages()) { // for every subpackage
-			buildWrappers(eSubpackage, PATH.append(path, eSubpackage.getName())) // do the same
+		for (EPackage eSubpackage : ePackage.getESubpackages) { // for every subpackage
+			buildWrappers(eSubpackage, PATH.append(path, eSubpackage.getName)) // do the same
 		}
 	}
 
@@ -66,17 +66,17 @@ final class WrapperGenerator {
 	 * @param name is the name of the wrapper to generate.
 	 */
 	def private static void createXtendWrapper(String packagePath, String name) {
-		var String filePath = PATH.append(directories.getSourceDirectory(), "wrappers", packagePath, '''«name»Wrapper.xtend''')
+		var String filePath = PATH.append(directories.getSourceDirectory, "wrappers", packagePath, '''«name»Wrapper.xtend''')
 		var String currentPackage = packagePath.replace(File.separatorChar, Character.valueOf('.').charValue)
 		var String wrapperPackage = PACKAGE.append("wrappers", currentPackage)
 		var String ecorePackage = PACKAGE.append("ecore", currentPackage)
 		var String factoryName = '''«PACKAGE.nameOf(currentPackage)»Factory'''
-		factoryName = factoryName.substring(0, 1).toUpperCase() + factoryName.substring(1)
+		factoryName = factoryName.substring(0, 1).toUpperCase + factoryName.substring(1)
 		var File file = new File(filePath)
-		if (file.exists()) {
+		if (file.exists) {
 			throw new IllegalArgumentException('''File already exists: «filePath»''')
 		}
-		file.getParentFile().mkdirs() // ensure folder tree exists
+		file.getParentFile.mkdirs // ensure folder tree exists
 		write(file, wrapperContent(name, factoryName, wrapperPackage, ecorePackage))
 	}
 
@@ -84,8 +84,8 @@ final class WrapperGenerator {
 	 * Refreshes the source folder where the wrappers are generated in.
 	 */
 	def private static void refreshSourceFolder() {
-		var IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot()
-		var IContainer folder = root.getContainerForLocation(new Path(directories.getSourceDirectory()))
+		var IWorkspaceRoot root = ResourcesPlugin.getWorkspace.getRoot
+		var IContainer folder = root.getContainerForLocation(new Path(directories.getSourceDirectory))
 		try {
 			folder.refreshLocal(IResource.DEPTH_INFINITE, null)
 		} catch (CoreException exception) {
@@ -101,13 +101,13 @@ final class WrapperGenerator {
 	 */
 	def private static void write(File file, String content) {
 		try {
-			file.createNewFile()
+			file.createNewFile
 			var FileWriter fileWriter = new FileWriter(file)
 			fileWriter.write(content)
-			fileWriter.flush()
-			fileWriter.close()
+			fileWriter.flush
+			fileWriter.close
 		} catch (IOException exception) {
-			exception.printStackTrace()
+			exception.printStackTrace
 		}
 
 	}
@@ -127,10 +127,10 @@ final class WrapperGenerator {
 		 */
 		class «className»Wrapper implements «className» {
 			@Delegate
-			private var «className» ecoreImplementation;
+			private var «className» ecoreImplementation
 		
 			new() {
-				ecoreImplementation = «factoryName».eINSTANCE.create«className»();
+				ecoreImplementation = «factoryName».eINSTANCE.create«className»()
 			}
 		}
 	'''
