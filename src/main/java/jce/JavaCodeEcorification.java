@@ -64,11 +64,11 @@ public class JavaCodeEcorification {
         // Generate metamodel, GenModel and model code:
         GeneratedEcoreMetamodel metamodel = metamodelGenerator.extractAndSaveFrom(copy);
         GenModel genModel = genModelGenerator.generate(metamodel);
-        ModelCodeGenerator.generate(genModel);
         ProjectDirectories directories = new ProjectDirectories(metamodel, genModel);
+        ModelCodeGenerator.generate(genModel);
         // Generate wrappers and edit classes:
         XtendLibraryHelper.addXtendLibs(javaProject, directories);
-        WrapperGenerator.buildWrappers(metamodel, directories);
+        WrapperGenerator.buildWrappers(metamodel, copy, directories);
         refreshProject(copy); // TODO (MEDIUM) is this needed?
         new InheritanceManipulator().manipulate(originalPackages, copy);
         // make changes visible in the Eclipse IDE:

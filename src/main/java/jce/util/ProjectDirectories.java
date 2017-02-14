@@ -2,8 +2,6 @@ package jce.util;
 
 import java.io.File;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
 import org.eclipse.emf.codegen.ecore.genmodel.GenModel;
 
 import eme.generator.GeneratedEcoreMetamodel;
@@ -13,7 +11,6 @@ import eme.generator.GeneratedEcoreMetamodel;
  * @author Timur Saglam
  */
 public class ProjectDirectories {
-    private static final Logger logger = LogManager.getLogger(ProjectDirectories.class.getName());
     private static final String MANIFEST_FOLDER = "META-INF";
     private static final String MODEL_FOLDER = "model";
     private static final char SLASH = File.separatorChar;
@@ -41,9 +38,6 @@ public class ProjectDirectories {
         sourceDirectory = new File(getProjectDirectory() + SLASH + pathHelper.nameOf(genModel.getModelDirectory()));
         modelDirectory = new File(getProjectDirectory() + SLASH + MODEL_FOLDER);
         manifestDirectory = new File(getProjectDirectory() + SLASH + MANIFEST_FOLDER);
-        if (!validate()) {
-            logger.error("Some directories do not exist.");
-        }
     }
 
     /**
