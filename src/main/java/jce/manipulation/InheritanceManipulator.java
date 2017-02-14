@@ -44,19 +44,26 @@ public class InheritanceManipulator {
                 }
             }
         }
+        System.err.println("");
+        for (IPackageFragment frag : project.getPackageFragments()) {
+            if (frag.getKind() == IPackageFragmentRoot.K_SOURCE) {
+                System.err.println("   name:" + frag.getElementName() + " has " + frag.getCompilationUnits().length);
+            }
+        }
     }
 
     /**
      * Changes the inheritance for all classes of specific packages.
      * @param packages are the specific packages.
+     * @param project is the {@link IProject} that contains the packages.
      */
-    public void manipulate(IPackageFragment[] packages, IProject iProject) {
-        IJavaProject project = getCompiled(iProject);
+    public void manipulate(IPackageFragment[] packages, IProject project) {
+        IJavaProject javaProject = getCompiled(project);
         try {
-            debug(project);
+            debug(javaProject);
             for (IPackageFragment mypackage : packages) {
                 if (mypackage.getKind() == IPackageFragmentRoot.K_SOURCE) {
-                    editTypesIn(mypackage, project);
+                    editTypesIn(mypackage, javaProject);
                 }
             }
         } catch (JavaModelException exception) {
@@ -80,7 +87,7 @@ public class InheritanceManipulator {
     private IJavaProject getCompiled(IProject project) {
         try {
             project.refreshLocal(IProject.DEPTH_INFINITE, new NullProgressMonitor());
-            project.build(IncrementalProjectBuilder.CLEAN_BUILD, new NullProgressMonitor());
+            project.build(IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
         } catch (CoreException exception) {
             logger.error(exception);
         }

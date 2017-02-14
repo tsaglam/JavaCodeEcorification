@@ -2,6 +2,7 @@ package jce.manipulation;
 
 import java.awt.Window.Type;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -19,6 +20,7 @@ public class TypeVisitor extends ASTVisitor {
     /**
      * Basic constructor.
      * @param currentPackage is the current package.
+     * @param project is the current {@link IProject}.
      */
     public TypeVisitor(String currentPackage, IJavaProject project) {
         this.currentPackage = currentPackage;
