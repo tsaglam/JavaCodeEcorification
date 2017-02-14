@@ -5,6 +5,7 @@ import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.InputStream
 import jce.util.PathHelper
+import jce.util.ProgressMonitorAdapter
 import jce.util.ProjectDirectories
 import org.apache.log4j.LogManager
 import org.apache.log4j.Logger
@@ -16,12 +17,11 @@ import org.eclipse.core.resources.IResource
 import org.eclipse.core.resources.IWorkspaceRoot
 import org.eclipse.core.resources.ResourcesPlugin
 import org.eclipse.core.runtime.CoreException
+import org.eclipse.core.runtime.IProgressMonitor
 import org.eclipse.core.runtime.Path
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EClassifier
 import org.eclipse.emf.ecore.EPackage
-import org.eclipse.core.runtime.IProgressMonitor
-import jce.util.ProgressMonitorAdapter
 
 /** 
  * Creates and manages wrappers for the classes of the orginal Java project with is ecorified.
@@ -30,10 +30,10 @@ import jce.util.ProgressMonitorAdapter
 final class WrapperGenerator {
 	static ProjectDirectories directories
 	static final Logger logger = LogManager.getLogger(WrapperGenerator.getName)
-	private static final IProgressMonitor MONITOR = new ProgressMonitorAdapter(logger);
+	private static final IProgressMonitor MONITOR = new ProgressMonitorAdapter(logger)
 	static final PathHelper PACKAGE = new PathHelper(Character.valueOf('.').charValue)
 	static final PathHelper PATH = new PathHelper(File.separatorChar)
-	static IProject project;
+	static IProject project
 
 	private new() {
 		// private constructor.
@@ -46,8 +46,10 @@ final class WrapperGenerator {
 	 */
 	def static void buildWrappers(GeneratedEcoreMetamodel metamodel, IProject project, ProjectDirectories directories) {
 		logger.info("Starting the wrapper class generation...")
-		WrapperGenerator.project = project;
+		WrapperGenerator.project = project
 		WrapperGenerator.directories = directories
+		var IFolder folder = project.getFolder(PATH.append("src", File.separator, "wrappers"))
+		folder.create(false, true, MONITOR)
 		buildWrappers(metamodel.getRoot, "")
 		refreshSourceFolder // makes wrappers visible in the Eclipse IDE
 	}
@@ -58,7 +60,6 @@ final class WrapperGenerator {
 	 * @param path is the current file path of the {@link EPackage}. Should be initially an empty string.
 	 */
 	def private static void buildWrappers(EPackage ePackage, String path) {
-
 		for (EClassifier eClassifier : ePackage.getEClassifiers) { // for every classifier
 			if (eClassifier instanceof EClass) { // if is class
 				createXtendWrapper(path, eClassifier.getName) // create wrapper class
@@ -75,8 +76,8 @@ final class WrapperGenerator {
 		val String ecorePackage = PACKAGE.append("ecore", currentPackage)
 		var String factoryName = '''«PACKAGE.nameOf(currentPackage)»Factory'''
 		factoryName = factoryName.substring(0, 1).toUpperCase + factoryName.substring(1) // first letter upper case
-		val String content = wrapperContent(name, factoryName, wrapperPackage, ecorePackage);
-		createFile(packagePath, '''«name»Wrapper.xtend''', content);
+		val String content = wrapperContent(name, factoryName, wrapperPackage, ecorePackage)
+		createFile(packagePath, '''«name»Wrapper.xtend''', content)
 	}
 
 	/**
@@ -87,11 +88,11 @@ final class WrapperGenerator {
 		if (!folder.exists) { // TODO (HIGH) fix org.eclipse.e4.core.di.InjectionException: org.eclipse.core.internal.resources.ResourceException: Resource '/ProofOfConceptEcorified/src/wrappers' does not exist.
 			folder.create(false, true, MONITOR)
 		}
-		var IFile file = folder.getFile(name);
+		var IFile file = folder.getFile(name)
 		if (!file.exists()) {
-			val InputStream source = new ByteArrayInputStream(content.bytes);
-			file.create(source, IResource.NONE, MONITOR);
-			file.touch(MONITOR);
+			val InputStream source = new ByteArrayInputStream(content.bytes)
+			file.create(source, IResource.NONE, MONITOR)
+			file.touch(MONITOR)
 		}
 	}
 
