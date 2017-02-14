@@ -1,14 +1,13 @@
 package jce.util;
 
 import org.apache.log4j.Logger;
-import org.eclipse.emf.common.util.Diagnostic;
-import org.eclipse.emf.common.util.Monitor;
+import org.eclipse.core.runtime.IProgressMonitor;
 
 /**
- * Adapter class to feed monitor tasks and their messages into a log4j logger.
+ * Adapter class to feed {@link IProgressMonitor} tasks and their messages into a log4j logger.
  * @author Timur Saglam
  */
-public class MonitorToLoggerAdapter implements Monitor {
+public class ProgressMonitorAdapter implements IProgressMonitor {
     private boolean canceled;
     private final Logger logger;
 
@@ -16,18 +15,13 @@ public class MonitorToLoggerAdapter implements Monitor {
      * Basic constructor, sets the logger.
      * @param logger is the logger to redirect to the tasks and their messages.
      */
-    public MonitorToLoggerAdapter(Logger logger) {
+    public ProgressMonitorAdapter(Logger logger) {
         this.logger = logger;
     }
 
     @Override
     public void beginTask(String name, int totalWork) {
         redirectToLogger(name);
-    }
-
-    @Override
-    public void clearBlocked() {
-        // Does nothing.
     }
 
     @Override
@@ -46,11 +40,6 @@ public class MonitorToLoggerAdapter implements Monitor {
     }
 
     @Override
-    public void setBlocked(Diagnostic reason) {
-        redirectToLogger(reason.getMessage());
-    }
-
-    @Override
     public void setCanceled(boolean value) {
         canceled = value;
     }
@@ -58,11 +47,13 @@ public class MonitorToLoggerAdapter implements Monitor {
     @Override
     public void setTaskName(String name) {
         redirectToLogger(name);
+
     }
 
     @Override
     public void subTask(String name) {
         redirectToLogger(name);
+
     }
 
     @Override
