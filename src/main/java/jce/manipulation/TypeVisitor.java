@@ -1,53 +1,59 @@
 package jce.manipulation;
 
-import java.awt.Window.Type;
-
-import org.eclipse.core.resources.IProject;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IType;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.text.edits.TextEdit;
 
 /**
  * {@link ASTVisitor} class for {@link Type}s to the manipulate inheritance relations.
  * @author Timur Saglam
  */
 public class TypeVisitor extends ASTVisitor {
+    private static final Logger logger = LogManager.getLogger(TypeVisitor.class.getName());
     private final String currentPackage;
-    private final IJavaProject project;
 
     /**
      * Basic constructor.
      * @param currentPackage is the current package.
-     * @param project is the current {@link IProject}.
      */
-    public TypeVisitor(String currentPackage, IJavaProject project) {
+    public TypeVisitor(String currentPackage) {
         this.currentPackage = currentPackage;
-        this.project = project;
     }
 
     @Override
     public boolean visit(TypeDeclaration node) {
         if (!node.isInterface()) { // is class
-            // TODO (HIGH) change inheritance if it has a ecore equivalent.
-            System.err.print(node.getName().getFullyQualifiedName());
+            System.err.print(node.getName().getFullyQualifiedName()); // TODO (HIGH) remove debug output
             System.err.print(" is a ");
             System.err.print(node.getSuperclassType());
             System.err.print(" in ");
             System.err.println(currentPackage);
-            try {
-                System.err.println("SEARCH: " + "wrappers." + currentPackage + "." + node.getName().toString() + "Wrapper");
-                IType result = project.findType("wrappers." + currentPackage + "." + node.getName().toString() + "Wrapper");
-                if (result != null) {
-                    System.err.println("   FOUND" + result.getFullyQualifiedName());
-                } else {
-                    System.err.println("   NO RESULT");
-                }
-            } catch (JavaModelException exception) {
-                exception.printStackTrace();
-            }
+            setSuperClass(node, "wrappers." + currentPackage + "." + node.getName().toString() + "Wrapper");
         }
         return super.visit(node);
+    }
+
+    void setSuperClass(TypeDeclaration typeDecl, String qualifiedName) {
+        System.err.println("   try to set: " + qualifiedName);
+        AST ast = typeDecl.getAST();
+        Name name = ast.newName(qualifiedName);
+        Type type = ast.newSimpleType(name);
+        typeDecl.setSuperclassType(type);
+        System.err.println("   is: " + typeDecl.getSuperclassType());
+        ASTRewrite astRewriter = ASTRewrite.create(ast);
+        try {
+            TextEdit edits = astRewriter.rewriteAST(); // TODO CONTINUE HERE
+        } catch (JavaModelException exception) {
+            logger.fatal(exception);
+        } catch (IllegalArgumentException exception) {
+            logger.fatal(exception);
+        }
     }
 }
