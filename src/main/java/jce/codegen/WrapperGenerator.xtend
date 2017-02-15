@@ -85,7 +85,7 @@ final class WrapperGenerator {
 	 */
 	def private static void createFile(String packagePath, String name, String content) {
 		var IFolder folder = project.getFolder(PATH.append("src", File.separator, "wrappers", packagePath))
-		if (!folder.exists) { // TODO (HIGH) fix org.eclipse.e4.core.di.InjectionException: org.eclipse.core.internal.resources.ResourceException: Resource '/ProofOfConceptEcorified/src/wrappers' does not exist.
+		if (!folder.exists) {
 			folder.create(false, true, MONITOR)
 		}
 		var IFile file = folder.getFile(name)
