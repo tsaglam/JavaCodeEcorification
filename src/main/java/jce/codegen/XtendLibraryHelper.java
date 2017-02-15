@@ -13,11 +13,14 @@ import java.util.List;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import jce.util.ProgressMonitorAdapter;
 import jce.util.ProjectDirectories;
 
 /**
@@ -38,7 +41,7 @@ public final class XtendLibraryHelper {
      * @param directories is the {@link ProjectDirectories} instance of the project.
      */
     public static void addXtendLibs(IJavaProject project, ProjectDirectories directories) {
-        createXtendFolder(directories);
+        createXtendFolder(project);
         addClasspathEntry(project); // TODO (MEDIUM) add xtend-gen folder to build.properties file.
         addManifestEntries(directories);
     }
@@ -78,9 +81,13 @@ public final class XtendLibraryHelper {
     /**
      * Creates the binary file folder for Xtend. This is the xtend-bin folder.
      */
-    private static void createXtendFolder(ProjectDirectories directories) {
-        String folder = directories.getProjectDirectory() + SLASH + "xtend-gen"; // TODO (MEDIUM) use IFolder
-        new File(folder).mkdirs(); // ensure folder exists
+    private static void createXtendFolder(IJavaProject project) {
+        IFolder folder = project.getProject().getFolder("xtend-gen");
+        try {
+            folder.create(false, true, new ProgressMonitorAdapter(logger));
+        } catch (CoreException exception) {
+            logger.fatal(exception);
+        }
     }
 
     /**
