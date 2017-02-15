@@ -6,7 +6,6 @@ import java.io.File
 import java.io.InputStream
 import jce.util.PathHelper
 import jce.util.ProgressMonitorAdapter
-import jce.util.ProjectDirectories
 import org.apache.log4j.LogManager
 import org.apache.log4j.Logger
 import org.eclipse.core.resources.IFile

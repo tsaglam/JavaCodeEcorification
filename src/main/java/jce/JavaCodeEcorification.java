@@ -26,7 +26,6 @@ import jce.codegen.ModelCodeGenerator;
 import jce.codegen.WrapperGenerator;
 import jce.codegen.XtendLibraryHelper;
 import jce.manipulation.InheritanceManipulator;
-import jce.util.ProjectDirectories;
 
 /**
  * Main class for Java code ecorification.
@@ -64,10 +63,9 @@ public class JavaCodeEcorification {
         // Generate metamodel, GenModel and model code:
         GeneratedEcoreMetamodel metamodel = metamodelGenerator.extractAndSaveFrom(copy);
         GenModel genModel = genModelGenerator.generate(metamodel);
-        ProjectDirectories directories = new ProjectDirectories(metamodel, genModel);
         ModelCodeGenerator.generate(genModel);
         // Generate wrappers and edit classes:
-        XtendLibraryHelper.addXtendLibs(javaProject, directories);
+        XtendLibraryHelper.addXtendLibs(javaProject);
         WrapperGenerator.buildWrappers(metamodel, copy);
         new InheritanceManipulator().manipulate(originalPackages, copy);
         // make changes visible in the Eclipse IDE:

@@ -14,14 +14,16 @@ import java.util.List;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import jce.util.ProgressMonitorAdapter;
-import jce.util.ProjectDirectories;
 
 /**
  * Helper class that edits an project do add the Xtend dependencies.
@@ -37,13 +39,13 @@ public final class XtendLibraryHelper {
 
     /**
      * Adds the Xtend dependencies to a project and creates the xtend-gen source folder.
-     * @param project is the {@link IJavaProject} instance of the project.
-     * @param directories is the {@link ProjectDirectories} instance of the project.
+     * @param javaProject is the {@link IJavaProject} instance of the project.
      */
-    public static void addXtendLibs(IJavaProject project, ProjectDirectories directories) {
+    public static void addXtendLibs(IJavaProject javaProject) {
+        IProject project = javaProject.getProject();
         createXtendFolder(project);
-        addClasspathEntry(project); // TODO (MEDIUM) add xtend-gen folder to build.properties file.
-        addManifestEntries(directories);
+        addClasspathEntry(javaProject); // TODO (MEDIUM) add xtend-gen folder to build.properties file.
+        addManifestEntries(project);
     }
 
     /**
@@ -65,24 +67,26 @@ public final class XtendLibraryHelper {
 
     /**
      * Adds Xtend manifest entries to the manifest file.
-     * @param directories is the {@link ProjectDirectories} instance of the project.
+     * @param project is the {@link IJavaProject}.
      */
-    private static void addManifestEntries(ProjectDirectories directories) {
-        File file = new File(directories.getManifestDirectory() + SLASH + "MANIFEST.MF");
+    private static void addManifestEntries(IProject project) {
+        IPath workspace = ResourcesPlugin.getWorkspace().getRoot().getLocation(); // workspace path
+        String folder = workspace.toString() + project.getFolder("META-INF").getFullPath(); // manifest folder
+        File file = new File(folder + SLASH + "MANIFEST.MF"); // manifest file
         if (file.exists()) {
             List<String> manifest = read(file.toPath());
             List<String> newManifest = edit(manifest);
             write(file.toPath(), newManifest);
         } else {
-            logger.error("Could not find MANIFEST.MF file in " + directories.getManifestDirectory());
+            logger.error("Could not find MANIFEST.MF file in " + folder);
         }
     }
 
     /**
      * Creates the binary file folder for Xtend. This is the xtend-bin folder.
      */
-    private static void createXtendFolder(IJavaProject project) {
-        IFolder folder = project.getProject().getFolder("xtend-gen");
+    private static void createXtendFolder(IProject project) {
+        IFolder folder = project.getFolder("xtend-gen");
         try {
             folder.create(false, true, new ProgressMonitorAdapter(logger));
         } catch (CoreException exception) {
