@@ -40,13 +40,18 @@ public class TypeVisitor extends ASTVisitor {
         return super.visit(node);
     }
 
-    void setSuperClass(TypeDeclaration typeDecl, String qualifiedName) {
+    /**
+     * Sets a qualified name as super class of a type declaration.
+     * @param declaration is the type declaration.
+     * @param qualifiedName is the qualified name.
+     */
+    public void setSuperClass(TypeDeclaration declaration, String qualifiedName) {
         System.err.println("   try to set: " + qualifiedName);
-        AST ast = typeDecl.getAST();
+        AST ast = declaration.getAST();
         Name name = ast.newName(qualifiedName);
         Type type = ast.newSimpleType(name);
-        typeDecl.setSuperclassType(type);
-        System.err.println("   is: " + typeDecl.getSuperclassType());
+        declaration.setSuperclassType(type);
+        System.err.println("   is: " + declaration.getSuperclassType());
         ASTRewrite astRewriter = ASTRewrite.create(ast);
         try {
             TextEdit edits = astRewriter.rewriteAST(); // TODO CONTINUE HERE

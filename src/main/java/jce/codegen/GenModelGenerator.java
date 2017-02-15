@@ -68,7 +68,7 @@ public class GenModelGenerator {
             String modelName = information.getFileName();
             String modelPath = information.getFilePath();
             String projectPath = modelPath.substring(0, modelPath.lastIndexOf(SLASH, modelPath.lastIndexOf(SLASH) - 1));
-            String projectName = projectPath.substring(projectPath.lastIndexOf(SLASH));
+            String projectName = projectPath.substring(projectPath.lastIndexOf(SLASH)); // TODO (LOW) use Eclipse API.
             GenModel genModel = GenModelFactory.eINSTANCE.createGenModel();
             genModel.setModelDirectory(projectName + "/src");
             genModel.setModelPluginID(projectName.substring(1));
