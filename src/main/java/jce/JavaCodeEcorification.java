@@ -7,9 +7,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.emf.codegen.ecore.genmodel.GenModel;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -18,6 +16,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import eme.EcoreMetamodelExtraction;
 import eme.generator.GeneratedEcoreMetamodel;
+import eme.generator.saving.SavingInformation;
 import eme.properties.BinaryProperty;
 import eme.properties.ExtractionProperties;
 import eme.properties.TextProperty;
@@ -44,7 +43,8 @@ public class JavaCodeEcorification {
         metamodelGenerator = new EcoreMetamodelExtraction();
         genModelGenerator = new GenModelGenerator();
         extractionProperties = metamodelGenerator.getProperties();
-        extractionProperties.set(TextProperty.SAVING_STRATEGY, "SameProject");
+        extractionProperties.set(TextProperty.SAVING_STRATEGY, "CopyProject");
+        extractionProperties.set(TextProperty.PROJECT_SUFFIX, "Ecorified");
         extractionProperties.set(TextProperty.DEFAULT_PACKAGE, "ecore");
         extractionProperties.set(BinaryProperty.DUMMY_CLASS, false);
     }
@@ -56,12 +56,12 @@ public class JavaCodeEcorification {
     public void start(IProject project) {
         // Initialize:
         check(project);
-        IProject copy = copy(project);
         logger.info("Starting Ecorification...");
-        IPackageFragment[] originalPackages = getPackages(JavaCore.create(copy));
+        IPackageFragment[] originalPackages = getPackages(JavaCore.create(project));
         // Generate metamodel, GenModel and model code:
-        GeneratedEcoreMetamodel metamodel = metamodelGenerator.extractAndSaveFrom(copy);
+        GeneratedEcoreMetamodel metamodel = metamodelGenerator.extractAndSaveFrom(project);
         GenModel genModel = genModelGenerator.generate(metamodel);
+        IProject copy = getProject(metamodel.getSavingInformation()); // Retrieve output project
         ModelCodeGenerator.generate(genModel);
         // Generate wrappers and edit classes:
         XtendLibraryHelper.addXtendLibs(copy);
@@ -84,25 +84,6 @@ public class JavaCodeEcorification {
     }
 
     /**
-     * Copies an specific {@link IProject}.
-     * @param project is the specific {@link IProject} to copy to.
-     * @return the copy of the original {@link IProject}.
-     */
-    private IProject copy(IProject project) {
-        IProject copy = null;
-        try { // TODO (MEDIUM) duplicate check and intelligent naming
-            IPath newPath = new Path(project.getFullPath() + "Ecorified");
-            project.copy(newPath, false, new NullProgressMonitor());
-            logger.info("Copied the project...");
-            IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
-            copy = workspaceRoot.getProject(newPath.toString());
-        } catch (CoreException exception) {
-            logger.fatal(exception);
-        }
-        return copy;
-    }
-
-    /**
      * Gets packages from a specific {@link IJavaProject}.
      * @param project is the specific {@link IJavaProject}.
      * @return the array of {@link IPackageFragment}s.
@@ -112,6 +93,22 @@ public class JavaCodeEcorification {
             return project.getPackageFragments();
         } catch (JavaModelException exception) {
             logger.fatal(exception);
+        }
+        return null;
+    }
+
+    /**
+     * Gets {@link IProject} from {@link SavingInformation}.
+     */
+    private IProject getProject(SavingInformation information) {
+        String name = information.getProjectName();
+        IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+        for (IProject project : root.getProjects()) {
+            if (project.getName().equals(name)) {
+                check(project);
+                refreshProject(project);
+                return project;
+            }
         }
         return null;
     }
