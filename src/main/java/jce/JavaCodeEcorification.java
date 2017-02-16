@@ -58,14 +58,13 @@ public class JavaCodeEcorification {
         check(project);
         IProject copy = copy(project);
         logger.info("Starting Ecorification...");
-        IJavaProject javaProject = JavaCore.create(copy);
-        IPackageFragment[] originalPackages = getPackages(javaProject);
+        IPackageFragment[] originalPackages = getPackages(JavaCore.create(copy));
         // Generate metamodel, GenModel and model code:
         GeneratedEcoreMetamodel metamodel = metamodelGenerator.extractAndSaveFrom(copy);
         GenModel genModel = genModelGenerator.generate(metamodel);
         ModelCodeGenerator.generate(genModel);
         // Generate wrappers and edit classes:
-        XtendLibraryHelper.addXtendLibs(javaProject);
+        XtendLibraryHelper.addXtendLibs(copy);
         WrapperGenerator.buildWrappers(metamodel, copy);
         new InheritanceManipulator().manipulate(originalPackages, copy);
         // make changes visible in the Eclipse IDE:

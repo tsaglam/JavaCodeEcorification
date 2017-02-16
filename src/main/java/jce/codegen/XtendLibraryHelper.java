@@ -22,6 +22,11 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.pde.core.IEditableModel;
+import org.eclipse.pde.core.build.IBuildEntry;
+import org.eclipse.pde.core.build.IBuildModel;
+import org.eclipse.pde.core.plugin.IPluginModelBase;
+import org.eclipse.pde.core.plugin.PluginRegistry;
 
 import jce.util.ProgressMonitorAdapter;
 
@@ -32,6 +37,7 @@ import jce.util.ProgressMonitorAdapter;
 public final class XtendLibraryHelper {
     private static final Logger logger = LogManager.getLogger(XtendLibraryHelper.class.getName());
     private static final char SLASH = File.separatorChar;
+    private static final String XTEND = "xtend-gen"; // Xtend folder name
 
     private XtendLibraryHelper() {
         // private constructor.
@@ -41,25 +47,42 @@ public final class XtendLibraryHelper {
      * Adds the Xtend dependencies to a project and creates the xtend-gen source folder.
      * @param javaProject is the {@link IJavaProject} instance of the project.
      */
-    public static void addXtendLibs(IJavaProject javaProject) {
-        IProject project = javaProject.getProject();
+    public static void addXtendLibs(IProject project) {
         createXtendFolder(project);
-        addClasspathEntry(javaProject); // TODO (MEDIUM) add xtend-gen folder to build.properties file.
+        addClasspathEntry(project);
+        addBuildProperty(project);
         addManifestEntries(project);
+    }
+
+    /**
+     * Adds the Xtend folder (xtend-gen) to the build.properties file.
+     */
+    private static void addBuildProperty(IProject project) {
+        try {
+            IPluginModelBase base = PluginRegistry.findModel(project);
+            IBuildModel buildModel = PluginRegistry.createBuildModel(base);
+            IBuildEntry entry = buildModel.getBuild().getEntry("source..");
+            entry.addToken(XTEND + SLASH);
+            if (buildModel instanceof IEditableModel) { // if saveable
+                ((IEditableModel) buildModel).save(); // save changes
+            }
+        } catch (CoreException exception) {
+            logger.error(exception);
+        }
     }
 
     /**
      * Retrieves the class path file from the {@link IJavaProject}, adds an {@link IClasspathEntry} for the xtend-gen
      * source folder and sets the changed content.
-     * @param project is the {@link IJavaProject}.
      */
-    private static void addClasspathEntry(IJavaProject project) {
+    private static void addClasspathEntry(IProject project) {
+        IJavaProject javaProject = JavaCore.create(project);
         try {
-            ArrayList<IClasspathEntry> entries = new ArrayList<IClasspathEntry>(Arrays.asList(project.getRawClasspath()));
-            String xtendDirectory = SLASH + project.getElementName() + SLASH + "xtend-gen";
+            ArrayList<IClasspathEntry> entries = new ArrayList<IClasspathEntry>(Arrays.asList(javaProject.getRawClasspath()));
+            String xtendDirectory = SLASH + javaProject.getElementName() + SLASH + XTEND;
             entries.add(JavaCore.newSourceEntry(new org.eclipse.core.runtime.Path(xtendDirectory)));
-            IClasspathEntry[] entryArray = new IClasspathEntry[entries.size()];
-            project.setRawClasspath(entries.toArray(entryArray), null);
+            IClasspathEntry[] entryArray = new IClasspathEntry[entries.size()]; // TODO (LOW) use arrays and arracopy
+            javaProject.setRawClasspath(entries.toArray(entryArray), null);
         } catch (JavaModelException exception) {
             logger.fatal(exception);
         }
@@ -86,7 +109,7 @@ public final class XtendLibraryHelper {
      * Creates the binary file folder for Xtend. This is the xtend-bin folder.
      */
     private static void createXtendFolder(IProject project) {
-        IFolder folder = project.getFolder("xtend-gen");
+        IFolder folder = project.getFolder(XTEND);
         try {
             folder.create(false, true, new ProgressMonitorAdapter(logger));
         } catch (CoreException exception) {
@@ -115,8 +138,6 @@ public final class XtendLibraryHelper {
 
     /**
      * Reads a file from a path and return its content.
-     * @param path is the path.
-     * @return the content as a list of lines.
      */
     private static List<String> read(Path path) {
         List<String> content = new LinkedList<String>();
@@ -133,8 +154,6 @@ public final class XtendLibraryHelper {
 
     /**
      * Writes in file at a specific path from a list of lines.
-     * @param path is the path of the file.
-     * @param content is the list of lines.
      */
     private static void write(Path path, List<String> content) {
         try (BufferedWriter writer = Files.newBufferedWriter(path)) {
