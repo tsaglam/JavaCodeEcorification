@@ -62,7 +62,7 @@ public final class XtendLibraryHelper {
             IPluginModelBase base = PluginRegistry.findModel(project);
             IBuildModel buildModel = PluginRegistry.createBuildModel(base);
             IBuildEntry entry = buildModel.getBuild().getEntry("source..");
-            entry.addToken(XTEND + SLASH);
+            entry.addToken(XTEND + SLASH); // TODO (MEDIUM) check if duplicate
             if (buildModel instanceof IEditableModel) { // if saveable
                 ((IEditableModel) buildModel).save(); // save changes
             }
@@ -82,9 +82,9 @@ public final class XtendLibraryHelper {
             String xtendDirectory = SLASH + javaProject.getElementName() + SLASH + XTEND;
             entries.add(JavaCore.newSourceEntry(new org.eclipse.core.runtime.Path(xtendDirectory)));
             IClasspathEntry[] entryArray = new IClasspathEntry[entries.size()]; // TODO (LOW) use arrays and arracopy
-            javaProject.setRawClasspath(entries.toArray(entryArray), null);
+            javaProject.setRawClasspath(entries.toArray(entryArray), null); // TODO (MEDIUM) check if duplicate
         } catch (JavaModelException exception) {
-            logger.fatal(exception);
+            logger.error(exception);
         }
     }
 
@@ -110,10 +110,12 @@ public final class XtendLibraryHelper {
      */
     private static void createXtendFolder(IProject project) {
         IFolder folder = project.getFolder(XTEND);
-        try {
-            folder.create(false, true, new ProgressMonitorAdapter(logger));
-        } catch (CoreException exception) {
-            logger.fatal(exception);
+        if (!folder.exists()) {
+            try {
+                folder.create(false, true, new ProgressMonitorAdapter(logger));
+            } catch (CoreException exception) {
+                logger.fatal(exception);
+            }
         }
     }
 
@@ -125,7 +127,7 @@ public final class XtendLibraryHelper {
     private static List<String> edit(List<String> manifest) {
         List<String> newManifest = new LinkedList<String>();
         for (String line : manifest) {
-            newManifest.add(line);
+            newManifest.add(line); // TODO (MEDIUM) check if duplicate
             if (line.contains("Require-Bundle:")) {
                 newManifest.add(" com.google.guava,");
                 newManifest.add(" org.eclipse.xtext.xbase.lib,");
