@@ -57,11 +57,11 @@ public class JavaCodeEcorification {
         // Initialize:
         check(project);
         logger.info("Starting Ecorification...");
-        IPackageFragment[] originalPackages = getPackages(JavaCore.create(project));
         // Generate metamodel, GenModel and model code:
         GeneratedEcoreMetamodel metamodel = metamodelGenerator.extractAndSaveFrom(project);
         GenModel genModel = genModelGenerator.generate(metamodel);
         IProject copy = getProject(metamodel.getSavingInformation()); // Retrieve output project
+        IPackageFragment[] originalPackages = getPackages(JavaCore.create(copy));
         ModelCodeGenerator.generate(genModel);
         // Generate wrappers and edit classes:
         XtendLibraryHelper.addXtendLibs(copy);
