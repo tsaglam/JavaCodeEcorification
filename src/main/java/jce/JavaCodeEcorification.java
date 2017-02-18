@@ -3,11 +3,8 @@ package jce;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.emf.codegen.ecore.genmodel.GenModel;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -25,6 +22,7 @@ import jce.codegen.ModelCodeGenerator;
 import jce.codegen.WrapperGenerator;
 import jce.codegen.XtendLibraryHelper;
 import jce.manipulation.InheritanceManipulator;
+import jce.util.FolderRefresher;
 
 /**
  * Main class for Java code ecorification.
@@ -68,7 +66,7 @@ public class JavaCodeEcorification {
         WrapperGenerator.buildWrappers(metamodel, copy);
         new InheritanceManipulator().manipulate(originalPackages, copy);
         // make changes visible in the Eclipse IDE:
-        refreshProject(copy);
+        FolderRefresher.refresh(copy);
     }
 
     /**
@@ -106,21 +104,11 @@ public class JavaCodeEcorification {
         for (IProject project : root.getProjects()) {
             if (project.getName().equals(name)) {
                 check(project);
-                refreshProject(project);
+                FolderRefresher.refresh(project);
                 return project;
             }
         }
         return null;
     }
 
-    /**
-     * Refreshes the project folder.
-     */
-    private void refreshProject(IProject project) {
-        try {
-            project.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
-        } catch (CoreException exception) {
-            logger.warn("Could not refresh project folder. Try that manually.", exception);
-        }
-    }
 }

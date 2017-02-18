@@ -4,6 +4,7 @@ import eme.generator.GeneratedEcoreMetamodel
 import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.InputStream
+import jce.util.FolderRefresher
 import jce.util.PathHelper
 import jce.util.ProgressMonitorAdapter
 import org.apache.log4j.LogManager
@@ -12,7 +13,6 @@ import org.eclipse.core.resources.IFile
 import org.eclipse.core.resources.IFolder
 import org.eclipse.core.resources.IProject
 import org.eclipse.core.resources.IResource
-import org.eclipse.core.runtime.CoreException
 import org.eclipse.core.runtime.IProgressMonitor
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EClassifier
@@ -45,7 +45,7 @@ final class WrapperGenerator {
 		var IFolder folder = project.getFolder(PATH.append(SRC_FOLDER, File.separator, "wrappers"))
 		folder.create(false, true, MONITOR)
 		buildWrappers(metamodel.getRoot, "")
-		refreshSourceFolder(project) // makes wrappers visible in the Eclipse IDE
+		FolderRefresher.refresh(project, SRC_FOLDER); // makes wrappers visible in the Eclipse IDE
 	}
 
 	/** 
@@ -86,19 +86,6 @@ final class WrapperGenerator {
 			file.create(source, IResource.NONE, MONITOR)
 			file.touch(MONITOR)
 		}
-	}
-
-	/** 
-	 * Refreshes the source folder where the wrappers are generated in.
-	 */
-	def private static void refreshSourceFolder(IProject project) {
-		var IFolder folder = project.getFolder(SRC_FOLDER)
-		try {
-			folder.refreshLocal(IResource.DEPTH_INFINITE, null)
-		} catch (CoreException exception) {
-			logger.warn("Could not refresh source folder. Try that manually.", exception)
-		}
-
 	}
 
 	/**
