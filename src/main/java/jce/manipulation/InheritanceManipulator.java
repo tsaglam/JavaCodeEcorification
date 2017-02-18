@@ -3,6 +3,8 @@ package jce.manipulation;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -11,6 +13,12 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.text.edits.MalformedTreeException;
+import org.eclipse.text.edits.TextEdit;
+import org.eclipse.text.edits.UndoEdit;
 
 /**
  * Changes the inheritance of the original Java classes.
@@ -26,6 +34,7 @@ public class InheritanceManipulator {
      */
     public void manipulate(IPackageFragment[] packages, IProject project) {
         try {
+            project.refreshLocal(IProject.DEPTH_INFINITE, new NullProgressMonitor());
             for (IPackageFragment mypackage : packages) {
                 if (mypackage.getKind() == IPackageFragmentRoot.K_SOURCE) {
                     editTypesIn(mypackage);
@@ -33,6 +42,8 @@ public class InheritanceManipulator {
             }
         } catch (JavaModelException exception) {
             logger.fatal(exception);
+        } catch (CoreException exception) {
+            exception.printStackTrace();
         }
     }
 
@@ -42,10 +53,25 @@ public class InheritanceManipulator {
      * @throws JavaModelException if there is a problem with the JDT API.
      */
     private void editTypesIn(IPackageFragment myPackage) throws JavaModelException {
-        TypeVisitor visitor = new TypeVisitor(myPackage.getElementName());
         for (ICompilationUnit unit : myPackage.getCompilationUnits()) {
+            TypeVisitor visitor = new TypeVisitor(myPackage.getElementName());
+            unit.becomeWorkingCopy(new NullProgressMonitor());
+            IDocument document = new Document(unit.getSource());
             CompilationUnit parse = parse(unit);
+            parse.recordModifications();
             parse.accept(visitor);
+            TextEdit edits = parse.rewrite(document, null);
+            System.err.println("EDIT: " + edits.toString()); // TODO (HIGH) remove debug messages.
+            try {
+                UndoEdit undo = edits.apply(document);
+                System.err.println("UNDO: " + undo.toString());
+            } catch (MalformedTreeException exception) {
+                logger.error(exception);
+            } catch (BadLocationException exception) {
+                logger.error(exception);
+            }
+            unit.getBuffer().setContents(document.get());
+            unit.commitWorkingCopy(true, new NullProgressMonitor());
         }
     }
 
