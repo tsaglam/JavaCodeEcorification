@@ -6,11 +6,6 @@ import java.util.Collections;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.emf.codegen.ecore.genmodel.GenJDKLevel;
 import org.eclipse.emf.codegen.ecore.genmodel.GenModel;
 import org.eclipse.emf.codegen.ecore.genmodel.GenModelFactory;
@@ -20,6 +15,8 @@ import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
 
 import eme.generator.GeneratedEcoreMetamodel;
 import eme.generator.saving.SavingInformation;
+import jce.util.FolderRefresher;
+import jce.util.PathHelper;
 
 /**
  * Creates generation models from Ecore metamodels.
@@ -64,11 +61,11 @@ public class GenModelGenerator {
      */
     public GenModel generate(GeneratedEcoreMetamodel metamodel) {
         if (metamodel.isSaved()) {
+            PathHelper pathHelper = new PathHelper(SLASH);
             SavingInformation information = metamodel.getSavingInformation();
             String modelName = information.getFileName();
             String modelPath = information.getFilePath();
-            String projectPath = modelPath.substring(0, modelPath.lastIndexOf(SLASH, modelPath.lastIndexOf(SLASH) - 1));
-            String projectName = projectPath.substring(projectPath.lastIndexOf(SLASH)); // TODO (LOW) use Eclipse API.
+            String projectName = SLASH + pathHelper.nameOf(pathHelper.parentOf(modelPath));
             GenModel genModel = GenModelFactory.eINSTANCE.createGenModel();
             genModel.setModelDirectory(projectName + "/src");
             genModel.setModelPluginID(projectName.substring(1));
@@ -96,12 +93,9 @@ public class GenModelGenerator {
             genModelResource.getDefaultSaveOptions().put(XMLResource.OPTION_ENCODING, xmlEncoding);
             genModelResource.getContents().add(genModel);
             genModelResource.save(Collections.EMPTY_MAP);
-            IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot(); // refresh workspace folder:
-            root.getContainerForLocation(new Path(modelPath)).refreshLocal(IResource.DEPTH_INFINITE, null);
+            FolderRefresher.refresh(modelPath);
         } catch (IOException exception) {
             logger.error("Error while saving the generator model: ", exception);
-        } catch (CoreException exception) {
-            logger.warn("Could not refresh output folder. Try that manually.", exception);
         }
         logger.info("The genmodel was saved under: " + modelPath);
     }
