@@ -6,8 +6,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -18,6 +16,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -78,11 +77,12 @@ public final class XtendLibraryHelper {
     private static void addClasspathEntry(IProject project) {
         IJavaProject javaProject = JavaCore.create(project);
         try {
-            ArrayList<IClasspathEntry> entries = new ArrayList<IClasspathEntry>(Arrays.asList(javaProject.getRawClasspath()));
+            IClasspathEntry[] entries = javaProject.getRawClasspath();
+            IClasspathEntry[] newEntries = new IClasspathEntry[entries.length + 1];
+            System.arraycopy(entries, 0, newEntries, 0, entries.length);
             String xtendDirectory = SLASH + javaProject.getElementName() + SLASH + XTEND;
-            entries.add(JavaCore.newSourceEntry(new org.eclipse.core.runtime.Path(xtendDirectory)));
-            IClasspathEntry[] entryArray = new IClasspathEntry[entries.size()]; // TODO (LOW) use arrays and arracopy
-            javaProject.setRawClasspath(entries.toArray(entryArray), null); // TODO (MEDIUM) check if duplicate
+            newEntries[entries.length] = JavaCore.newSourceEntry(new org.eclipse.core.runtime.Path(xtendDirectory));
+            javaProject.setRawClasspath(newEntries, new NullProgressMonitor()); // TODO (MEDIUM) check if duplicate
         } catch (JavaModelException exception) {
             logger.error(exception);
         }
