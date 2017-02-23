@@ -28,6 +28,7 @@ final class WrapperGenerator {
 	private static final PathHelper PACKAGE = new PathHelper(Character.valueOf('.').charValue)
 	private static final PathHelper PATH = new PathHelper(File.separatorChar)
 	private static final String SRC_FOLDER = "src"
+	private static final String WRAPPER_FOLDER = PATH.append(SRC_FOLDER, "wrappers")
 	private static IProject project
 
 	private new() {
@@ -42,10 +43,9 @@ final class WrapperGenerator {
 	def static void buildWrappers(GeneratedEcoreMetamodel metamodel, IProject project) {
 		logger.info("Starting the wrapper class generation...")
 		WrapperGenerator.project = project
-		var IFolder folder = project.getFolder(PATH.append(SRC_FOLDER, File.separator, "wrappers"))
-		folder.create(false, true, MONITOR)
+		createFolder(WRAPPER_FOLDER) // build wrapper base folder
 		buildWrappers(metamodel.getRoot, "")
-		FolderRefresher.refresh(project, SRC_FOLDER); // makes wrappers visible in the Eclipse IDE
+		FolderRefresher.refresh(project, SRC_FOLDER) // makes wrappers visible in the Eclipse IDE
 	}
 
 	/** 
@@ -54,6 +54,7 @@ final class WrapperGenerator {
 	 * @param path is the current file path of the {@link EPackage}. Should be initially an empty string.
 	 */
 	def private static void buildWrappers(EPackage ePackage, String path) {
+		createFolder(PATH.append(WRAPPER_FOLDER, path))
 		for (EClassifier eClassifier : ePackage.getEClassifiers) { // for every classifier
 			if (eClassifier instanceof EClass) { // if is class
 				createXtendWrapper(path, eClassifier.getName) // create wrapper class
@@ -64,6 +65,19 @@ final class WrapperGenerator {
 		}
 	}
 
+	/**
+	 * Creates an {@link IFolder} in the project with a project relative path.
+	 */
+	def private static void createFolder(String path) {
+		var IFolder folder = project.getFolder(path)
+		if (!folder.exists) {
+			folder.create(false, true, MONITOR)
+		}
+	}
+
+	/**
+	 * Creates a Xtend Wrapper in a package path with a specific name. 
+	 */
 	def private static void createXtendWrapper(String packagePath, String name) {
 		val String currentPackage = packagePath.replace(File.separatorChar, '.')
 		var String factoryName = '''«PACKAGE.nameOf(currentPackage)»Factory'''
@@ -73,15 +87,12 @@ final class WrapperGenerator {
 	}
 
 	/**
-	 * Creates an IFile and its IFolder from a package path, a file name and the file content.
+	 * Creates an IFile from a project relative path, a file name and creates the file content.
 	 */
-	def private static void createFile(String packagePath, String name, String content) {
-		var IFolder folder = project.getFolder(PATH.append(SRC_FOLDER, File.separator, "wrappers", packagePath))
-		if (!folder.exists) {
-			folder.create(false, true, MONITOR)
-		}
+	def private static void createFile(String path, String name, String content) {
+		var IFolder folder = project.getFolder(PATH.append(SRC_FOLDER, "wrappers", path))
 		var IFile file = folder.getFile(name)
-		if (!file.exists()) {
+		if (!file.exists) {
 			val InputStream source = new ByteArrayInputStream(content.bytes)
 			file.create(source, IResource.NONE, MONITOR)
 			file.touch(MONITOR)
