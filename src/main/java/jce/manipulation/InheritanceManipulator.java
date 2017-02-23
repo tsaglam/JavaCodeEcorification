@@ -18,7 +18,6 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
-import org.eclipse.text.edits.UndoEdit;
 
 /**
  * Changes the inheritance of the original Java classes.
@@ -33,6 +32,7 @@ public class InheritanceManipulator {
      * @param project is the {@link IProject} that contains the packages.
      */
     public void manipulate(IPackageFragment[] packages, IProject project) {
+        logger.info("Starting the inheritance manipulation...");
         try {
             project.refreshLocal(IProject.DEPTH_INFINITE, new NullProgressMonitor());
             for (IPackageFragment mypackage : packages) {
@@ -43,7 +43,7 @@ public class InheritanceManipulator {
         } catch (JavaModelException exception) {
             logger.fatal(exception);
         } catch (CoreException exception) {
-            exception.printStackTrace();
+            logger.fatal(exception);
         }
     }
 
@@ -61,14 +61,12 @@ public class InheritanceManipulator {
             parse.recordModifications();
             parse.accept(visitor);
             TextEdit edits = parse.rewrite(document, null);
-            System.err.println("EDIT: " + edits.toString()); // TODO (HIGH) remove debug messages.
             try {
-                UndoEdit undo = edits.apply(document);
-                System.err.println("UNDO: " + undo.toString());
+                edits.apply(document);
             } catch (MalformedTreeException exception) {
-                logger.error(exception);
+                logger.fatal(exception);
             } catch (BadLocationException exception) {
-                logger.error(exception);
+                logger.fatal(exception);
             }
             unit.getBuffer().setContents(document.get());
             unit.commitWorkingCopy(true, new NullProgressMonitor());

@@ -41,7 +41,7 @@ final class WrapperGenerator {
 	 * @param directories is the {@link ProjectDirectories} instance for the project.
 	 */
 	def static void buildWrappers(GeneratedEcoreMetamodel metamodel, IProject project) {
-		logger.info("Starting the wrapper class generation...")
+		logger.info("Starting the wrapper generation...")
 		WrapperGenerator.project = project
 		createFolder(WRAPPER_FOLDER) // build wrapper base folder
 		buildWrappers(metamodel.getRoot, "")

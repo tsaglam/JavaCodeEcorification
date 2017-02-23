@@ -47,6 +47,7 @@ public final class XtendLibraryHelper {
      * @param javaProject is the {@link IJavaProject} instance of the project.
      */
     public static void addXtendLibs(IProject project) {
+        logger.info("Adding Xtend dependencies...");
         createXtendFolder(project);
         addClasspathEntry(project);
         addBuildProperty(project);

@@ -55,7 +55,7 @@ public class JavaCodeEcorification {
         // Initialize:
         check(project);
         logger.info("Starting Ecorification...");
-        // Generate metamodel, GenModel and model code:
+        // Generate metamodel, GenModel, model code and make Project copy:
         GeneratedEcoreMetamodel metamodel = metamodelGenerator.extractAndSaveFrom(project);
         GenModel genModel = genModelGenerator.generate(metamodel);
         IProject copy = getProject(metamodel.getSavingInformation()); // Retrieve output project
@@ -67,6 +67,7 @@ public class JavaCodeEcorification {
         new InheritanceManipulator().manipulate(originalPackages, copy);
         // make changes visible in the Eclipse IDE:
         FolderRefresher.refresh(copy);
+        logger.info("Ecorification complete!");
     }
 
     /**
@@ -99,16 +100,14 @@ public class JavaCodeEcorification {
      * Gets {@link IProject} from {@link SavingInformation}.
      */
     private IProject getProject(SavingInformation information) {
-        String name = information.getProjectName();
+        String name = information.getProjectName(); // get project name
         IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-        for (IProject project : root.getProjects()) {
-            if (project.getName().equals(name)) {
-                check(project);
+        for (IProject project : root.getProjects()) { // for every project
+            if (project.getName().equals(name)) { // compare with name
                 FolderRefresher.refresh(project);
                 return project;
             }
         }
         return null;
     }
-
 }
