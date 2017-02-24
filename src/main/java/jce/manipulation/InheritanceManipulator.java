@@ -23,15 +23,19 @@ import org.eclipse.text.edits.TextEdit;
  * Changes the inheritance of the original Java classes.
  * @author Timur Saglam
  */
-public class InheritanceManipulator {
+public final class InheritanceManipulator {
     private static final Logger logger = LogManager.getLogger(InheritanceManipulator.class.getName());
+
+    private InheritanceManipulator() {
+        // private constructor.
+    }
 
     /**
      * Changes the inheritance for all classes of specific packages.
      * @param packages are the specific packages.
      * @param project is the {@link IProject} that contains the packages.
      */
-    public void manipulate(IPackageFragment[] packages, IProject project) {
+    public static void manipulate(IPackageFragment[] packages, IProject project) {
         logger.info("Starting the inheritance manipulation...");
         try {
             project.refreshLocal(IProject.DEPTH_INFINITE, new NullProgressMonitor());
@@ -52,7 +56,7 @@ public class InheritanceManipulator {
      * @param myPackage is the {@link IPackageFragment}.
      * @throws JavaModelException if there is a problem with the JDT API.
      */
-    private void editTypesIn(IPackageFragment myPackage) throws JavaModelException {
+    private static void editTypesIn(IPackageFragment myPackage) throws JavaModelException {
         for (ICompilationUnit unit : myPackage.getCompilationUnits()) {
             TypeVisitor visitor = new TypeVisitor(myPackage.getElementName());
             unit.becomeWorkingCopy(new NullProgressMonitor());

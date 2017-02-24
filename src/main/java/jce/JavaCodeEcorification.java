@@ -64,7 +64,7 @@ public class JavaCodeEcorification {
         // Generate wrappers and edit classes:
         XtendLibraryHelper.addXtendLibs(copy);
         WrapperGenerator.buildWrappers(metamodel, copy);
-        new InheritanceManipulator().manipulate(originalPackages, copy);
+        InheritanceManipulator.manipulate(originalPackages, copy);
         // make changes visible in the Eclipse IDE:
         FolderRefresher.refresh(copy);
         logger.info("Ecorification complete!");
