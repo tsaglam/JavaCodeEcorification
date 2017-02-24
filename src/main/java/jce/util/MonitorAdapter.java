@@ -76,7 +76,7 @@ public class MonitorAdapter implements Monitor {
      */
     private void redirectToLogger(String message) {
         if (message != null && message.length() > 1) {
-            logger.debug(message);
+            logger.info(message);
         }
     }
 }
