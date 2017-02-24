@@ -21,14 +21,6 @@ public class TypeVisitor extends ASTVisitor {
         this.currentPackage = currentPackage;
     }
 
-    @Override
-    public boolean visit(TypeDeclaration node) {
-        if (!node.isInterface()) { // if is class, manipulate inheritance:
-            setSuperClass(node, "wrappers." + currentPackage + "." + node.getName().toString() + "Wrapper");
-        }
-        return super.visit(node);
-    }
-
     /**
      * Sets a qualified name as super class of a type declaration.
      * @param declaration is the type declaration.
@@ -39,5 +31,13 @@ public class TypeVisitor extends ASTVisitor {
         Name name = ast.newName(qualifiedName);
         Type type = ast.newSimpleType(name);
         declaration.setSuperclassType(type);
+    }
+
+    @Override
+    public boolean visit(TypeDeclaration node) {
+        if (!node.isInterface()) { // if is class, manipulate inheritance:
+            setSuperClass(node, "wrappers." + currentPackage + "." + node.getName().toString() + "Wrapper");
+        }
+        return super.visit(node);
     }
 }
