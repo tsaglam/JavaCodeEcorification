@@ -21,13 +21,13 @@ import org.eclipse.emf.ecore.EPackage
  * @author Timur Saglam
  */
 final class WrapperGenerator {
-	private static final Logger logger = LogManager.getLogger(WrapperGenerator.getName)
-	private static final IProgressMonitor MONITOR = new ProgressMonitorAdapter(logger)
-	private static final PathHelper PACKAGE = new PathHelper(Character.valueOf('.').charValue)
-	private static final PathHelper PATH = new PathHelper(File.separatorChar)
-	private static final String SRC_FOLDER = "src"
-	private static final String WRAPPER_FOLDER = PATH.append(SRC_FOLDER, "wrappers")
-	private static IProject project
+	static final Logger logger = LogManager.getLogger(WrapperGenerator.getName)
+	static final IProgressMonitor MONITOR = new ProgressMonitorAdapter(logger)
+	static final PathHelper PACKAGE = new PathHelper(Character.valueOf('.').charValue)
+	static final PathHelper PATH = new PathHelper(File.separatorChar)
+	static final String SRC_FOLDER = "src"
+	static final String WRAPPER_FOLDER = PATH.append(SRC_FOLDER, "wrappers")
+	static IProject project
 
 	private new() {
 		// private constructor.
