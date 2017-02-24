@@ -44,6 +44,7 @@ public class JavaCodeEcorification {
         extractionProperties.set(TextProperty.SAVING_STRATEGY, "CopyProject");
         extractionProperties.set(TextProperty.PROJECT_SUFFIX, "Ecorified");
         extractionProperties.set(TextProperty.DEFAULT_PACKAGE, "ecore");
+        extractionProperties.set(TextProperty.DATATYPE_PACKAGE, "datatypes");
         extractionProperties.set(BinaryProperty.DUMMY_CLASS, false);
     }
 

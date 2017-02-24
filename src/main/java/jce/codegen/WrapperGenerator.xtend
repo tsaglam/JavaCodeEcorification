@@ -3,13 +3,11 @@ package jce.codegen
 import eme.generator.GeneratedEcoreMetamodel
 import java.io.ByteArrayInputStream
 import java.io.File
-import java.io.InputStream
 import jce.util.FolderRefresher
 import jce.util.PathHelper
 import jce.util.ProgressMonitorAdapter
 import org.apache.log4j.LogManager
 import org.apache.log4j.Logger
-import org.eclipse.core.resources.IFile
 import org.eclipse.core.resources.IFolder
 import org.eclipse.core.resources.IProject
 import org.eclipse.core.resources.IResource
@@ -42,7 +40,7 @@ final class WrapperGenerator {
 	 */
 	def static void buildWrappers(GeneratedEcoreMetamodel metamodel, IProject project) {
 		logger.info("Starting the wrapper generation...")
-		WrapperGenerator.project = project
+		WrapperGenerator::project = project
 		createFolder(WRAPPER_FOLDER) // build wrapper base folder
 		buildWrappers(metamodel.getRoot, "")
 		FolderRefresher.refresh(project, SRC_FOLDER) // makes wrappers visible in the Eclipse IDE
@@ -54,13 +52,15 @@ final class WrapperGenerator {
 	 * @param path is the current file path of the {@link EPackage}. Should be initially an empty string.
 	 */
 	def private static void buildWrappers(EPackage ePackage, String path) {
-		createFolder(PATH.append(WRAPPER_FOLDER, path))
-		for (EClassifier eClassifier : ePackage.getEClassifiers) { // for every classifier
+		if (!isEmpty(ePackage)) {
+			createFolder(PATH.append(WRAPPER_FOLDER, path))
+		}
+		for (EClassifier eClassifier : ePackage.EClassifiers) { // for every classifier
 			if (eClassifier instanceof EClass) { // if is class
 				createXtendWrapper(path, eClassifier.getName) // create wrapper class
 			}
 		}
-		for (EPackage eSubpackage : ePackage.getESubpackages) { // for every subpackage
+		for (EPackage eSubpackage : ePackage.ESubpackages) { // for every subpackage
 			buildWrappers(eSubpackage, PATH.append(path, eSubpackage.getName)) // do the same
 		}
 	}
@@ -79,10 +79,10 @@ final class WrapperGenerator {
 	 * Creates a Xtend Wrapper in a package path with a specific name. 
 	 */
 	def private static void createXtendWrapper(String packagePath, String name) {
-		val String currentPackage = packagePath.replace(File.separatorChar, '.')
-		var String factoryName = '''«PACKAGE.nameOf(currentPackage)»Factory'''
+		val currentPackage = packagePath.replace(File.separatorChar, '.')
+		var factoryName = '''«PACKAGE.nameOf(currentPackage)»Factory'''
 		factoryName = factoryName.substring(0, 1).toUpperCase + factoryName.substring(1) // first letter upper case
-		val String content = wrapperContent(name, factoryName, currentPackage)
+		val content = wrapperContent(name, factoryName, currentPackage)
 		createFile(packagePath, '''«name»Wrapper.xtend''', content)
 	}
 
@@ -90,12 +90,27 @@ final class WrapperGenerator {
 	 * Creates an IFile from a project relative path, a file name and creates the file content.
 	 */
 	def private static void createFile(String path, String name, String content) {
-		var IFolder folder = project.getFolder(PATH.append(SRC_FOLDER, "wrappers", path))
-		var IFile file = folder.getFile(name)
+		var folder = project.getFolder(PATH.append(SRC_FOLDER, "wrappers", path))
+		var file = folder.getFile(name)
 		if (!file.exists) {
-			val InputStream source = new ByteArrayInputStream(content.bytes)
+			val source = new ByteArrayInputStream(content.bytes)
 			file.create(source, IResource.NONE, MONITOR)
 			file.touch(MONITOR)
+		}
+	}
+
+	/**
+	 * Checks whether the EPackage is empty or not. An empty ePackage has no classifiers and only empty subpackages. 
+	 */
+	def private static boolean isEmpty(EPackage ePackage) {
+		if (!ePackage.EClassifiers.empty) {
+			return false // has classifier.
+		} else {
+			var empty = true
+			for (EPackage eSubpackage : ePackage.ESubpackages) { // for every subpackage
+				empty = empty && isEmpty(eSubpackage) // check if empty
+			}
+			return empty
 		}
 	}
 
