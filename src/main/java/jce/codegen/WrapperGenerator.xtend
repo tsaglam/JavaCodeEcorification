@@ -17,7 +17,7 @@ import org.eclipse.emf.ecore.EClassifier
 import org.eclipse.emf.ecore.EPackage
 
 /** 
- * Creates and manages wrappers for the classes of the orginal Java project with is ecorified.
+ * Creates and manages wrappers for the classes of the original Java project with is ecorified.
  * @author Timur Saglam
  */
 final class WrapperGenerator {
