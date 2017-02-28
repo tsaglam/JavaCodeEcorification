@@ -103,15 +103,14 @@ final class WrapperGenerator {
 	 * Checks whether the EPackage is empty or not. An empty ePackage has no classifiers and only empty subpackages. 
 	 */
 	def private static boolean isEmpty(EPackage ePackage) {
-		if (!ePackage.EClassifiers.empty) {
-			return false // has classifier.
-		} else {
-			var empty = true
-			for (EPackage eSubpackage : ePackage.ESubpackages) { // for every subpackage
-				empty = empty && isEmpty(eSubpackage) // check if empty
-			}
-			return empty
+		var empty = true;
+		for (EClassifier eClassifier : ePackage.EClassifiers) { // for every classifier
+			empty = empty && !(eClassifier instanceof EClass) // check if is EClass
 		}
+		for (EPackage eSubpackage : ePackage.ESubpackages) { // for every subpackage
+			empty = empty && isEmpty(eSubpackage) // check if empty
+		}
+		return empty
 	}
 
 	/**
