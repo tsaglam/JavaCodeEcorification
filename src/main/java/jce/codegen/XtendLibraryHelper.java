@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -44,7 +45,7 @@ public final class XtendLibraryHelper {
 
     /**
      * Adds the Xtend dependencies to a project and creates the xtend-gen source folder.
-     * @param javaProject is the {@link IJavaProject} instance of the project.
+     * @param project is the {@link IProject} instance of the project.
      */
     public static void addXtendLibs(IProject project) {
         logger.info("Adding Xtend dependencies...");
@@ -62,7 +63,12 @@ public final class XtendLibraryHelper {
             IPluginModelBase base = PluginRegistry.findModel(project);
             IBuildModel buildModel = PluginRegistry.createBuildModel(base);
             IBuildEntry entry = buildModel.getBuild().getEntry("source..");
-            entry.addToken(XTEND + SLASH); // TODO (MEDIUM) check if duplicate
+            String token = XTEND + SLASH;
+            if (entry.contains(token)) {
+                logger.warn("build.properties already contains " + token);
+            } else {
+                entry.addToken(token);
+            }
             if (buildModel instanceof IEditableModel) { // if saveable
                 ((IEditableModel) buildModel).save(); // save changes
             }
@@ -79,11 +85,15 @@ public final class XtendLibraryHelper {
         IJavaProject javaProject = JavaCore.create(project);
         try {
             IClasspathEntry[] entries = javaProject.getRawClasspath();
-            IClasspathEntry[] newEntries = new IClasspathEntry[entries.length + 1];
-            System.arraycopy(entries, 0, newEntries, 0, entries.length);
             String xtendDirectory = SLASH + javaProject.getElementName() + SLASH + XTEND;
-            newEntries[entries.length] = JavaCore.newSourceEntry(new org.eclipse.core.runtime.Path(xtendDirectory));
-            javaProject.setRawClasspath(newEntries, new NullProgressMonitor()); // TODO (MEDIUM) check if duplicate
+            if (Arrays.asList(entries).contains(xtendDirectory)) {
+                logger.warn(".classpath already contains " + xtendDirectory);
+            } else {
+                IClasspathEntry[] newEntries = new IClasspathEntry[entries.length + 1];
+                System.arraycopy(entries, 0, newEntries, 0, entries.length);
+                newEntries[entries.length] = JavaCore.newSourceEntry(new org.eclipse.core.runtime.Path(xtendDirectory));
+                javaProject.setRawClasspath(newEntries, new NullProgressMonitor());
+            }
         } catch (JavaModelException exception) {
             logger.error(exception);
         }
@@ -104,6 +114,19 @@ public final class XtendLibraryHelper {
         } else {
             logger.error("Could not find MANIFEST.MF file in " + folder);
         }
+    }
+
+    /**
+     * Adds new entry to list if there is no existing entry in the list that conatins the new entry.
+     */
+    private static void addTo(String newEntry, List<String> manifest) {
+        for (String existingEntry : manifest) {
+            if (existingEntry.contains(newEntry)) {
+                logger.info("Manifest already contains " + newEntry);
+                return;
+            }
+        }
+        manifest.add(" " + newEntry + ",");
     }
 
     /**
@@ -128,12 +151,12 @@ public final class XtendLibraryHelper {
     private static List<String> edit(List<String> manifest) {
         List<String> newManifest = new LinkedList<String>();
         for (String line : manifest) {
-            newManifest.add(line); // TODO (MEDIUM) check if duplicate
+            newManifest.add(line);
             if (line.contains("Require-Bundle:")) {
-                newManifest.add(" com.google.guava,");
-                newManifest.add(" org.eclipse.xtext.xbase.lib,");
-                newManifest.add(" org.eclipse.xtend.lib,");
-                newManifest.add(" org.eclipse.xtend.lib.macro,");
+                addTo("com.google.guava", manifest);
+                addTo("org.eclipse.xtext.xbase.lib", manifest);
+                addTo("org.eclipse.xtend.lib", manifest);
+                addTo("org.eclipse.xtend.lib.macro", manifest);
             }
         }
         return newManifest;
