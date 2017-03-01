@@ -117,19 +117,6 @@ public final class XtendLibraryHelper {
     }
 
     /**
-     * Adds new entry to list if there is no existing entry in the list that conatins the new entry.
-     */
-    private static void addTo(String newEntry, List<String> manifest) {
-        for (String existingEntry : manifest) {
-            if (existingEntry.contains(newEntry)) {
-                logger.info("Manifest already contains " + newEntry);
-                return;
-            }
-        }
-        manifest.add(" " + newEntry + ",");
-    }
-
-    /**
      * Creates the binary file folder for Xtend. This is the xtend-bin folder.
      */
     private static void createXtendFolder(IProject project) {
@@ -153,10 +140,10 @@ public final class XtendLibraryHelper {
         for (String line : manifest) {
             newManifest.add(line);
             if (line.contains("Require-Bundle:")) {
-                addTo("com.google.guava", manifest);
-                addTo("org.eclipse.xtext.xbase.lib", manifest);
-                addTo("org.eclipse.xtend.lib", manifest);
-                addTo("org.eclipse.xtend.lib.macro", manifest);
+                newManifest.add(" com.google.guava,");
+                newManifest.add(" org.eclipse.xtext.xbase.lib,");
+                newManifest.add(" org.eclipse.xtend.lib,");
+                newManifest.add(" org.eclipse.xtend.lib.macro,");
             }
         }
         return newManifest;
