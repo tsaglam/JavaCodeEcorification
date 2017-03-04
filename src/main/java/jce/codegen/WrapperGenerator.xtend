@@ -55,12 +55,12 @@ final class WrapperGenerator {
 		if (!isEmpty(ePackage)) {
 			createFolder(PATH.append(WRAPPER_FOLDER, path))
 		}
-		for (EClassifier eClassifier : ePackage.EClassifiers) { // for every classifier
+		for (eClassifier : ePackage.EClassifiers) { // for every classifier
 			if (eClassifier instanceof EClass) { // if is class
-				createXtendWrapper(path, eClassifier.getName) // create wrapper class
+				createXtendWrapper(path, eClassifier.getName, getSuperClass(eClassifier)) // create wrapper class
 			}
 		}
-		for (EPackage eSubpackage : ePackage.ESubpackages) { // for every subpackage
+		for (eSubpackage : ePackage.ESubpackages) { // for every subpackage
 			buildWrappers(eSubpackage, PATH.append(path, eSubpackage.getName)) // do the same
 		}
 	}
@@ -78,11 +78,11 @@ final class WrapperGenerator {
 	/**
 	 * Creates a Xtend Wrapper in a package path with a specific name. 
 	 */
-	def private static void createXtendWrapper(String packagePath, String name) {
+	def private static void createXtendWrapper(String packagePath, String name, String superClass) {
 		val currentPackage = packagePath.replace(File.separatorChar, '.')
 		var factoryName = '''«PACKAGE.nameOf(currentPackage)»Factory'''
 		factoryName = factoryName.substring(0, 1).toUpperCase + factoryName.substring(1) // first letter upper case
-		val content = wrapperContent(name, factoryName, currentPackage)
+		val content = wrapperContent(name, factoryName, currentPackage, superClass)
 		createFile(packagePath, '''«name»Wrapper.xtend''', content)
 	}
 
@@ -97,6 +97,28 @@ final class WrapperGenerator {
 			file.create(source, IResource.NONE, MONITOR)
 			file.touch(MONITOR)
 		}
+	}
+	
+	def private static String getSuperClass(EClass eClass) {
+		for (superType : eClass.ESuperTypes) {
+			if (!superType.interface) {
+				System.err.println("ECLASS " + eClass.name + " IS " +
+					PACKAGE.append(getPackage(superType), superType.name)) // TODO
+				return PACKAGE.append(getPackage(superType), superType.name)
+			}
+		}
+		return null
+	}
+
+	def private static String getPackage(EClass eClass) {
+		var String package = ""
+		var EPackage current = eClass.EPackage
+		while (current !== null) {
+			package = PACKAGE.append(current.name, package)
+			current = current.ESuperPackage
+		}
+		System.err.println("PACKAGE OF " + eClass.name + " IS " + package) // TODO
+		return PACKAGE.cutParent(package)
 	}
 
 	/**
@@ -116,17 +138,21 @@ final class WrapperGenerator {
 	/**
 	 * Builds the content of a wrapper class.
 	 */
-	def private static String wrapperContent(String className, String factoryName, String currentPackage) '''
+	def private static String wrapperContent(String className, String factoryName, String currentPackage,
+		String superClass) '''
 		package «PACKAGE.append("wrappers", currentPackage)»
 		
 		import org.eclipse.xtend.lib.annotations.Delegate
 		import «PACKAGE.append("ecore", currentPackage)».«className»
 		import «PACKAGE.append("ecore", currentPackage)».«factoryName»
+		«IF superClass !== null»
+		import «superClass»
+		«ENDIF»
 		
 		/**
 		 * Wrapper class for the class «className»
 		 */
-		class «className»Wrapper implements «className» {
+		class «className»Wrapper«IF superClass !== null» extends «PACKAGE.nameOf(superClass)»«ENDIF» implements «className» {
 			@Delegate
 			private var «className» ecoreImplementation
 		
