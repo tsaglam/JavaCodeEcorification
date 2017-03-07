@@ -102,8 +102,6 @@ final class WrapperGenerator {
 	def private static String getSuperClass(EClass eClass) {
 		for (superType : eClass.ESuperTypes) {
 			if (!superType.interface) {
-				System.err.println("ECLASS " + eClass.name + " IS " +
-					PACKAGE.append(getPackage(superType), superType.name)) // TODO
 				return PACKAGE.append(getPackage(superType), superType.name)
 			}
 		}
@@ -117,7 +115,6 @@ final class WrapperGenerator {
 			package = PACKAGE.append(current.name, package)
 			current = current.ESuperPackage
 		}
-		System.err.println("PACKAGE OF " + eClass.name + " IS " + package) // TODO
 		return PACKAGE.cutParent(package)
 	}
 
