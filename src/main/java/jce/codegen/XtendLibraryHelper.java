@@ -12,8 +12,10 @@ import java.util.List;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -53,6 +55,7 @@ public final class XtendLibraryHelper {
         addClasspathEntry(project);
         addBuildProperty(project);
         addManifestEntries(project);
+        updateProjectDescription(project);
     }
 
     /**
@@ -108,9 +111,9 @@ public final class XtendLibraryHelper {
         String folder = workspace.toString() + project.getFolder("META-INF").getFullPath(); // manifest folder
         File file = new File(folder + SLASH + "MANIFEST.MF"); // manifest file
         if (file.exists()) {
-            List<String> manifest = read(file.toPath());
-            List<String> newManifest = edit(manifest);
-            write(file.toPath(), newManifest);
+            List<String> manifest = readFile(file.toPath());
+            List<String> newManifest = editManifest(manifest);
+            writeFile(file.toPath(), newManifest);
         } else {
             logger.error("Could not find MANIFEST.MF file in " + folder);
         }
@@ -135,7 +138,7 @@ public final class XtendLibraryHelper {
      * @param manifest is the original manifest file list.
      * @return the edited manifest file list.
      */
-    private static List<String> edit(List<String> manifest) {
+    private static List<String> editManifest(List<String> manifest) {
         List<String> newManifest = new LinkedList<String>();
         for (String line : manifest) {
             newManifest.add(line);
@@ -152,7 +155,7 @@ public final class XtendLibraryHelper {
     /**
      * Reads a file from a path and return its content.
      */
-    private static List<String> read(Path path) {
+    private static List<String> readFile(Path path) {
         List<String> content = new LinkedList<String>();
         try (BufferedReader reader = Files.newBufferedReader(path)) {
             String line = null;
@@ -166,9 +169,45 @@ public final class XtendLibraryHelper {
     }
 
     /**
+     * Adds the xtext nature and builder command to the .project file of the project.
+     */
+    private static void updateProjectDescription(IProject project) {
+        String builderName = " org.eclipse.xtext.ui.shared.xtextBuilder";
+        String xtextNature = "org.eclipse.xtext.ui.shared.xtextNature";
+        IProjectDescription description = null;
+        try {
+            description = project.getDescription();
+        } catch (CoreException exception) {
+            exception.printStackTrace();
+        }
+        // add xtext builder:
+        ICommand[] commands = description.getBuildSpec();
+        ICommand command = description.newCommand();
+        command.setBuilderName(builderName);
+        if (Arrays.asList(commands).contains(command)) {
+            logger.warn(".project already contains " + builderName);
+        } else {
+            ICommand[] newCommands = new ICommand[commands.length + 1];
+            System.arraycopy(commands, 0, newCommands, 0, commands.length);
+            newCommands[commands.length] = command;
+            description.setBuildSpec(newCommands);
+        }
+        // Add xtext nature:
+        String[] natures = description.getNatureIds();
+        if (Arrays.asList(natures).contains(xtextNature)) {
+            logger.warn(".project already contains " + xtextNature);
+        } else {
+            String[] newNatures = new String[natures.length + 1];
+            System.arraycopy(natures, 0, newNatures, 0, natures.length);
+            newNatures[natures.length] = xtextNature;
+            description.setNatureIds(newNatures);
+        }
+    }
+
+    /**
      * Writes in file at a specific path from a list of lines.
      */
-    private static void write(Path path, List<String> content) {
+    private static void writeFile(Path path, List<String> content) {
         try (BufferedWriter writer = Files.newBufferedWriter(path)) {
             for (String line : content) {
                 writer.write(line + System.getProperty("line.separator"));
