@@ -4,7 +4,10 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.emf.codegen.ecore.genmodel.GenModel;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -64,11 +67,22 @@ public class JavaCodeEcorification {
         ModelCodeGenerator.generate(genModel);
         // Generate wrappers and edit classes:
         XtendLibraryHelper.addXtendLibs(copy);
+        FolderRefresher.refresh(copy);
         WrapperGenerator.buildWrappers(metamodel, copy);
         InheritanceManipulator.manipulate(originalPackages, copy);
+        rebuild(copy);
         // make changes visible in the Eclipse IDE:
         FolderRefresher.refresh(copy);
         logger.info("Ecorification complete!");
+    }
+
+    private void rebuild(IProject project) {
+        try {
+            project.build(IncrementalProjectBuilder.CLEAN_BUILD, new NullProgressMonitor());
+            project.build(IncrementalProjectBuilder.INCREMENTAL_BUILD, new NullProgressMonitor());
+        } catch (CoreException exception) {
+            exception.printStackTrace();
+        }
     }
 
     /**
