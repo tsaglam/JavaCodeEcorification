@@ -139,7 +139,7 @@ final class WrapperGenerator {
 		String superClass) '''
 		package «PACKAGE.append("wrappers", currentPackage)»
 		
-		import org.eclipse.xtend.lib.annotations.Delegate
+		import jce.util.DelegateDeclared
 		import «PACKAGE.append("ecore", currentPackage)».«className»
 		import «PACKAGE.append("ecore", currentPackage)».«factoryName»
 		«IF superClass !== null»
@@ -150,7 +150,7 @@ final class WrapperGenerator {
 		 * Wrapper class for the class «className»
 		 */
 		class «className»Wrapper«IF superClass !== null» extends «PACKAGE.nameOf(superClass)»«ENDIF» implements «className» {
-			@Delegate
+			@DelegateDeclared
 			private var «className» ecoreImplementation
 		
 			new() {
