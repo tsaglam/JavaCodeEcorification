@@ -43,7 +43,7 @@ final class WrapperGenerator {
 		WrapperGenerator::project = project
 		createFolder(WRAPPER_FOLDER) // build wrapper base folder
 		buildWrappers(metamodel.getRoot, "")
-		ResourceRefresher.ResourceRefresher.refresh(project, SRC_FOLDER) // makes wrappers visible in the Eclipse IDE
+		ResourceRefresher.refresh(project, SRC_FOLDER) // makes wrappers visible in the Eclipse IDE
 	}
 
 	/** 
