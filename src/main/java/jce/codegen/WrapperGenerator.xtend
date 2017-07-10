@@ -139,21 +139,23 @@ final class WrapperGenerator {
 		String superClass) '''
 		package «PACKAGE.append("wrappers", currentPackage)»
 		
+		import «PACKAGE.append("ecore", currentPackage)».«className»
+		import «PACKAGE.append("ecore", currentPackage)».«factoryName»
+		«IF superClass === null»
+			import org.eclipse.emf.ecore.impl.MinimalEObjectImpl
+		«ELSE»
+			import «superClass»
+		«ENDIF»
 		«IF superClass === null»
 			import org.eclipse.xtend.lib.annotations.Delegate
 		«ELSE»
 			import jce.util.DelegateDeclared
 		«ENDIF»
-		import «PACKAGE.append("ecore", currentPackage)».«className»
-		import «PACKAGE.append("ecore", currentPackage)».«factoryName»
-		«IF superClass !== null»
-			import «superClass»
-		«ENDIF»
 		
 		/**
 		 * Wrapper class for the class «className»
 		 */
-		class «className»Wrapper«IF superClass !== null» extends «PACKAGE.nameOf(superClass)»«ENDIF» implements «className» {
+		class «className»Wrapper extends «IF superClass === null»MinimalEObjectImpl.Container«ELSE»«PACKAGE.nameOf(superClass)»«ENDIF» implements «className» {
 			«IF superClass === null»
 				@Delegate
 			«ELSE»
