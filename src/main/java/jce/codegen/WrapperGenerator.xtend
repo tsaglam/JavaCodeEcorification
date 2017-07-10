@@ -3,7 +3,6 @@ package jce.codegen
 import eme.generator.GeneratedEcoreMetamodel
 import java.io.ByteArrayInputStream
 import java.io.File
-import jce.util.FolderRefresher
 import jce.util.PathHelper
 import jce.util.ProgressMonitorAdapter
 import org.apache.log4j.LogManager
@@ -15,6 +14,7 @@ import org.eclipse.core.runtime.IProgressMonitor
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EClassifier
 import org.eclipse.emf.ecore.EPackage
+import jce.util.ResourceRefresher
 
 /** 
  * Creates and manages wrappers for the classes of the original Java project with is ecorified.
@@ -43,7 +43,7 @@ final class WrapperGenerator {
 		WrapperGenerator::project = project
 		createFolder(WRAPPER_FOLDER) // build wrapper base folder
 		buildWrappers(metamodel.getRoot, "")
-		FolderRefresher.refresh(project, SRC_FOLDER) // makes wrappers visible in the Eclipse IDE
+		ResourceRefresher.ResourceRefresher.refresh(project, SRC_FOLDER) // makes wrappers visible in the Eclipse IDE
 	}
 
 	/** 
@@ -130,7 +130,7 @@ final class WrapperGenerator {
 			empty = empty && isEmpty(eSubpackage) // check if empty
 		}
 		return empty
-	}
+	} // TODO (HIGH) normal delegate when no EInterface has only EObject as superinterface 
 
 	/**
 	 * Builds the content of a wrapper class.

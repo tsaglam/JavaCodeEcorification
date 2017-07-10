@@ -25,7 +25,7 @@ import jce.codegen.ModelCodeGenerator;
 import jce.codegen.WrapperGenerator;
 import jce.codegen.XtendLibraryHelper;
 import jce.manipulation.InheritanceManipulator;
-import jce.util.FolderRefresher;
+import jce.util.ResourceRefresher;
 
 /**
  * Main class for Java code ecorification.
@@ -67,12 +67,12 @@ public class JavaCodeEcorification {
         ModelCodeGenerator.generate(genModel);
         // Generate wrappers and edit classes:
         XtendLibraryHelper.addXtendLibs(copy);
-        FolderRefresher.refresh(copy);
+        ResourceRefresher.refresh(copy);
         WrapperGenerator.buildWrappers(metamodel, copy);
         InheritanceManipulator.manipulate(originalPackages, copy);
         rebuild(copy);
         // make changes visible in the Eclipse IDE:
-        FolderRefresher.refresh(copy);
+        ResourceRefresher.refresh(copy);
         logger.info("Ecorification complete!");
     }
 
@@ -119,7 +119,7 @@ public class JavaCodeEcorification {
         IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
         for (IProject project : root.getProjects()) { // for every project
             if (project.getName().equals(name)) { // compare with name
-                FolderRefresher.refresh(project);
+                ResourceRefresher.refresh(project);
                 return project;
             }
         }

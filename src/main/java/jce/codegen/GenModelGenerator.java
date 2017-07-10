@@ -15,7 +15,7 @@ import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
 
 import eme.generator.GeneratedEcoreMetamodel;
 import eme.generator.saving.SavingInformation;
-import jce.util.FolderRefresher;
+import jce.util.ResourceRefresher;
 import jce.util.PathHelper;
 
 /**
@@ -93,7 +93,7 @@ public class GenModelGenerator {
             genModelResource.getDefaultSaveOptions().put(XMLResource.OPTION_ENCODING, xmlEncoding);
             genModelResource.getContents().add(genModel);
             genModelResource.save(Collections.EMPTY_MAP);
-            FolderRefresher.refresh(modelPath);
+            ResourceRefresher.refresh(modelPath);
         } catch (IOException exception) {
             logger.error("Error while saving the generator model: ", exception);
         }
