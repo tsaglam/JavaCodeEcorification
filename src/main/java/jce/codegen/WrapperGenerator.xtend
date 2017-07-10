@@ -98,7 +98,7 @@ final class WrapperGenerator {
 			file.touch(MONITOR)
 		}
 	}
-	
+
 	def private static String getSuperClass(EClass eClass) {
 		for (superType : eClass.ESuperTypes) {
 			if (!superType.interface) {
@@ -139,18 +139,26 @@ final class WrapperGenerator {
 		String superClass) '''
 		package «PACKAGE.append("wrappers", currentPackage)»
 		
-		import jce.util.DelegateDeclared
+		«IF superClass === null»
+			import org.eclipse.xtend.lib.annotations.Delegate
+		«ELSE»
+			import jce.util.DelegateDeclared
+		«ENDIF»
 		import «PACKAGE.append("ecore", currentPackage)».«className»
 		import «PACKAGE.append("ecore", currentPackage)».«factoryName»
 		«IF superClass !== null»
-		import «superClass»
+			import «superClass»
 		«ENDIF»
 		
 		/**
 		 * Wrapper class for the class «className»
 		 */
 		class «className»Wrapper«IF superClass !== null» extends «PACKAGE.nameOf(superClass)»«ENDIF» implements «className» {
-			@DelegateDeclared
+			«IF superClass === null»
+				@Delegate
+			«ELSE»
+				@DelegateDeclared
+			«ENDIF»
 			private var «className» ecoreImplementation
 		
 			new() {
