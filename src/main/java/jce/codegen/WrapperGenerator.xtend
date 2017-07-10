@@ -5,6 +5,7 @@ import java.io.ByteArrayInputStream
 import java.io.File
 import jce.util.PathHelper
 import jce.util.ProgressMonitorAdapter
+import jce.util.ResourceRefresher
 import org.apache.log4j.LogManager
 import org.apache.log4j.Logger
 import org.eclipse.core.resources.IFolder
@@ -14,7 +15,6 @@ import org.eclipse.core.runtime.IProgressMonitor
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EClassifier
 import org.eclipse.emf.ecore.EPackage
-import jce.util.ResourceRefresher
 
 /** 
  * Creates and manages wrappers for the classes of the original Java project with is ecorified.
@@ -42,7 +42,7 @@ final class WrapperGenerator {
 		logger.info("Starting the wrapper generation...")
 		WrapperGenerator::project = project
 		createFolder(WRAPPER_FOLDER) // build wrapper base folder
-		buildWrappers(metamodel.getRoot, "")
+		buildWrappers(metamodel.root, "")
 		ResourceRefresher.refresh(project, SRC_FOLDER) // makes wrappers visible in the Eclipse IDE
 	}
 
@@ -52,16 +52,16 @@ final class WrapperGenerator {
 	 * @param path is the current file path of the {@link EPackage}. Should be initially an empty string.
 	 */
 	def private static void buildWrappers(EPackage ePackage, String path) {
-		if (!isEmpty(ePackage)) {
+		if (containsEClass(ePackage)) { // avoids empty folders
 			createFolder(PATH.append(WRAPPER_FOLDER, path))
 		}
 		for (eClassifier : ePackage.EClassifiers) { // for every classifier
 			if (eClassifier instanceof EClass) { // if is class
-				createXtendWrapper(path, eClassifier.getName, getSuperClass(eClassifier)) // create wrapper class
+				createXtendWrapper(path, eClassifier.name, getSuperClass(eClassifier)) // create wrapper class
 			}
 		}
 		for (eSubpackage : ePackage.ESubpackages) { // for every subpackage
-			buildWrappers(eSubpackage, PATH.append(path, eSubpackage.getName)) // do the same
+			buildWrappers(eSubpackage, PATH.append(path, eSubpackage.name)) // do the same
 		}
 	}
 
@@ -119,18 +119,18 @@ final class WrapperGenerator {
 	}
 
 	/**
-	 * Checks whether the EPackage is empty or not. An empty ePackage has no classifiers and only empty subpackages. 
+	 * Checks whether the EPackage contains an EClass. An empty EPackage has no classifiers and only empty subpackages. 
 	 */
-	def private static boolean isEmpty(EPackage ePackage) {
-		var empty = true
+	def private static boolean containsEClass(EPackage ePackage) {
+		var containsEClass = false
 		for (EClassifier eClassifier : ePackage.EClassifiers) { // for every classifier
-			empty = empty && !(eClassifier instanceof EClass) // check if is EClass
+			containsEClass = containsEClass || eClassifier instanceof EClass // check if is EClass
 		}
 		for (EPackage eSubpackage : ePackage.ESubpackages) { // for every subpackage
-			empty = empty && isEmpty(eSubpackage) // check if empty
+			containsEClass = containsEClass || containsEClass(eSubpackage) // check if empty
 		}
-		return empty
-	} // TODO (HIGH) normal delegate when no EInterface has only EObject as superinterface 
+		return containsEClass
+	}
 
 	/**
 	 * Builds the content of a wrapper class.
