@@ -11,8 +11,8 @@ import org.eclipse.xtend.lib.annotations.DelegateProcessor
 import org.eclipse.xtend.lib.macro.Active
 import org.eclipse.xtend.lib.macro.TransformationContext
 import org.eclipse.xtend.lib.macro.TransformationParticipant
-import org.eclipse.xtend.lib.macro.declaration.MutableMemberDeclaration
 import org.eclipse.xtend.lib.macro.declaration.MemberDeclaration
+import org.eclipse.xtend.lib.macro.declaration.MutableMemberDeclaration
 import org.eclipse.xtend.lib.macro.declaration.TypeDeclaration
 
 /**
@@ -49,7 +49,7 @@ class DelegateDeclaredProcessor implements TransformationParticipant<MutableMemb
 	}
 
 	/**
-	 * Utility class of the {@link jce.util.DelegateDeclaredProcessor}. Extends the utility class of the
+	 * Utility class of the {@link DelegateDeclaredProcessor}. Extends the utility class of the
 	 * {@link DelegateProcessor} of the the {@link DelegateDeclared} annotation.
 	 */
 	@Beta
@@ -75,7 +75,7 @@ class DelegateDeclaredProcessor implements TransformationParticipant<MutableMemb
 		}
 
 		/**
-		 * Getter for the delegates. The delegates are the members marked by the {@link jce.util.DelegateDeclared}
+		 * Getter for the delegates. The delegates are the members marked by the {@link DelegateDeclared}
 		 * annotation.
 		 */
 		override getDelegates(TypeDeclaration it) { // Needs to be overridden to make the annotation work.

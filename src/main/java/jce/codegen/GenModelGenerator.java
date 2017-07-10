@@ -15,8 +15,8 @@ import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
 
 import eme.generator.GeneratedEcoreMetamodel;
 import eme.generator.saving.SavingInformation;
-import jce.util.ResourceRefresher;
 import jce.util.PathHelper;
+import jce.util.ResourceRefresher;
 
 /**
  * Creates generation models from Ecore metamodels.
