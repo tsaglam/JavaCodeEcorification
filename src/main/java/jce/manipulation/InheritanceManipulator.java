@@ -1,16 +1,9 @@
 package jce.manipulation;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
@@ -18,50 +11,29 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
 
-import jce.util.PackageFilter;
-import jce.util.ResourceRefresher;
-
 /**
  * Changes the inheritance of the original Java classes.
  * @author Timur Saglam
  */
-public class InheritanceManipulator {
-    private static final Logger logger = LogManager.getLogger(InheritanceManipulator.class.getName());
-    private String ecorePackage;
-    private String wrapperPackage;
-
-    public InheritanceManipulator(String ecorePackageName, String wrapperPackageName) {
-        this.ecorePackage = ecorePackageName;
-        this.wrapperPackage = wrapperPackageName;
-    }
-
+public class InheritanceManipulator extends OriginCodeManipulator {
     /**
-     * Changes the inheritance for all classes of specific packages.
-     * @param packages are the specific packages.
-     * @param project is the {@link IProject} that contains the packages.
+     * Simple constructor that sets the package names.
+     * @param ecorePackageName is the name of the Ecore code base package.
+     * @param wrapperPackageName is the name of the wrapper code base package.
      */
-    public void manipulate(IProject project) {
-        logger.info("Starting the inheritance manipulation...");
-        ResourceRefresher.refresh(project);
-        try {
-            for (IPackageFragment mypackage : PackageFilter.startsNotWith(project, ecorePackage, wrapperPackage)) {
-                if (mypackage.getKind() == IPackageFragmentRoot.K_SOURCE) {
-                    editTypesIn(mypackage);
-                }
-            }
-        } catch (JavaModelException exception) {
-            logger.fatal(exception);
-        }
+    public InheritanceManipulator(String ecorePackage, String wrapperPackage) {
+        super(ecorePackage, wrapperPackage);
     }
 
     /**
      * Visits all types of all {@link ICompilationUnit}s of a {@link IPackageFragment}.
-     * @param myPackage is the {@link IPackageFragment}.
+     * @param fragment is the {@link IPackageFragment}.
      * @throws JavaModelException if there is a problem with the JDT API.
      */
-    private void editTypesIn(IPackageFragment myPackage) throws JavaModelException {
-        for (ICompilationUnit unit : myPackage.getCompilationUnits()) {
-            OriginCodeVisitor visitor = new OriginCodeVisitor(myPackage.getElementName());
+    @Override
+    protected void manipulate(IPackageFragment fragment) throws JavaModelException {
+        for (ICompilationUnit unit : fragment.getCompilationUnits()) {
+            OriginCodeVisitor visitor = new OriginCodeVisitor(fragment.getElementName());
             unit.becomeWorkingCopy(new NullProgressMonitor());
             IDocument document = new Document(unit.getSource());
             CompilationUnit parse = parse(unit);
@@ -78,18 +50,5 @@ public class InheritanceManipulator {
             unit.getBuffer().setContents(document.get());
             unit.commitWorkingCopy(true, new NullProgressMonitor());
         }
-    }
-
-    /**
-     * Reads a {@link ICompilationUnit} and creates the AST DOM for manipulating the Java source file.
-     * @param unit is the {@link ICompilationUnit}.
-     * @return the {@link ASTNode}.
-     */
-    private CompilationUnit parse(ICompilationUnit unit) {
-        ASTParser parser = ASTParser.newParser(AST.JLS8);
-        parser.setKind(ASTParser.K_COMPILATION_UNIT);
-        parser.setSource(unit);
-        parser.setResolveBindings(true);
-        return (CompilationUnit) parser.createAST(null); // parse
     }
 }
