@@ -6,6 +6,7 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
@@ -53,15 +54,16 @@ public class FieldEncapsulationVisitor extends ASTVisitor {
     @Override
     public boolean visit(TypeDeclaration node) {
         if (!node.isInterface()) { // if is class, manipulate inheritance:
-            System.out.println("Node: " + node); // TODO
+            System.out.println("Node: " + node.getName()); // TODO
             for (FieldDeclaration field : node.getFields()) {
-                System.out.println("Field: "+field); // TODO
+                System.out.println("Field: " + field); // TODO
                 VariableDeclarationFragment fragment = (VariableDeclarationFragment) field.fragments().get(0);
-                IVariableBinding binding = fragment.resolveBinding();
-                if (binding instanceof IField) {
-                    encapsulateField((IField) binding);
+                IJavaElement element = fragment.resolveBinding().getJavaElement();
+                if (element instanceof IField) {
+                    encapsulateField((IField) element);
                 } else {
-                    throw new RuntimeException("Critical problem with field encapsulation. IVariableBinding is not IField: " + binding); // TODO
+                    throw new RuntimeException("Critical problem with field encapsulation. IJavaElement is not IField: " + element + " IS "
+                            + element.getClass().getName()); // TODO
                 }
             }
         }
