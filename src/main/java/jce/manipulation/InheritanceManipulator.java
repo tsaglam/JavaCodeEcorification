@@ -33,13 +33,13 @@ public class InheritanceManipulator extends OriginCodeManipulator {
     @Override
     protected void manipulate(IPackageFragment fragment) throws JavaModelException {
         for (ICompilationUnit unit : fragment.getCompilationUnits()) {
-            OriginCodeVisitor visitor = new OriginCodeVisitor(fragment.getElementName());
+            InheritanceManipulationVisitor visitor = new InheritanceManipulationVisitor(fragment.getElementName());
             unit.becomeWorkingCopy(new NullProgressMonitor());
             IDocument document = new Document(unit.getSource());
-            CompilationUnit parse = parse(unit);
-            parse.recordModifications();
-            parse.accept(visitor);
-            TextEdit edits = parse.rewrite(document, null);
+            CompilationUnit parsedUnit = parse(unit);
+            parsedUnit.recordModifications();
+            parsedUnit.accept(visitor);
+            TextEdit edits = parsedUnit.rewrite(document, null);
             try {
                 edits.apply(document);
             } catch (MalformedTreeException exception) {

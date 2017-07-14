@@ -10,14 +10,14 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
  * {@link ASTVisitor} class for {@link Type}s to the manipulate inheritance relations.
  * @author Timur Saglam
  */
-public class OriginCodeVisitor extends ASTVisitor {
+public class InheritanceManipulationVisitor extends ASTVisitor {
     private final String currentPackage;
 
     /**
      * Basic constructor.
      * @param currentPackage is the current package.
      */
-    public OriginCodeVisitor(String currentPackage) {
+    public InheritanceManipulationVisitor(String currentPackage) {
         this.currentPackage = currentPackage;
     }
 
