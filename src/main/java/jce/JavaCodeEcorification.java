@@ -9,10 +9,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.emf.codegen.ecore.genmodel.GenModel;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 
 import eme.EcoreMetamodelExtraction;
 import eme.generator.GeneratedEcoreMetamodel;
@@ -36,6 +32,9 @@ public class JavaCodeEcorification {
     private final ExtractionProperties extractionProperties;
     private final GenModelGenerator genModelGenerator;
     private final EcoreMetamodelExtraction metamodelGenerator;
+    private final InheritanceManipulator inheritanceManipulator;
+    private static final String ECORE_PACKAGE_NAME = "ecore";
+    private static final String WRAPPER_PACKAGE_NAME = "wrappers";
 
     /**
      * Basic constructor.
@@ -46,9 +45,10 @@ public class JavaCodeEcorification {
         extractionProperties = metamodelGenerator.getProperties();
         extractionProperties.set(TextProperty.SAVING_STRATEGY, "CopyProject");
         extractionProperties.set(TextProperty.PROJECT_SUFFIX, "Ecorified");
-        extractionProperties.set(TextProperty.DEFAULT_PACKAGE, "ecore");
+        extractionProperties.set(TextProperty.DEFAULT_PACKAGE, ECORE_PACKAGE_NAME);
         extractionProperties.set(TextProperty.DATATYPE_PACKAGE, "datatypes");
         extractionProperties.set(BinaryProperty.DUMMY_CLASS, false);
+        inheritanceManipulator = new InheritanceManipulator(ECORE_PACKAGE_NAME, WRAPPER_PACKAGE_NAME);
     }
 
     /**
@@ -63,13 +63,12 @@ public class JavaCodeEcorification {
         GeneratedEcoreMetamodel metamodel = metamodelGenerator.extractAndSaveFrom(project);
         GenModel genModel = genModelGenerator.generate(metamodel);
         IProject copy = getProject(metamodel.getSavingInformation()); // Retrieve output project
-        IPackageFragment[] originalPackages = getPackages(JavaCore.create(copy));
         ModelCodeGenerator.generate(genModel);
         // Generate wrappers and edit classes:
         XtendLibraryHelper.addXtendLibs(copy);
         ResourceRefresher.refresh(copy);
         WrapperGenerator.buildWrappers(metamodel, copy);
-        InheritanceManipulator.manipulate(originalPackages, copy);
+        inheritanceManipulator.manipulate(copy);
         rebuild(copy);
         // make changes visible in the Eclipse IDE:
         ResourceRefresher.refresh(copy);
@@ -77,7 +76,7 @@ public class JavaCodeEcorification {
     }
 
     private void rebuild(IProject project) {
-        try {
+        try { // TODO (MEDIUM) fix Xtend build.
             project.build(IncrementalProjectBuilder.CLEAN_BUILD, new NullProgressMonitor());
             project.build(IncrementalProjectBuilder.INCREMENTAL_BUILD, new NullProgressMonitor());
         } catch (CoreException exception) {
@@ -95,20 +94,6 @@ public class JavaCodeEcorification {
         } else if (!project.exists()) {
             throw new IllegalArgumentException("Project " + project.toString() + "does not exist!");
         }
-    }
-
-    /**
-     * Gets packages from a specific {@link IJavaProject}.
-     * @param project is the specific {@link IJavaProject}.
-     * @return the array of {@link IPackageFragment}s.
-     */
-    private IPackageFragment[] getPackages(IJavaProject project) {
-        try {
-            return project.getPackageFragments();
-        } catch (JavaModelException exception) {
-            logger.fatal(exception);
-        }
-        return null;
     }
 
     /**

@@ -19,15 +19,20 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
 
+import jce.util.PackageFilter;
+
 /**
  * Changes the inheritance of the original Java classes.
  * @author Timur Saglam
  */
-public final class InheritanceManipulator {
+public class InheritanceManipulator {
     private static final Logger logger = LogManager.getLogger(InheritanceManipulator.class.getName());
+    private String ecorePackage;
+    private String wrapperPackage;
 
-    private InheritanceManipulator() {
-        // private constructor.
+    public InheritanceManipulator(String ecorePackageName, String wrapperPackageName) {
+        this.ecorePackage = ecorePackageName;
+        this.wrapperPackage = wrapperPackageName;
     }
 
     /**
@@ -35,11 +40,11 @@ public final class InheritanceManipulator {
      * @param packages are the specific packages.
      * @param project is the {@link IProject} that contains the packages.
      */
-    public static void manipulate(IPackageFragment[] packages, IProject project) {
+    public void manipulate(IProject project) {
         logger.info("Starting the inheritance manipulation...");
         try {
             project.refreshLocal(IProject.DEPTH_INFINITE, new NullProgressMonitor());
-            for (IPackageFragment mypackage : packages) {
+            for (IPackageFragment mypackage : PackageFilter.startsNotWith(project, ecorePackage, wrapperPackage)) {
                 if (mypackage.getKind() == IPackageFragmentRoot.K_SOURCE) {
                     editTypesIn(mypackage);
                 }
@@ -56,7 +61,7 @@ public final class InheritanceManipulator {
      * @param myPackage is the {@link IPackageFragment}.
      * @throws JavaModelException if there is a problem with the JDT API.
      */
-    private static void editTypesIn(IPackageFragment myPackage) throws JavaModelException {
+    private void editTypesIn(IPackageFragment myPackage) throws JavaModelException {
         for (ICompilationUnit unit : myPackage.getCompilationUnits()) {
             TypeVisitor visitor = new TypeVisitor(myPackage.getElementName());
             unit.becomeWorkingCopy(new NullProgressMonitor());
@@ -82,7 +87,7 @@ public final class InheritanceManipulator {
      * @param unit is the {@link ICompilationUnit}.
      * @return the {@link ASTNode}.
      */
-    private static CompilationUnit parse(ICompilationUnit unit) {
+    private CompilationUnit parse(ICompilationUnit unit) {
         ASTParser parser = ASTParser.newParser(AST.JLS8);
         parser.setKind(ASTParser.K_COMPILATION_UNIT);
         parser.setSource(unit);
