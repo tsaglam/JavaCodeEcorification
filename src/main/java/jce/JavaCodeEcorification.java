@@ -20,6 +20,7 @@ import jce.codegen.GenModelGenerator;
 import jce.codegen.ModelCodeGenerator;
 import jce.codegen.WrapperGenerator;
 import jce.codegen.XtendLibraryHelper;
+import jce.manipulation.FieldEncapsulator;
 import jce.manipulation.InheritanceManipulator;
 import jce.util.ResourceRefresher;
 
@@ -33,6 +34,7 @@ public class JavaCodeEcorification {
     private final GenModelGenerator genModelGenerator;
     private final EcoreMetamodelExtraction metamodelGenerator;
     private final InheritanceManipulator inheritanceManipulator;
+    private final FieldEncapsulator fieldEncapsulator;
     private static final String ECORE_PACKAGE_NAME = "ecore";
     private static final String WRAPPER_PACKAGE_NAME = "wrappers";
 
@@ -49,6 +51,7 @@ public class JavaCodeEcorification {
         extractionProperties.set(TextProperty.DATATYPE_PACKAGE, "datatypes");
         extractionProperties.set(BinaryProperty.DUMMY_CLASS, false);
         inheritanceManipulator = new InheritanceManipulator(ECORE_PACKAGE_NAME, WRAPPER_PACKAGE_NAME);
+        fieldEncapsulator = new FieldEncapsulator(ECORE_PACKAGE_NAME, WRAPPER_PACKAGE_NAME);
     }
 
     /**
@@ -68,6 +71,7 @@ public class JavaCodeEcorification {
         XtendLibraryHelper.addXtendLibs(copy);
         ResourceRefresher.refresh(copy);
         WrapperGenerator.buildWrappers(metamodel, copy);
+        fieldEncapsulator.manipulate(copy);
         inheritanceManipulator.manipulate(copy);
         rebuild(copy);
         // make changes visible in the Eclipse IDE:
