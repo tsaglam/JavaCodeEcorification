@@ -3,7 +3,6 @@ package jce.manipulation;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -20,6 +19,7 @@ import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
 
 import jce.util.PackageFilter;
+import jce.util.ResourceRefresher;
 
 /**
  * Changes the inheritance of the original Java classes.
@@ -42,16 +42,14 @@ public class InheritanceManipulator {
      */
     public void manipulate(IProject project) {
         logger.info("Starting the inheritance manipulation...");
+        ResourceRefresher.refresh(project);
         try {
-            project.refreshLocal(IProject.DEPTH_INFINITE, new NullProgressMonitor());
             for (IPackageFragment mypackage : PackageFilter.startsNotWith(project, ecorePackage, wrapperPackage)) {
                 if (mypackage.getKind() == IPackageFragmentRoot.K_SOURCE) {
                     editTypesIn(mypackage);
                 }
             }
         } catch (JavaModelException exception) {
-            logger.fatal(exception);
-        } catch (CoreException exception) {
             logger.fatal(exception);
         }
     }
@@ -63,7 +61,7 @@ public class InheritanceManipulator {
      */
     private void editTypesIn(IPackageFragment myPackage) throws JavaModelException {
         for (ICompilationUnit unit : myPackage.getCompilationUnits()) {
-            TypeVisitor visitor = new TypeVisitor(myPackage.getElementName());
+            OriginCodeVisitor visitor = new OriginCodeVisitor(myPackage.getElementName());
             unit.becomeWorkingCopy(new NullProgressMonitor());
             IDocument document = new Document(unit.getSource());
             CompilationUnit parse = parse(unit);
