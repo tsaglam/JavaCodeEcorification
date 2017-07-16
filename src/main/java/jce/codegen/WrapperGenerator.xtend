@@ -4,7 +4,6 @@ import eme.generator.GeneratedEcoreMetamodel
 import java.io.ByteArrayInputStream
 import java.io.File
 import jce.util.PathHelper
-import jce.util.ProgressMonitorAdapter
 import jce.util.ResourceRefresher
 import org.apache.log4j.LogManager
 import org.apache.log4j.Logger
@@ -12,6 +11,7 @@ import org.eclipse.core.resources.IFolder
 import org.eclipse.core.resources.IProject
 import org.eclipse.core.resources.IResource
 import org.eclipse.core.runtime.IProgressMonitor
+import org.eclipse.core.runtime.NullProgressMonitor
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EClassifier
 import org.eclipse.emf.ecore.EPackage
@@ -22,7 +22,7 @@ import org.eclipse.emf.ecore.EPackage
  */
 final class WrapperGenerator {
 	static final Logger logger = LogManager.getLogger(WrapperGenerator.getName)
-	static final IProgressMonitor MONITOR = new ProgressMonitorAdapter(logger)
+	static final IProgressMonitor MONITOR = new NullProgressMonitor()
 	static final PathHelper PACKAGE = new PathHelper(Character.valueOf('.').charValue)
 	static final PathHelper PATH = new PathHelper(File.separatorChar)
 	static final String SRC_FOLDER = "src"
