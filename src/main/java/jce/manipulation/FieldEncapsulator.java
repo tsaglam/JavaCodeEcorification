@@ -1,6 +1,5 @@
 package jce.manipulation;
 
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
@@ -21,10 +20,15 @@ public class FieldEncapsulator extends OriginCodeManipulator {
         super(ecorePackage, wrapperPackage);
     }
 
+    /**
+     * Visits all types of all {@link ICompilationUnit}s of a {@link IPackageFragment} to encapsulate all fields.
+     * @param fragment is the {@link IPackageFragment}.
+     * @throws JavaModelException if there is a problem with the JDT API.
+     */
+    @Override
     protected void manipulate(IPackageFragment fragment) throws JavaModelException {
         for (ICompilationUnit unit : fragment.getCompilationUnits()) {
             FieldEncapsulationVisitor visitor = new FieldEncapsulationVisitor();
-            unit.becomeWorkingCopy(new NullProgressMonitor());
             CompilationUnit parsedUnit = parse(unit);
             parsedUnit.accept(visitor);
         }

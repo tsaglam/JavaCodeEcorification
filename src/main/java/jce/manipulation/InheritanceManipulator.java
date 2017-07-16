@@ -16,6 +16,7 @@ import org.eclipse.text.edits.TextEdit;
  * @author Timur Saglam
  */
 public class InheritanceManipulator extends OriginCodeManipulator {
+
     /**
      * Simple constructor that sets the package names.
      * @param ecorePackageName is the name of the Ecore code base package.
@@ -26,7 +27,8 @@ public class InheritanceManipulator extends OriginCodeManipulator {
     }
 
     /**
-     * Visits all types of all {@link ICompilationUnit}s of a {@link IPackageFragment}.
+     * Visits all types of all {@link ICompilationUnit}s of a {@link IPackageFragment} to override the super class
+     * declarations.
      * @param fragment is the {@link IPackageFragment}.
      * @throws JavaModelException if there is a problem with the JDT API.
      */
@@ -34,9 +36,8 @@ public class InheritanceManipulator extends OriginCodeManipulator {
     protected void manipulate(IPackageFragment fragment) throws JavaModelException {
         for (ICompilationUnit unit : fragment.getCompilationUnits()) {
             InheritanceManipulationVisitor visitor = new InheritanceManipulationVisitor(fragment.getElementName());
-            unit.becomeWorkingCopy(new NullProgressMonitor());
-            IDocument document = new Document(unit.getSource());
             CompilationUnit parsedUnit = parse(unit);
+            IDocument document = new Document(unit.getSource());
             parsedUnit.recordModifications();
             parsedUnit.accept(visitor);
             TextEdit edits = parsedUnit.rewrite(document, null);

@@ -3,6 +3,7 @@ package jce.manipulation;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -63,8 +64,10 @@ public abstract class OriginCodeManipulator {
      * Reads a {@link ICompilationUnit} and creates the AST DOM for manipulating the Java source file.
      * @param unit is the {@link ICompilationUnit}.
      * @return the {@link ASTNode}.
+     * @throws JavaModelException if there is problem with the Java model.
      */
-    protected CompilationUnit parse(ICompilationUnit unit) {
+    protected CompilationUnit parse(ICompilationUnit unit) throws JavaModelException {
+        unit.becomeWorkingCopy(new NullProgressMonitor());
         ASTParser parser = ASTParser.newParser(AST.JLS8);
         parser.setKind(ASTParser.K_COMPILATION_UNIT);
         parser.setSource(unit);
