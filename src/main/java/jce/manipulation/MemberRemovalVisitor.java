@@ -19,7 +19,9 @@ public class MemberRemovalVisitor extends ASTVisitor {
 
     private List<String> removedFields;
 
-    // Basic constructor.
+    /**
+     * Basic constructor.
+     */
     public MemberRemovalVisitor() {
         removedFields = new LinkedList<>();
     }
@@ -44,15 +46,22 @@ public class MemberRemovalVisitor extends ASTVisitor {
      * Checks whether a {@link MethodDeclaration} is an access method.
      */
     private boolean isAccessMethod(MethodDeclaration method) {
-        String[] prefixes = { "get", "set", "is" };
+        String[] prefixes = { "get", "set", "is" }; // access method prefixes
         for (String prefix : prefixes) {
             for (String field : removedFields) {
                 if (method.getName().getIdentifier().equals(prefix + capitalize(field))) {
-                    return true;
+                    return true; // is access method if method name matches prefix + field name once
                 }
             }
         }
-        return false; // TODO !!! CONTINUE HERE !!!
+        return false;
+    }
+
+    /**
+     * Checks whether a {@link FieldDeclaration} is unnecessary. That means it should be removed by this visitor.
+     */
+    private boolean isUnnecessary(FieldDeclaration field) {
+        return !Modifier.isStatic(field.getModifiers()) && Modifier.isPrivate(field.getModifiers());
     }
 
     /**
@@ -73,12 +82,9 @@ public class MemberRemovalVisitor extends ASTVisitor {
      */
     private void removeFields(TypeDeclaration type) {
         for (FieldDeclaration field : type.getFields()) { // for every field
-            if (!Modifier.isStatic(field.getModifiers())) { // if not static
+            if (isUnnecessary(field)) { // if not static
                 field.delete(); // delete
                 VariableDeclarationFragment fragment = (VariableDeclarationFragment) field.fragments().get(0);
-                System.err.println(fragment.getName()); // TODO
-                System.err.println(fragment.getName().getIdentifier()); // TODO
-                System.err.println(fragment.getName().getFullyQualifiedName()); // TODO
                 removedFields.add(fragment.getName().getIdentifier());
             }
         }
