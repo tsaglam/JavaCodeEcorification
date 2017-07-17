@@ -1,7 +1,6 @@
 package jce.manipulation;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
@@ -13,24 +12,22 @@ public class FieldEncapsulator extends OriginCodeManipulator {
 
     /**
      * Simple constructor that sets the package names.
-     * @param ecorePackageName is the name of the Ecore code base package.
-     * @param wrapperPackageName is the name of the wrapper code base package.
+     * @param ecorePackage is the name of the Ecore code base package.
+     * @param wrapperPackage is the name of the wrapper code base package.
      */
     public FieldEncapsulator(String ecorePackage, String wrapperPackage) {
         super(ecorePackage, wrapperPackage);
     }
 
     /**
-     * Visits all types of all {@link ICompilationUnit}s of a {@link IPackageFragment} to encapsulate all fields.
-     * @param fragment is the {@link IPackageFragment}.
+     * Visits all types of an {@link ICompilationUnit} to encapsulate all fields.
+     * @param unit is the {@link ICompilationUnit}.
      * @throws JavaModelException if there is a problem with the JDT API.
      */
     @Override
-    protected void manipulate(IPackageFragment fragment) throws JavaModelException {
-        for (ICompilationUnit unit : fragment.getCompilationUnits()) {
-            FieldEncapsulationVisitor visitor = new FieldEncapsulationVisitor();
-            CompilationUnit parsedUnit = parse(unit);
-            parsedUnit.accept(visitor);
-        }
+    protected void manipulate(ICompilationUnit unit) throws JavaModelException {
+        FieldEncapsulationVisitor visitor = new FieldEncapsulationVisitor();
+        CompilationUnit parsedUnit = parse(unit);
+        parsedUnit.accept(visitor);
     }
 }

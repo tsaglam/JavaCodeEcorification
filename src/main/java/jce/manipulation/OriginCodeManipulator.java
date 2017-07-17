@@ -11,7 +11,13 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.text.edits.MalformedTreeException;
+import org.eclipse.text.edits.TextEdit;
 
 import jce.util.PackageFilter;
 import jce.util.ResourceRefresher;
@@ -27,8 +33,8 @@ public abstract class OriginCodeManipulator {
 
     /**
      * Simple constructor that sets the package names.
-     * @param ecorePackageName is the name of the Ecore code base package.
-     * @param wrapperPackageName is the name of the wrapper code base package.
+     * @param ecorePackage is the name of the Ecore code base package.
+     * @param wrapperPackage is the name of the wrapper code base package.
      */
     public OriginCodeManipulator(String ecorePackage, String wrapperPackage) {
         this.ecorePackage = ecorePackage;
@@ -45,7 +51,9 @@ public abstract class OriginCodeManipulator {
         try {
             for (IPackageFragment fragment : PackageFilter.startsNotWith(project, ecorePackage, wrapperPackage)) {
                 if (fragment.getKind() == IPackageFragmentRoot.K_SOURCE) {
-                    manipulate(fragment);
+                    for (ICompilationUnit unit : fragment.getCompilationUnits()) {
+                        manipulate(unit);
+                    }
                 }
             }
         } catch (JavaModelException exception) {
@@ -54,11 +62,35 @@ public abstract class OriginCodeManipulator {
     }
 
     /**
-     * Executes the origin code manipulation for every package.
-     * @param fragment is the {@link IPackageFragment} of the package.
+     * Visits all types of any {@link ICompilationUnit} of a {@link IPackageFragment} with a specific {@link ASTVisitor}
+     * and applies all recorded modifications to the Java files.
+     * @param unit is the {@link ICompilationUnit}.
+     * @param visitor is the specific {@link ASTVisitor}.
+     * @throws JavaModelException if there is a problem with the JDT API.
+     */
+    protected void applyVisitorModifications(ICompilationUnit unit, ASTVisitor visitor) throws JavaModelException {
+        CompilationUnit parsedUnit = parse(unit);
+        IDocument document = new Document(unit.getSource());
+        parsedUnit.recordModifications();
+        parsedUnit.accept(visitor);
+        TextEdit edits = parsedUnit.rewrite(document, null);
+        try {
+            edits.apply(document);
+        } catch (MalformedTreeException exception) {
+            logger.fatal(exception);
+        } catch (BadLocationException exception) {
+            logger.fatal(exception);
+        }
+        unit.getBuffer().setContents(document.get());
+        unit.commitWorkingCopy(true, new NullProgressMonitor());
+    }
+
+    /**
+     * Executes the origin code manipulation on a compilation unit.
+     * @param unit is the {@link ICompilationUnit}.
      * @throws JavaModelException if there are problems with the Java model.
      */
-    protected abstract void manipulate(IPackageFragment fragment) throws JavaModelException;
+    protected abstract void manipulate(ICompilationUnit unit) throws JavaModelException;
 
     /**
      * Reads a {@link ICompilationUnit} and creates the AST DOM for manipulating the Java source file.
