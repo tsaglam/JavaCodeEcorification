@@ -31,6 +31,7 @@ import org.eclipse.pde.core.plugin.IPluginModelBase;
 import org.eclipse.pde.core.plugin.PluginRegistry;
 
 import jce.util.ProgressMonitorAdapter;
+import jce.util.ResourceRefresher;
 
 /**
  * Helper class that edits an project do add the Xtend dependencies.
@@ -51,6 +52,7 @@ public final class XtendLibraryHelper {
      */
     public static void addXtendLibs(IProject project) {
         logger.info("Adding Xtend dependencies...");
+        ResourceRefresher.refresh(project);
         createXtendFolder(project);
         addClasspathEntry(project);
         addBuildProperty(project);

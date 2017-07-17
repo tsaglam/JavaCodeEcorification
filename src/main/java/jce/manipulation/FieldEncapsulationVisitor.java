@@ -33,7 +33,7 @@ public class FieldEncapsulationVisitor extends ASTVisitor {
      * Encapsulates a specific {@link IField}.
      * @param field is the specific {@link IField}.
      */
-    public void encapsulateField(IField field) { // TODO (HIGH) Test this process.
+    public void encapsulateField(IField field) {
         try {
             SelfEncapsulateFieldRefactoring refactoring = new SelfEncapsulateFieldRefactoring(field);
             CheckConditionsOperation checkCondOp = new CheckConditionsOperation(refactoring, CheckConditionsOperation.ALL_CONDITIONS);

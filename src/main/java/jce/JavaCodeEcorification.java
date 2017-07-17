@@ -22,6 +22,7 @@ import jce.codegen.WrapperGenerator;
 import jce.codegen.XtendLibraryHelper;
 import jce.manipulation.FieldEncapsulator;
 import jce.manipulation.InheritanceManipulator;
+import jce.manipulation.MemberRemover;
 import jce.util.ResourceRefresher;
 
 /**
@@ -29,14 +30,15 @@ import jce.util.ResourceRefresher;
  * @author Timur Saglam
  */
 public class JavaCodeEcorification {
+    private static final String ECORE_PACKAGE = "ecore";
     private static final Logger logger = LogManager.getLogger(JavaCodeEcorification.class.getName());
+    private static final String WRAPPER_PACKAGE = "wrappers";
     private final ExtractionProperties extractionProperties;
-    private final GenModelGenerator genModelGenerator;
-    private final EcoreMetamodelExtraction metamodelGenerator;
-    private final InheritanceManipulator inheritanceManipulator;
     private final FieldEncapsulator fieldEncapsulator;
-    private static final String ECORE_PACKAGE_NAME = "ecore";
-    private static final String WRAPPER_PACKAGE_NAME = "wrappers";
+    private final GenModelGenerator genModelGenerator;
+    private final InheritanceManipulator inheritanceManipulator;
+    private final MemberRemover memberRemover;
+    private final EcoreMetamodelExtraction metamodelGenerator;
 
     /**
      * Basic constructor.
@@ -47,45 +49,41 @@ public class JavaCodeEcorification {
         extractionProperties = metamodelGenerator.getProperties();
         extractionProperties.set(TextProperty.SAVING_STRATEGY, "CopyProject");
         extractionProperties.set(TextProperty.PROJECT_SUFFIX, "Ecorified");
-        extractionProperties.set(TextProperty.DEFAULT_PACKAGE, ECORE_PACKAGE_NAME);
+        extractionProperties.set(TextProperty.DEFAULT_PACKAGE, ECORE_PACKAGE);
         extractionProperties.set(TextProperty.DATATYPE_PACKAGE, "datatypes");
         extractionProperties.set(BinaryProperty.DUMMY_CLASS, false);
-        inheritanceManipulator = new InheritanceManipulator(ECORE_PACKAGE_NAME, WRAPPER_PACKAGE_NAME);
-        fieldEncapsulator = new FieldEncapsulator(ECORE_PACKAGE_NAME, WRAPPER_PACKAGE_NAME);
+        inheritanceManipulator = new InheritanceManipulator(ECORE_PACKAGE, WRAPPER_PACKAGE);
+        fieldEncapsulator = new FieldEncapsulator(ECORE_PACKAGE, WRAPPER_PACKAGE);
+        memberRemover = new MemberRemover(ECORE_PACKAGE, WRAPPER_PACKAGE);
     }
 
     /**
-     * Starts the ecorification for a specific Java project.
+     * Starts the ecorification for a specific Java project. Initializes the different steps of the Ecorification
+     * pipeline: The extraction of an Ecore metamodel, the Ecore model code generation, the wrapper generation and the
+     * origin code adaption.
      * @param project is the specific Java project as {@link IProject}.
      */
     public void start(IProject project) {
-        // Initialize:
+        // 0. initialize:
         check(project);
         logger.info("Starting Ecorification...");
-        // Generate metamodel, GenModel, model code and make Project copy:
+        // 1. generate metamodel, GenModel, model code and make Project copy:
         GeneratedEcoreMetamodel metamodel = metamodelGenerator.extractAndSaveFrom(project);
         GenModel genModel = genModelGenerator.generate(metamodel);
         IProject copy = getProject(metamodel.getSavingInformation()); // Retrieve output project
         ModelCodeGenerator.generate(genModel);
-        // Generate wrappers and edit classes:
+        // 2. generate wrappers:
         XtendLibraryHelper.addXtendLibs(copy);
         ResourceRefresher.refresh(copy);
         WrapperGenerator.buildWrappers(metamodel, copy);
+        // 3. adapt origin code:
         fieldEncapsulator.manipulate(copy);
+        memberRemover.manipulate(copy);
         inheritanceManipulator.manipulate(copy);
         rebuild(copy);
-        // make changes visible in the Eclipse IDE:
+        // 4. make changes visible in the Eclipse IDE:
         ResourceRefresher.refresh(copy);
         logger.info("Ecorification complete!");
-    }
-
-    private void rebuild(IProject project) {
-        try { // TODO (MEDIUM) fix Xtend build.
-            project.build(IncrementalProjectBuilder.CLEAN_BUILD, new NullProgressMonitor());
-            project.build(IncrementalProjectBuilder.INCREMENTAL_BUILD, new NullProgressMonitor());
-        } catch (CoreException exception) {
-            exception.printStackTrace();
-        }
     }
 
     /**
@@ -113,5 +111,14 @@ public class JavaCodeEcorification {
             }
         }
         return null;
+    }
+
+    private void rebuild(IProject project) {
+        try { // TODO (MEDIUM) fix Xtend build. 
+            project.build(IncrementalProjectBuilder.CLEAN_BUILD, new NullProgressMonitor());
+            project.build(IncrementalProjectBuilder.INCREMENTAL_BUILD, new NullProgressMonitor());
+        } catch (CoreException exception) {
+            exception.printStackTrace();
+        }
     }
 }
