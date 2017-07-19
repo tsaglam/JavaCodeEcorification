@@ -143,13 +143,10 @@ final class WrapperGenerator {
 		import «PACKAGE.append("ecore", currentPackage)».«factoryName»
 		«IF superClass === null»
 			import org.eclipse.emf.ecore.impl.MinimalEObjectImpl
-		«ELSE»
-			import «superClass»
-		«ENDIF»
-		«IF superClass === null»
 			import org.eclipse.xtend.lib.annotations.Delegate
 		«ELSE»
-			import jce.util.DelegateDeclared
+			import edu.kit.ipd.sdq.activextendannotations.DelegateDeclared
+			import «superClass»
 		«ENDIF»
 		
 		/**
