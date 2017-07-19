@@ -1,7 +1,10 @@
 package jce;
 
+import java.io.File;
+
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
@@ -23,6 +26,7 @@ import jce.codegen.XtendLibraryHelper;
 import jce.manipulation.FieldEncapsulator;
 import jce.manipulation.InheritanceManipulator;
 import jce.manipulation.MemberRemover;
+import jce.util.ProgressMonitorAdapter;
 import jce.util.ResourceRefresher;
 
 /**
@@ -61,28 +65,28 @@ public class JavaCodeEcorification {
      * Starts the ecorification for a specific Java project. Initializes the different steps of the Ecorification
      * pipeline: The extraction of an Ecore metamodel, the Ecore model code generation, the wrapper generation and the
      * origin code adaption.
-     * @param project is the specific Java project as {@link IProject}.
+     * @param originalProject is the specific Java project as {@link IProject}.
      */
-    public void start(IProject project) {
+    public void start(IProject originalProject) {
         // 0. initialize:
-        check(project);
+        check(originalProject);
         logger.info("Starting Ecorification...");
         // 1. generate metamodel, GenModel, model code and make Project copy:
-        GeneratedEcoreMetamodel metamodel = metamodelGenerator.extractAndSaveFrom(project);
+        GeneratedEcoreMetamodel metamodel = metamodelGenerator.extractAndSaveFrom(originalProject);
         GenModel genModel = genModelGenerator.generate(metamodel);
-        IProject copy = getProject(metamodel.getSavingInformation()); // Retrieve output project
+        IProject project = getProject(metamodel.getSavingInformation()); // Retrieve output project
         ModelCodeGenerator.generate(genModel);
         // 2. generate wrappers:
-        XtendLibraryHelper.addXtendLibs(copy);
-        ResourceRefresher.refresh(copy);
-        WrapperGenerator.buildWrappers(metamodel, copy);
+        XtendLibraryHelper.addXtendLibs(project);
+        ResourceRefresher.refresh(project);
+        WrapperGenerator.buildWrappers(metamodel, project);
         // 3. adapt origin code:
-        fieldEncapsulator.manipulate(copy);
-        memberRemover.manipulate(copy);
-        inheritanceManipulator.manipulate(copy);
-        rebuild(copy);
-        // 4. make changes visible in the Eclipse IDE:
-        ResourceRefresher.refresh(copy);
+        fieldEncapsulator.manipulate(project);
+        memberRemover.manipulate(project);
+        inheritanceManipulator.manipulate(project);
+        // 4. build project and make changes visible in the Eclipse IDE:
+        rebuild(project);
+        ResourceRefresher.refresh(project);
         logger.info("Ecorification complete!");
     }
 
@@ -113,10 +117,17 @@ public class JavaCodeEcorification {
         return null;
     }
 
+    /**
+     * Tries to build the project.
+     */
     private void rebuild(IProject project) {
-        try { // TODO (MEDIUM) fix Xtend build. 
+        ResourceRefresher.refresh(project);
+        try { // TODO (MEDIUM) fix Xtend build.
             project.build(IncrementalProjectBuilder.CLEAN_BUILD, new NullProgressMonitor());
-            project.build(IncrementalProjectBuilder.INCREMENTAL_BUILD, new NullProgressMonitor());
+            project.build(IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
+            IFolder xtendFolder = project.getFolder("src" + File.separator + "main" + File.separator + "xtend-gen");
+            ResourceRefresher.refresh(project);
+            xtendFolder.delete(true, new ProgressMonitorAdapter(logger));
         } catch (CoreException exception) {
             exception.printStackTrace();
         }
