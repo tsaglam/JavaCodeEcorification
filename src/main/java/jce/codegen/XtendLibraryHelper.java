@@ -149,6 +149,7 @@ public final class XtendLibraryHelper {
                 newManifest.add(" org.eclipse.xtext.xbase.lib,");
                 newManifest.add(" org.eclipse.xtend.lib,");
                 newManifest.add(" org.eclipse.xtend.lib.macro,");
+                newManifest.add(" edu.kit.ipd.sdq.activextendannotations,");
             }
         }
         return newManifest;
