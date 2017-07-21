@@ -1,5 +1,7 @@
 package jce.manipulation;
 
+import java.util.List;
+
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.eclipse.core.resources.IProject;
@@ -19,6 +21,8 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
 
+import jce.properties.EcorificationProperties;
+import jce.properties.TextProperty;
 import jce.util.PackageFilter;
 import jce.util.ResourceRefresher;
 
@@ -28,17 +32,14 @@ import jce.util.ResourceRefresher;
  */
 public abstract class OriginCodeManipulator {
     protected static final Logger logger = LogManager.getLogger(InheritanceManipulator.class.getName());
-    protected String ecorePackage;
-    protected String wrapperPackage;
+    protected final EcorificationProperties properties;
 
     /**
-     * Simple constructor that sets the package names.
-     * @param ecorePackage is the name of the Ecore code base package.
-     * @param wrapperPackage is the name of the wrapper code base package.
+     * Simple constructor that sets the properties.
+     * @param properties are the {@link EcorificationProperties}.
      */
-    public OriginCodeManipulator(String ecorePackage, String wrapperPackage) {
-        this.ecorePackage = ecorePackage;
-        this.wrapperPackage = wrapperPackage;
+    public OriginCodeManipulator(EcorificationProperties properties) {
+        this.properties = properties;
     }
 
     /**
@@ -48,8 +49,10 @@ public abstract class OriginCodeManipulator {
     public void manipulate(IProject project) {
         logger.info("Starting the origin code manipulation " + getClass().getSimpleName());
         ResourceRefresher.refresh(project);
+        List<IPackageFragment> packages = PackageFilter.startsNotWith(project, properties.get(TextProperty.ECORE_PACKAGE),
+                properties.get(TextProperty.WRAPPER_PACKAGE));
         try {
-            for (IPackageFragment fragment : PackageFilter.startsNotWith(project, ecorePackage, wrapperPackage)) {
+            for (IPackageFragment fragment : packages) {
                 if (fragment.getKind() == IPackageFragmentRoot.K_SOURCE) {
                     for (ICompilationUnit unit : fragment.getCompilationUnits()) {
                         manipulate(unit);

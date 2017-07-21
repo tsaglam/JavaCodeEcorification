@@ -4,6 +4,8 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
+import jce.properties.EcorificationProperties;
+
 /**
  * Encapsulates the fields of the origin code. This is necessary for the removal of the fields.
  * @author Timur Saglam
@@ -11,12 +13,11 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 public class FieldEncapsulator extends OriginCodeManipulator {
 
     /**
-     * Simple constructor that sets the package names.
-     * @param ecorePackage is the name of the Ecore code base package.
-     * @param wrapperPackage is the name of the wrapper code base package.
+     * Simple constructor that sets the properties.
+     * @param properties are the {@link EcorificationProperties}.
      */
-    public FieldEncapsulator(String ecorePackage, String wrapperPackage) {
-        super(ecorePackage, wrapperPackage);
+    public FieldEncapsulator(EcorificationProperties properties) {
+        super(properties);
     }
 
     /**

@@ -9,7 +9,7 @@ public enum BinaryProperty implements IBinaryProperty {
     private final String key;
 
     /**
-     * Private constructor for enum values with key and default value of an extraction property.
+     * Private constructor for enum values with key and default value of an ecorification property.
      * @param key is the key of the property.
      * @param defaultValue is the default value of the property.
      */

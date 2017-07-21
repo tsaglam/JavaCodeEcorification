@@ -18,7 +18,6 @@ import eme.generator.GeneratedEcoreMetamodel;
 import eme.generator.saving.SavingInformation;
 import eme.properties.BinaryProperty;
 import eme.properties.ExtractionProperties;
-import eme.properties.TextProperty;
 import jce.codegen.GenModelGenerator;
 import jce.codegen.ModelCodeGenerator;
 import jce.codegen.WrapperGenerator;
@@ -26,6 +25,8 @@ import jce.codegen.XtendLibraryHelper;
 import jce.manipulation.FieldEncapsulator;
 import jce.manipulation.InheritanceManipulator;
 import jce.manipulation.MemberRemover;
+import jce.properties.EcorificationProperties;
+import jce.properties.TextProperty;
 import jce.util.ProgressMonitorAdapter;
 import jce.util.ResourceRefresher;
 
@@ -34,31 +35,31 @@ import jce.util.ResourceRefresher;
  * @author Timur Saglam
  */
 public class JavaCodeEcorification {
-    private static final String ECORE_PACKAGE = "ecore";
     private static final Logger logger = LogManager.getLogger(JavaCodeEcorification.class.getName());
-    private static final String WRAPPER_PACKAGE = "wrappers";
     private final ExtractionProperties extractionProperties;
     private final FieldEncapsulator fieldEncapsulator;
     private final GenModelGenerator genModelGenerator;
     private final InheritanceManipulator inheritanceManipulator;
     private final MemberRemover memberRemover;
     private final EcoreMetamodelExtraction metamodelGenerator;
+    private final EcorificationProperties properties;
 
     /**
      * Basic constructor.
      */
     public JavaCodeEcorification() {
+        properties = new EcorificationProperties();
         metamodelGenerator = new EcoreMetamodelExtraction();
         genModelGenerator = new GenModelGenerator();
         extractionProperties = metamodelGenerator.getProperties();
-        extractionProperties.set(TextProperty.SAVING_STRATEGY, "CopyProject");
-        extractionProperties.set(TextProperty.PROJECT_SUFFIX, "Ecorified");
-        extractionProperties.set(TextProperty.DEFAULT_PACKAGE, ECORE_PACKAGE);
-        extractionProperties.set(TextProperty.DATATYPE_PACKAGE, "datatypes");
+        extractionProperties.set(eme.properties.TextProperty.SAVING_STRATEGY, "CopyProject");
+        extractionProperties.set(eme.properties.TextProperty.PROJECT_SUFFIX, "Ecorified");
+        extractionProperties.set(eme.properties.TextProperty.DEFAULT_PACKAGE, properties.get(TextProperty.ECORE_PACKAGE));
+        extractionProperties.set(eme.properties.TextProperty.DATATYPE_PACKAGE, "datatypes");
         extractionProperties.set(BinaryProperty.DUMMY_CLASS, false);
-        inheritanceManipulator = new InheritanceManipulator(ECORE_PACKAGE, WRAPPER_PACKAGE);
-        fieldEncapsulator = new FieldEncapsulator(ECORE_PACKAGE, WRAPPER_PACKAGE);
-        memberRemover = new MemberRemover(ECORE_PACKAGE, WRAPPER_PACKAGE);
+        inheritanceManipulator = new InheritanceManipulator(properties);
+        fieldEncapsulator = new FieldEncapsulator(properties);
+        memberRemover = new MemberRemover(properties);
     }
 
     /**

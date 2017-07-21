@@ -3,6 +3,8 @@ package jce.manipulation;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 
+import jce.properties.EcorificationProperties;
+
 /**
  * Changes the inheritance of the original Java classes.
  * @author Timur Saglam
@@ -10,12 +12,11 @@ import org.eclipse.jdt.core.JavaModelException;
 public class InheritanceManipulator extends OriginCodeManipulator {
 
     /**
-     * Simple constructor that sets the package names.
-     * @param ecorePackage is the name of the Ecore code base package.
-     * @param wrapperPackage is the name of the wrapper code base package.
+     * Simple constructor that sets the properties.
+     * @param properties are the {@link EcorificationProperties}.
      */
-    public InheritanceManipulator(String ecorePackage, String wrapperPackage) {
-        super(ecorePackage, wrapperPackage);
+    public InheritanceManipulator(EcorificationProperties properties) {
+        super(properties);
     }
 
     /**
