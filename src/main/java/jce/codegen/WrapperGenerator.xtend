@@ -26,7 +26,8 @@ final class WrapperGenerator {
 	static final PathHelper PACKAGE = new PathHelper(Character.valueOf('.').charValue)
 	static final PathHelper PATH = new PathHelper(File.separatorChar)
 	static final String SRC_FOLDER = "src"
-	static final String WRAPPER_FOLDER = PATH.append(SRC_FOLDER, "wrappers")
+	static final String WRAPPER_PACKAGE = "unification"
+	static final String WRAPPER_FOLDER = PATH.append(SRC_FOLDER, WRAPPER_PACKAGE)
 	static IProject project
 
 	private new() {
@@ -64,6 +65,13 @@ final class WrapperGenerator {
 			buildWrappers(eSubpackage, PATH.append(path, eSubpackage.name)) // do the same
 		}
 	}
+	
+	/**
+     * Capitalizes the first letter of a String.
+     */
+    def private static String capitalize(String input) { // TODO (MEDIUM) move to utility class
+        return input.substring(0, 1).toUpperCase() + input.substring(1)
+    }
 
 	/**
 	 * Creates an {@link IFolder} in the project with a project relative path.
@@ -83,14 +91,14 @@ final class WrapperGenerator {
 		var factoryName = '''«PACKAGE.nameOf(currentPackage)»Factory'''
 		factoryName = factoryName.substring(0, 1).toUpperCase + factoryName.substring(1) // first letter upper case
 		val content = wrapperContent(name, factoryName, currentPackage, superClass)
-		createFile(packagePath, '''«name»Wrapper.xtend''', content)
+		createFile(packagePath, '''Unified«capitalize(name)».xtend''', content)
 	}
 
 	/**
 	 * Creates an IFile from a project relative path, a file name and creates the file content.
 	 */
 	def private static void createFile(String path, String name, String content) {
-		var folder = project.getFolder(PATH.append(SRC_FOLDER, "wrappers", path))
+		var folder = project.getFolder(PATH.append(SRC_FOLDER, WRAPPER_PACKAGE, path))
 		var file = folder.getFile(name)
 		if (!file.exists) {
 			val source = new ByteArrayInputStream(content.bytes)
