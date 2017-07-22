@@ -17,6 +17,7 @@ import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EClassifier
 import org.eclipse.emf.ecore.EPackage
 
+import static jce.properties.TextProperty.ECORE_PACKAGE
 import static jce.properties.TextProperty.WRAPPER_PACKAGE
 import static jce.properties.TextProperty.WRAPPER_PREFIX
 import static jce.properties.TextProperty.WRAPPER_SUFFIX
@@ -162,8 +163,8 @@ final class WrapperGenerator {
 		String superClass) '''
 		package «packageUtil.append(properties.get(WRAPPER_PACKAGE), currentPackage)»
 		
-		import «packageUtil.append("ecore", currentPackage)».«className»
-		import «packageUtil.append("ecore", currentPackage)».«factoryName»
+		import «packageUtil.append(properties.get(ECORE_PACKAGE), currentPackage)».«className»
+		import «packageUtil.append(properties.get(ECORE_PACKAGE), currentPackage)».«factoryName»
 		«IF superClass === null»
 			import org.eclipse.emf.ecore.impl.MinimalEObjectImpl
 			import org.eclipse.xtend.lib.annotations.Delegate
