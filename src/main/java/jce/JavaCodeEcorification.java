@@ -43,6 +43,7 @@ public class JavaCodeEcorification {
     private final MemberRemover memberRemover;
     private final EcoreMetamodelExtraction metamodelGenerator;
     private final EcorificationProperties properties;
+    private final WrapperGenerator wrapperGenerator;
 
     /**
      * Basic constructor.
@@ -51,6 +52,7 @@ public class JavaCodeEcorification {
         properties = new EcorificationProperties();
         metamodelGenerator = new EcoreMetamodelExtraction();
         genModelGenerator = new GenModelGenerator();
+        wrapperGenerator = new WrapperGenerator(properties);
         extractionProperties = metamodelGenerator.getProperties();
         extractionProperties.set(eme.properties.TextProperty.SAVING_STRATEGY, "CopyProject");
         extractionProperties.set(eme.properties.TextProperty.PROJECT_SUFFIX, "Ecorified");
@@ -80,7 +82,7 @@ public class JavaCodeEcorification {
         // 2. generate wrappers:
         XtendLibraryHelper.addXtendLibs(project);
         ResourceRefresher.refresh(project);
-        WrapperGenerator.buildWrappers(metamodel, project);
+        wrapperGenerator.buildWrappers(metamodel, project);
         // 3. adapt origin code:
         fieldEncapsulator.manipulate(project);
         memberRemover.manipulate(project);

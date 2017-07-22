@@ -27,6 +27,6 @@ public class InheritanceManipulator extends OriginCodeManipulator {
      */
     @Override
     protected void manipulate(ICompilationUnit unit) throws JavaModelException {
-        applyVisitorModifications(unit, new InheritanceManipulationVisitor(unit.getParent().getElementName()));
+        applyVisitorModifications(unit, new InheritanceManipulationVisitor(unit.getParent().getElementName(), properties));
     }
 }
