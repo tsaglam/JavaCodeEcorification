@@ -6,7 +6,8 @@ public enum TextProperty implements ITextProperty {
     ECORE_PACKAGE("EcorePackageName", "ecore"),
     WRAPPER_PACKAGE("WrapperPackageName", "unification"),
     WRAPPER_PREFIX("WrapperPrefix", "Unified"),
-    WRAPPER_SUFFIX("WrapperSuffix", "");
+    WRAPPER_SUFFIX("WrapperSuffix", ""),
+    PROJECT_SUFFIX("ProjectSuffix", "Ecorified");
 
     private final String defaultValue;
     private final String key;
