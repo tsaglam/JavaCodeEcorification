@@ -4,7 +4,9 @@ import eme.properties.ITextProperty;
 
 public enum TextProperty implements ITextProperty {
     ECORE_PACKAGE("EcorePackageName", "ecore"),
-    WRAPPER_PACKAGE("WrapperPackageName", "unification");
+    WRAPPER_PACKAGE("WrapperPackageName", "unification"),
+    WRAPPER_PREFIX("WrapperPrefix", "Unified"),
+    WRAPPER_SUFFIX("WrapperSuffix", "");
 
     private final String defaultValue;
     private final String key;
