@@ -4,6 +4,8 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
@@ -18,6 +20,8 @@ import org.eclipse.ltk.core.refactoring.CreateChangeOperation;
 import org.eclipse.ltk.core.refactoring.PerformChangeOperation;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
+import jce.properties.BinaryProperty;
+import jce.properties.EcorificationProperties;
 import jce.util.ProgressMonitorAdapter;
 
 /**
@@ -27,6 +31,15 @@ import jce.util.ProgressMonitorAdapter;
 @SuppressWarnings("restriction") // TODO (LOW) This class uses LTK classes & method that are not marked as API
 public class FieldEncapsulationVisitor extends ASTVisitor {
     private static final Logger logger = LogManager.getLogger(FieldEncapsulationVisitor.class.getName());
+    private IProgressMonitor monitor;
+
+    public FieldEncapsulationVisitor(EcorificationProperties properties) {
+        if (properties.get(BinaryProperty.FULL_LOGGING)) {
+            monitor = new ProgressMonitorAdapter(logger);
+        } else {
+            monitor = new NullProgressMonitor();
+        }
+    }
 
     /**
      * Encapsulates a specific {@link IField}.
@@ -38,7 +51,7 @@ public class FieldEncapsulationVisitor extends ASTVisitor {
             CheckConditionsOperation checkCondOp = new CheckConditionsOperation(refactoring, CheckConditionsOperation.ALL_CONDITIONS);
             CreateChangeOperation createChangeOp = new CreateChangeOperation(checkCondOp, RefactoringStatus.WARNING);
             PerformChangeOperation performChangeOp = new PerformChangeOperation(createChangeOp);
-            ResourcesPlugin.getWorkspace().run(performChangeOp, new ProgressMonitorAdapter(logger));
+            ResourcesPlugin.getWorkspace().run(performChangeOp, monitor);
         } catch (JavaModelException exception) {
             exception.printStackTrace();
         } catch (CoreException exception) {

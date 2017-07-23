@@ -27,7 +27,7 @@ public class FieldEncapsulator extends OriginCodeManipulator {
      */
     @Override
     protected void manipulate(ICompilationUnit unit) throws JavaModelException {
-        FieldEncapsulationVisitor visitor = new FieldEncapsulationVisitor();
+        FieldEncapsulationVisitor visitor = new FieldEncapsulationVisitor(properties);
         CompilationUnit parsedUnit = parse(unit);
         parsedUnit.accept(visitor);
     }

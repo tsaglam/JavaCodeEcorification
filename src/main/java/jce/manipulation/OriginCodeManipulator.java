@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -21,9 +22,11 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
 
+import jce.properties.BinaryProperty;
 import jce.properties.EcorificationProperties;
 import jce.properties.TextProperty;
 import jce.util.PackageFilter;
+import jce.util.ProgressMonitorAdapter;
 import jce.util.ResourceRefresher;
 
 /**
@@ -33,6 +36,7 @@ import jce.util.ResourceRefresher;
 public abstract class OriginCodeManipulator {
     protected static final Logger logger = LogManager.getLogger(InheritanceManipulator.class.getName());
     protected final EcorificationProperties properties;
+    protected final IProgressMonitor monitor;
 
     /**
      * Simple constructor that sets the properties.
@@ -40,6 +44,11 @@ public abstract class OriginCodeManipulator {
      */
     public OriginCodeManipulator(EcorificationProperties properties) {
         this.properties = properties;
+        if (properties.get(BinaryProperty.FULL_LOGGING)) {
+            monitor = new ProgressMonitorAdapter(logger);
+        } else {
+            monitor = new NullProgressMonitor();
+        }
     }
 
     /**
@@ -85,7 +94,7 @@ public abstract class OriginCodeManipulator {
             logger.fatal(exception);
         }
         unit.getBuffer().setContents(document.get());
-        unit.commitWorkingCopy(true, new NullProgressMonitor());
+        unit.commitWorkingCopy(true, monitor);
     }
 
     /**
@@ -102,11 +111,11 @@ public abstract class OriginCodeManipulator {
      * @throws JavaModelException if there is problem with the Java model.
      */
     protected CompilationUnit parse(ICompilationUnit unit) throws JavaModelException {
-        unit.becomeWorkingCopy(new NullProgressMonitor());
+        unit.becomeWorkingCopy(monitor);
         ASTParser parser = ASTParser.newParser(AST.JLS8);
         parser.setKind(ASTParser.K_COMPILATION_UNIT);
         parser.setSource(unit);
         parser.setResolveBindings(true);
-        return (CompilationUnit) parser.createAST(null); // parse
+        return (CompilationUnit) parser.createAST(monitor); // parse
     }
 }
