@@ -3,7 +3,7 @@ package jce.properties;
 import eme.properties.IBinaryProperty;
 
 public enum BinaryProperty implements IBinaryProperty {
-    ;
+    FULL_LOGGING("FullLogging", false);
 
     private final boolean defaultValue;
     private final String key;
