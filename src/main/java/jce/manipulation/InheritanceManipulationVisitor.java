@@ -32,7 +32,7 @@ public class InheritanceManipulationVisitor extends ASTVisitor {
     @Override
     public boolean visit(TypeDeclaration node) {
         if (!node.isInterface()) { // if is class, manipulate inheritance:
-            setSuperClass(node, getPackage() + "." + getName(node)); // TODO
+            setSuperClass(node, getPackage() + "." + getName(node));
         }
         return super.visit(node);
     }

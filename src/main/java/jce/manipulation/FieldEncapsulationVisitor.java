@@ -2,7 +2,6 @@ package jce.manipulation;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IField;
@@ -39,8 +38,7 @@ public class FieldEncapsulationVisitor extends ASTVisitor {
             CheckConditionsOperation checkCondOp = new CheckConditionsOperation(refactoring, CheckConditionsOperation.ALL_CONDITIONS);
             CreateChangeOperation createChangeOp = new CreateChangeOperation(checkCondOp, RefactoringStatus.WARNING);
             PerformChangeOperation performChangeOp = new PerformChangeOperation(createChangeOp);
-            IWorkspace workspace = ResourcesPlugin.getWorkspace();
-            workspace.run(performChangeOp, new ProgressMonitorAdapter(logger));
+            ResourcesPlugin.getWorkspace().run(performChangeOp, new ProgressMonitorAdapter(logger));
         } catch (JavaModelException exception) {
             exception.printStackTrace();
         } catch (CoreException exception) {
@@ -51,14 +49,13 @@ public class FieldEncapsulationVisitor extends ASTVisitor {
     @Override
     public boolean visit(TypeDeclaration node) {
         if (!node.isInterface()) { // if is class, manipulate inheritance:
-            for (FieldDeclaration field : node.getFields()) {
+            for (FieldDeclaration field : node.getFields()) { // for every field:
                 VariableDeclarationFragment fragment = (VariableDeclarationFragment) field.fragments().get(0);
-                IJavaElement element = fragment.resolveBinding().getJavaElement();
+                IJavaElement element = fragment.resolveBinding().getJavaElement(); // parse FieldDeclaration to IField
                 if (element instanceof IField) {
-                    encapsulateField((IField) element);
+                    encapsulateField((IField) element); // Encapsulate if casted succesful.
                 } else {
-                    throw new RuntimeException("Critical problem with field encapsulation. IJavaElement is not IField: " + element + " IS "
-                            + element.getClass().getName()); // TODO (HIGH) Improve error handling.
+                    throw new ClassCastException("IJavaElement is not IField: " + element + " is " + element.getClass().getName());
                 }
             }
         }
