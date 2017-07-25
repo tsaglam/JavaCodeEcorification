@@ -53,6 +53,27 @@ public class PathHelper {
     }
 
     /**
+     * Checks whether a path has at least one parent.
+     * @param path is the path.
+     * @return true if it has one.
+     */
+    public boolean hasParent(String path) {
+        return path.contains(Character.toString(separator));
+    }
+
+    /**
+     * Returns first parent of path. This is the first segment of the path.
+     * @param path is the original path.
+     * @return the last parent path. If it has no parent, it return the original path.
+     */
+    public String firstParent(String path) {
+        if (hasParent(path)) {
+            return path.substring(0, path.indexOf(separator));
+        }
+        return path;
+    }
+
+    /**
      * Returns the name of the original path. That is the last segment of the original path.
      * @param path is the original path.
      * @return the name.
