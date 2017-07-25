@@ -66,16 +66,20 @@ public final class XtendLibraryHelper {
     private static void addBuildProperty(IProject project) {
         try {
             IPluginModelBase base = PluginRegistry.findModel(project);
-            IBuildModel buildModel = PluginRegistry.createBuildModel(base);
-            IBuildEntry entry = buildModel.getBuild().getEntry("source..");
-            String token = XTEND + SLASH;
-            if (entry.contains(token)) {
-                logger.warn("build.properties already contains " + token);
+            if (base != null) {
+                IBuildModel buildModel = PluginRegistry.createBuildModel(base);
+                IBuildEntry entry = buildModel.getBuild().getEntry("source..");
+                String token = XTEND + SLASH;
+                if (entry.contains(token)) {
+                    logger.warn("build.properties already contains " + token);
+                } else {
+                    entry.addToken(token);
+                }
+                if (buildModel instanceof IEditableModel) { // if saveable
+                    ((IEditableModel) buildModel).save(); // save changes
+                }
             } else {
-                entry.addToken(token);
-            }
-            if (buildModel instanceof IEditableModel) { // if saveable
-                ((IEditableModel) buildModel).save(); // save changes
+                logger.error("Generated project is no plug-in project or contains a malformed manifest.");
             }
         } catch (CoreException exception) {
             logger.error(exception);
