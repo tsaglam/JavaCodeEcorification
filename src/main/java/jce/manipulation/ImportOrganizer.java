@@ -12,7 +12,6 @@ import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.text.edits.TextEdit;
 
-import eme.generator.GeneratedEcoreMetamodel;
 import jce.properties.BinaryProperty;
 import jce.properties.EcorificationProperties;
 import jce.util.ProgressMonitorAdapter;
@@ -40,7 +39,7 @@ public class ImportOrganizer extends OriginCodeManipulator {
     }
 
     @Override
-    protected void manipulate(ICompilationUnit unit, GeneratedEcoreMetamodel metamodel) throws JavaModelException {
+    protected void manipulate(ICompilationUnit unit) throws JavaModelException {
         unit.becomeWorkingCopy(monitor); // changes compilation unit handle to working copy
         CompilationUnit reconciledUnit = unit.reconcile(AST.JLS8, false, null, monitor); // don't ask me
         try {

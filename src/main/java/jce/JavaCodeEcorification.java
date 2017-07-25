@@ -85,10 +85,11 @@ public class JavaCodeEcorification {
         ResourceRefresher.refresh(project);
         wrapperGenerator.buildWrappers(metamodel, project);
         // 3. adapt origin code:
-        fieldEncapsulator.manipulate(project, metamodel);
-        memberRemover.manipulate(project, metamodel);
-        importOrganizer.manipulate(project, metamodel);
-        inheritanceManipulator.manipulate(project, metamodel);
+        fieldEncapsulator.manipulate(project);
+        memberRemover.setMetamodel(metamodel);
+        memberRemover.manipulate(project);
+        importOrganizer.manipulate(project);
+        inheritanceManipulator.manipulate(project);
         // 4. build project and make changes visible in the Eclipse IDE:
         rebuild(project);
         ResourceRefresher.refresh(project);

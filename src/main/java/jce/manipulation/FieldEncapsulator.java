@@ -4,7 +4,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
-import eme.generator.GeneratedEcoreMetamodel;
 import jce.properties.EcorificationProperties;
 
 /**
@@ -27,7 +26,7 @@ public class FieldEncapsulator extends OriginCodeManipulator {
      * @throws JavaModelException if there is a problem with the JDT API.
      */
     @Override
-    protected void manipulate(ICompilationUnit unit, GeneratedEcoreMetamodel metamodel) throws JavaModelException {
+    protected void manipulate(ICompilationUnit unit) throws JavaModelException {
         FieldEncapsulationVisitor visitor = new FieldEncapsulationVisitor(properties);
         CompilationUnit parsedUnit = parse(unit);
         parsedUnit.accept(visitor);
