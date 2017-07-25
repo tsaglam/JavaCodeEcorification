@@ -28,7 +28,7 @@ import jce.util.ProgressMonitorAdapter;
  * {@link ASTVisitor} class for {@link Type}s to the manipulate inheritance relations.
  * @author Timur Saglam
  */
-@SuppressWarnings("restriction") // TODO (LOW) This class uses LTK classes & method that are not marked as API
+@SuppressWarnings("restriction") // TODO (LOW) This class uses LTK classes & methods that are not marked as API
 public class FieldEncapsulationVisitor extends ASTVisitor {
     private static final Logger logger = LogManager.getLogger(FieldEncapsulationVisitor.class.getName());
     private IProgressMonitor monitor;
