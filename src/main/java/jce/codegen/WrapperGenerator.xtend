@@ -67,8 +67,10 @@ final class WrapperGenerator {
 			createFolder(pathUtil.append(wrapperFolder, path))
 		}
 		for (eClassifier : ePackage.EClassifiers) { // for every classifier
-			if (eClassifier instanceof EClass) { // if is class
-				createXtendWrapper(path, eClassifier.name, getSuperClass(eClassifier)) // create wrapper class
+			if (eClassifier instanceof EClass) { // if is EClass
+				if (!eClassifier.interface) { // if is not interface
+					createXtendWrapper(path, eClassifier.name, getSuperClass(eClassifier)) // create wrapper class
+				}
 			}
 		}
 		for (eSubpackage : ePackage.ESubpackages) { // for every subpackage
