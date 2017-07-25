@@ -3,6 +3,7 @@ package jce.manipulation;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -11,18 +12,22 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
+import eme.generator.GeneratedEcoreMetamodel;
+import jce.util.MetamodelSearcher;
+
 /**
  * {@link ASTVisitor} class for {@link Type}s to the manipulate inheritance relations.
  * @author Timur Saglam
  */
 public class MemberRemovalVisitor extends ASTVisitor {
-
-    private List<String> removedFields;
+    private final GeneratedEcoreMetamodel metamodel;
+    private final List<String> removedFields;
 
     /**
      * Basic constructor.
      */
-    public MemberRemovalVisitor() {
+    public MemberRemovalVisitor(GeneratedEcoreMetamodel metamodel) {
+        this.metamodel = metamodel;
         removedFields = new LinkedList<>();
     }
 
@@ -58,6 +63,16 @@ public class MemberRemovalVisitor extends ASTVisitor {
     }
 
     /**
+     * Checks whether a variable declaration fragment was generated as part of the Ecore model code by searching the
+     * correlating {@link EStructuralFeature} in the extracted Ecore metamodel.
+     */
+    private boolean isGenerated(VariableDeclarationFragment fragment, TypeDeclaration type) {
+        String typeName = type.getName().resolveTypeBinding().getQualifiedName(); // fully qualified name of class
+        String fieldName = fragment.getName().getIdentifier(); // name of field
+        return MetamodelSearcher.findEStructuralFeature(fieldName, typeName, metamodel.getRoot()) != null;
+    }
+
+    /**
      * Checks whether a {@link FieldDeclaration} is unnecessary. That means it should be removed by this visitor.
      */
     private boolean isUnnecessary(FieldDeclaration field) {
@@ -82,9 +97,9 @@ public class MemberRemovalVisitor extends ASTVisitor {
      */
     private void removeFields(TypeDeclaration type) {
         for (FieldDeclaration field : type.getFields()) { // for every field
-            if (isUnnecessary(field)) { // if not static
+            VariableDeclarationFragment fragment = (VariableDeclarationFragment) field.fragments().get(0);
+            if (isUnnecessary(field) && isGenerated(fragment, type)) { // if not static
                 field.delete(); // delete
-                VariableDeclarationFragment fragment = (VariableDeclarationFragment) field.fragments().get(0);
                 removedFields.add(fragment.getName().getIdentifier());
             }
         }

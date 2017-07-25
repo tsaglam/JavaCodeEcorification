@@ -22,6 +22,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
 
+import eme.generator.GeneratedEcoreMetamodel;
 import jce.properties.BinaryProperty;
 import jce.properties.EcorificationProperties;
 import jce.properties.TextProperty;
@@ -55,7 +56,7 @@ public abstract class OriginCodeManipulator {
      * Manipulates the origin code of the given {@link IProject}.
      * @param project is the given {@link IProject}.
      */
-    public void manipulate(IProject project) {
+    public void manipulate(IProject project, GeneratedEcoreMetamodel metamodel) {
         logger.info("Starting the origin code manipulation " + getClass().getSimpleName());
         ResourceRefresher.refresh(project);
         List<IPackageFragment> packages = PackageFilter.startsNotWith(project, properties.get(TextProperty.ECORE_PACKAGE),
@@ -64,7 +65,7 @@ public abstract class OriginCodeManipulator {
             for (IPackageFragment fragment : packages) {
                 if (fragment.getKind() == IPackageFragmentRoot.K_SOURCE) {
                     for (ICompilationUnit unit : fragment.getCompilationUnits()) {
-                        manipulate(unit);
+                        manipulate(unit, metamodel);
                     }
                 }
             }
@@ -102,7 +103,7 @@ public abstract class OriginCodeManipulator {
      * @param unit is the {@link ICompilationUnit}.
      * @throws JavaModelException if there are problems with the Java model.
      */
-    protected abstract void manipulate(ICompilationUnit unit) throws JavaModelException;
+    protected abstract void manipulate(ICompilationUnit unit, GeneratedEcoreMetamodel metamodel) throws JavaModelException;
 
     /**
      * Reads a {@link ICompilationUnit} and creates the AST DOM for manipulating the Java source file.

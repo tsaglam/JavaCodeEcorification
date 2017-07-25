@@ -3,6 +3,7 @@ package jce.manipulation;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 
+import eme.generator.GeneratedEcoreMetamodel;
 import jce.properties.EcorificationProperties;
 
 /**
@@ -26,7 +27,7 @@ public class InheritanceManipulator extends OriginCodeManipulator {
      * @throws JavaModelException if there is a problem with the JDT API.
      */
     @Override
-    protected void manipulate(ICompilationUnit unit) throws JavaModelException {
+    protected void manipulate(ICompilationUnit unit, GeneratedEcoreMetamodel metamodel) throws JavaModelException {
         applyVisitorModifications(unit, new InheritanceManipulationVisitor(unit.getParent().getElementName(), properties));
     }
 }
