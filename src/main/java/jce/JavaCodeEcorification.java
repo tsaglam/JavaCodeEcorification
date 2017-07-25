@@ -27,6 +27,7 @@ import jce.codegen.ModelCodeGenerator;
 import jce.codegen.WrapperGenerator;
 import jce.codegen.XtendLibraryHelper;
 import jce.manipulation.FieldEncapsulator;
+import jce.manipulation.ImportOrganizer;
 import jce.manipulation.InheritanceManipulator;
 import jce.manipulation.MemberRemover;
 import jce.properties.EcorificationProperties;
@@ -46,6 +47,7 @@ public class JavaCodeEcorification {
     private final EcoreMetamodelExtraction metamodelGenerator;
     private final EcorificationProperties properties;
     private final WrapperGenerator wrapperGenerator;
+    private final ImportOrganizer importOrganizer;
 
     /**
      * Basic constructor.
@@ -53,12 +55,13 @@ public class JavaCodeEcorification {
     public JavaCodeEcorification() {
         properties = new EcorificationProperties();
         metamodelGenerator = new EcoreMetamodelExtraction();
-        configureExtraction(metamodelGenerator.getProperties());
         genModelGenerator = new GenModelGenerator();
         wrapperGenerator = new WrapperGenerator(properties);
-        inheritanceManipulator = new InheritanceManipulator(properties);
         fieldEncapsulator = new FieldEncapsulator(properties);
         memberRemover = new MemberRemover(properties);
+        importOrganizer = new ImportOrganizer(properties);
+        inheritanceManipulator = new InheritanceManipulator(properties);
+        configureExtraction(metamodelGenerator.getProperties());
 
     }
 
@@ -84,6 +87,7 @@ public class JavaCodeEcorification {
         // 3. adapt origin code:
         fieldEncapsulator.manipulate(project, metamodel);
         memberRemover.manipulate(project, metamodel);
+        importOrganizer.manipulate(project, metamodel);
         inheritanceManipulator.manipulate(project, metamodel);
         // 4. build project and make changes visible in the Eclipse IDE:
         rebuild(project);
