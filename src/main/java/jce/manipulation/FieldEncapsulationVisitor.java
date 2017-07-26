@@ -5,7 +5,6 @@ import org.apache.log4j.Logger;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
@@ -20,9 +19,8 @@ import org.eclipse.ltk.core.refactoring.CreateChangeOperation;
 import org.eclipse.ltk.core.refactoring.PerformChangeOperation;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
-import jce.properties.BinaryProperty;
 import jce.properties.EcorificationProperties;
-import jce.util.ProgressMonitorAdapter;
+import jce.util.MonitorFactory;
 
 /**
  * {@link ASTVisitor} class for {@link Type}s to the manipulate inheritance relations.
@@ -34,11 +32,7 @@ public class FieldEncapsulationVisitor extends ASTVisitor {
     private IProgressMonitor monitor;
 
     public FieldEncapsulationVisitor(EcorificationProperties properties) {
-        if (properties.get(BinaryProperty.FULL_LOGGING)) {
-            monitor = new ProgressMonitorAdapter(logger);
-        } else {
-            monitor = new NullProgressMonitor();
-        }
+        monitor = MonitorFactory.createProgressMonitor(logger, properties);
     }
 
     /**

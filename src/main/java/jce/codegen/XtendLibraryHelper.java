@@ -19,7 +19,7 @@ import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -30,7 +30,8 @@ import org.eclipse.pde.core.build.IBuildModel;
 import org.eclipse.pde.core.plugin.IPluginModelBase;
 import org.eclipse.pde.core.plugin.PluginRegistry;
 
-import jce.util.ProgressMonitorAdapter;
+import jce.properties.EcorificationProperties;
+import jce.util.MonitorFactory;
 import jce.util.ResourceRefresher;
 
 /**
@@ -42,7 +43,7 @@ public final class XtendLibraryHelper {
     private static final char SLASH = File.separatorChar;
     private static final String XTEND = "xtend-gen"; // Xtend folder name
 
-    private XtendLibraryHelper() {
+    public XtendLibraryHelper() {
         throw new AssertionError("Suppress default constructor for noninstantiability");
     }
 
@@ -50,11 +51,12 @@ public final class XtendLibraryHelper {
      * Adds the Xtend dependencies to a project and creates the xtend-gen source folder.
      * @param project is the {@link IProject} instance of the project.
      */
-    public static void addXtendLibs(IProject project) {
+    public static void addXtendLibs(IProject project, EcorificationProperties properties) {
         logger.info("Adding Xtend dependencies...");
+        IProgressMonitor monitor = MonitorFactory.createProgressMonitor(logger, properties);
         ResourceRefresher.refresh(project);
-        createXtendFolder(project);
-        addClasspathEntry(project);
+        createXtendFolder(project, monitor);
+        addClasspathEntry(project, monitor);
         addBuildProperty(project);
         addManifestEntries(project);
         updateProjectDescription(project);
@@ -90,7 +92,7 @@ public final class XtendLibraryHelper {
      * Retrieves the class path file from the {@link IJavaProject}, adds an {@link IClasspathEntry} for the xtend-gen
      * source folder and sets the changed content.
      */
-    private static void addClasspathEntry(IProject project) {
+    private static void addClasspathEntry(IProject project, IProgressMonitor monitor) {
         IJavaProject javaProject = JavaCore.create(project);
         try {
             IClasspathEntry[] entries = javaProject.getRawClasspath();
@@ -101,7 +103,7 @@ public final class XtendLibraryHelper {
                 IClasspathEntry[] newEntries = new IClasspathEntry[entries.length + 1];
                 System.arraycopy(entries, 0, newEntries, 0, entries.length);
                 newEntries[entries.length] = JavaCore.newSourceEntry(new org.eclipse.core.runtime.Path(xtendDirectory));
-                javaProject.setRawClasspath(newEntries, new NullProgressMonitor()); // TODO (HIGH) add full logging
+                javaProject.setRawClasspath(newEntries, monitor);
             }
         } catch (JavaModelException exception) {
             logger.error(exception);
@@ -128,11 +130,11 @@ public final class XtendLibraryHelper {
     /**
      * Creates the binary file folder for Xtend. This is the xtend-bin folder.
      */
-    private static void createXtendFolder(IProject project) {
+    private static void createXtendFolder(IProject project, IProgressMonitor monitor) {
         IFolder folder = project.getFolder(XTEND);
         if (!folder.exists()) {
             try {
-                folder.create(false, true, new ProgressMonitorAdapter(logger)); // TODO (HIGH) add full logging
+                folder.create(false, true, monitor);
             } catch (CoreException exception) {
                 logger.fatal(exception);
             }

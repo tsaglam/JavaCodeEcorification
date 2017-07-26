@@ -4,6 +4,7 @@ import eme.generator.GeneratedEcoreMetamodel
 import java.io.ByteArrayInputStream
 import java.io.File
 import jce.properties.EcorificationProperties
+import jce.util.MonitorFactory
 import jce.util.PathHelper
 import jce.util.ResourceRefresher
 import org.apache.log4j.LogManager
@@ -12,7 +13,6 @@ import org.eclipse.core.resources.IFolder
 import org.eclipse.core.resources.IProject
 import org.eclipse.core.resources.IResource
 import org.eclipse.core.runtime.IProgressMonitor
-import org.eclipse.core.runtime.NullProgressMonitor
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EClassifier
 import org.eclipse.emf.ecore.EPackage
@@ -38,7 +38,7 @@ final class WrapperGenerator {
 
 	new(EcorificationProperties properties) {
 		this.properties = properties
-		monitor = new NullProgressMonitor()
+		monitor = MonitorFactory.createProgressMonitor(logger, properties)
 		packageUtil = new PathHelper(Character.valueOf('.').charValue)
 		pathUtil = new PathHelper(File.separatorChar)
 		wrapperFolder = pathUtil.append(SRC_FOLDER, properties.get(WRAPPER_PACKAGE))
@@ -104,6 +104,7 @@ final class WrapperGenerator {
 		val className = properties.get(WRAPPER_PREFIX) + capitalize(name) + properties.get(WRAPPER_SUFFIX) // name of the wrapper class
 		val content = wrapperContent(name, className, factoryName, currentPackage, superClass) // content of the class
 		createFile(path, '''«className».xtend''', content)
+		monitor.subTask(''' Created «currentPackage».«className».xtend''') // detailed logging
 	}
 
 	/**

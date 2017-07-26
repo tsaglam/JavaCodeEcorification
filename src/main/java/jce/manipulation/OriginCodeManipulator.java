@@ -6,7 +6,6 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -22,11 +21,10 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
 
-import jce.properties.BinaryProperty;
 import jce.properties.EcorificationProperties;
 import jce.properties.TextProperty;
+import jce.util.MonitorFactory;
 import jce.util.PackageFilter;
-import jce.util.ProgressMonitorAdapter;
 import jce.util.ResourceRefresher;
 
 /**
@@ -44,11 +42,7 @@ public abstract class OriginCodeManipulator {
      */
     public OriginCodeManipulator(EcorificationProperties properties) {
         this.properties = properties;
-        if (properties.get(BinaryProperty.FULL_LOGGING)) {
-            monitor = new ProgressMonitorAdapter(logger);
-        } else {
-            monitor = new NullProgressMonitor();
-        }
+        monitor = MonitorFactory.createProgressMonitor(logger, properties);
     }
 
     /**

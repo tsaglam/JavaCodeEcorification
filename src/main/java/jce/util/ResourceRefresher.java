@@ -25,9 +25,10 @@ public final class ResourceRefresher {
      * Refreshes a specific {@link IResource}.
      * @param resource is the {@link IResource}.
      */
-    public static void refresh(IResource resource) { // TODO (HIGH) add full logging
+    public static void refresh(IResource resource) {
         try {
-            resource.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
+            resource.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor()); // not detailed logging
+            logger.info("Refreshed IResource " + resource.getName()); // simple logging
         } catch (CoreException exception) {
             logger.warn("Could not refresh. Try refreshing manually!", exception);
         }

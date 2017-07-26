@@ -13,7 +13,7 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.emf.codegen.ecore.genmodel.GenModel;
 
 import eme.EcoreMetamodelExtraction;
@@ -31,7 +31,7 @@ import jce.manipulation.ImportOrganizer;
 import jce.manipulation.InheritanceManipulator;
 import jce.manipulation.MemberRemover;
 import jce.properties.EcorificationProperties;
-import jce.util.ProgressMonitorAdapter;
+import jce.util.MonitorFactory;
 import jce.util.ResourceRefresher;
 
 /**
@@ -79,9 +79,9 @@ public class JavaCodeEcorification {
         GeneratedEcoreMetamodel metamodel = metamodelGenerator.extractAndSaveFrom(originalProject);
         GenModel genModel = genModelGenerator.generate(metamodel);
         IProject project = getProject(metamodel.getSavingInformation()); // Retrieve output project
-        ModelCodeGenerator.generate(genModel);
+        ModelCodeGenerator.generate(genModel, properties);
         // 2. generate wrappers:
-        XtendLibraryHelper.addXtendLibs(project);
+        XtendLibraryHelper.addXtendLibs(project, properties);
         ResourceRefresher.refresh(project);
         wrapperGenerator.buildWrappers(metamodel, project);
         // 3. adapt origin code:
@@ -91,7 +91,7 @@ public class JavaCodeEcorification {
         importOrganizer.manipulate(project);
         inheritanceManipulator.manipulate(project);
         // 4. build project and make changes visible in the Eclipse IDE:
-        rebuild(project);
+        rebuild(project, properties);
         ResourceRefresher.refresh(project);
         logger.info("Ecorification complete!");
     }
@@ -138,14 +138,15 @@ public class JavaCodeEcorification {
     /**
      * Tries to build the project.
      */
-    private void rebuild(IProject project) {
+    private void rebuild(IProject project, EcorificationProperties properties) {
+        IProgressMonitor monitor = MonitorFactory.createProgressMonitor(logger, properties);
         ResourceRefresher.refresh(project);
         try { // TODO (MEDIUM) fix Xtend build.
-            project.build(IncrementalProjectBuilder.CLEAN_BUILD, new NullProgressMonitor());
-            project.build(IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
+            project.build(IncrementalProjectBuilder.CLEAN_BUILD, monitor);
+            project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
             IFolder xtendFolder = project.getFolder("src" + File.separator + "main" + File.separator + "xtend-gen");
-            ResourceRefresher.refresh(project);
-            xtendFolder.delete(true, new ProgressMonitorAdapter(logger));
+            ResourceRefresher.refresh(project); 
+            xtendFolder.delete(true, monitor);
         } catch (CoreException exception) {
             exception.printStackTrace();
         }

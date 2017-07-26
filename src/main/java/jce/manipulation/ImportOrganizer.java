@@ -2,7 +2,6 @@ package jce.manipulation;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
@@ -12,9 +11,8 @@ import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.text.edits.TextEdit;
 
-import jce.properties.BinaryProperty;
 import jce.properties.EcorificationProperties;
-import jce.util.ProgressMonitorAdapter;
+import jce.util.MonitorFactory;
 
 /**
  * Organizes the imports of the origin code.
@@ -31,11 +29,7 @@ public class ImportOrganizer extends OriginCodeManipulator {
      */
     public ImportOrganizer(EcorificationProperties properties) {
         super(properties);
-        if (properties.get(BinaryProperty.FULL_LOGGING)) {
-            monitor = new ProgressMonitorAdapter(logger);
-        } else {
-            monitor = new NullProgressMonitor();
-        }
+        monitor = MonitorFactory.createProgressMonitor(logger, properties);
     }
 
     @Override

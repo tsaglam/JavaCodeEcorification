@@ -5,7 +5,9 @@ import org.apache.log4j.Logger;
 import org.eclipse.emf.codegen.ecore.generator.Generator;
 import org.eclipse.emf.codegen.ecore.genmodel.GenModel;
 import org.eclipse.emf.codegen.ecore.genmodel.generator.GenBaseGeneratorAdapter;
-import org.eclipse.emf.common.util.BasicMonitor;
+
+import jce.properties.EcorificationProperties;
+import jce.util.MonitorFactory;
 
 /**
  * Class for code generation (e.g generating Java code from Ecore GenModels).
@@ -21,14 +23,14 @@ public final class ModelCodeGenerator {
      * Uses a specific GenModel to generate Java Code.
      * @param genModel is the specific GenModel.
      */
-    public static void generate(GenModel genModel) {
+    public static void generate(GenModel genModel, EcorificationProperties properties) {
         if (genModel == null) {
             throw new IllegalArgumentException("GenModel cannot be null to generate code from it");
         }
         genModel.setCanGenerate(true); // allow generation
         Generator generator = new Generator(); // create generator
         generator.setInput(genModel); // set the model-level input object
-        generator.generate(genModel, GenBaseGeneratorAdapter.MODEL_PROJECT_TYPE, new BasicMonitor()); // TODO (HIGH) add full logging
+        generator.generate(genModel, GenBaseGeneratorAdapter.MODEL_PROJECT_TYPE, MonitorFactory.createMonitor(logger, properties));
         logger.info("Generated Java code from GenModel in: " + generator.getGeneratedOutputs().toString());
     }
 }
