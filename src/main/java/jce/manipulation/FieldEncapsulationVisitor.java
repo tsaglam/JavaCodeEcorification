@@ -10,7 +10,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
-import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldRefactoring;
@@ -23,7 +22,7 @@ import jce.properties.EcorificationProperties;
 import jce.util.MonitorFactory;
 
 /**
- * {@link ASTVisitor} class for {@link Type}s to the manipulate inheritance relations.
+ * {@link ASTVisitor} class for the encapsulation of fields. Encapsulates all field of an class upon visiting.
  * @author Timur Saglam
  */
 @SuppressWarnings("restriction") // TODO (LOW) This class uses LTK classes & methods that are not marked as API
