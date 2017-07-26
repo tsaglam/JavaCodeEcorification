@@ -14,7 +14,7 @@ public final class MetamodelSearcher {
     private final static PathHelper PATH = new PathHelper('.');
 
     private MetamodelSearcher() {
-        // private constructor.
+        throw new AssertionError("Suppress default constructor for noninstantiability");
     }
 
     /**

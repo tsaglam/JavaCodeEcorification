@@ -14,7 +14,7 @@ public final class ModelCodeGenerator {
     private static final Logger logger = LogManager.getLogger(ModelCodeGenerator.class.getName());
 
     private ModelCodeGenerator() {
-        // private constructor.
+        throw new AssertionError("Suppress default constructor for noninstantiability");
     }
 
     /**
@@ -28,7 +28,7 @@ public final class ModelCodeGenerator {
         genModel.setCanGenerate(true); // allow generation
         Generator generator = new Generator(); // create generator
         generator.setInput(genModel); // set the model-level input object
-        generator.generate(genModel, GenBaseGeneratorAdapter.MODEL_PROJECT_TYPE, new BasicMonitor());
+        generator.generate(genModel, GenBaseGeneratorAdapter.MODEL_PROJECT_TYPE, new BasicMonitor()); // TODO (HIGH) add full logging
         logger.info("Generated Java code from GenModel in: " + generator.getGeneratedOutputs().toString());
     }
 }

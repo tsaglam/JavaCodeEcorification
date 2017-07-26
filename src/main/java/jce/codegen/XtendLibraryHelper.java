@@ -43,7 +43,7 @@ public final class XtendLibraryHelper {
     private static final String XTEND = "xtend-gen"; // Xtend folder name
 
     private XtendLibraryHelper() {
-        // private constructor.
+        throw new AssertionError("Suppress default constructor for noninstantiability");
     }
 
     /**
@@ -101,7 +101,7 @@ public final class XtendLibraryHelper {
                 IClasspathEntry[] newEntries = new IClasspathEntry[entries.length + 1];
                 System.arraycopy(entries, 0, newEntries, 0, entries.length);
                 newEntries[entries.length] = JavaCore.newSourceEntry(new org.eclipse.core.runtime.Path(xtendDirectory));
-                javaProject.setRawClasspath(newEntries, new NullProgressMonitor());
+                javaProject.setRawClasspath(newEntries, new NullProgressMonitor()); // TODO (HIGH) add full logging
             }
         } catch (JavaModelException exception) {
             logger.error(exception);
@@ -132,7 +132,7 @@ public final class XtendLibraryHelper {
         IFolder folder = project.getFolder(XTEND);
         if (!folder.exists()) {
             try {
-                folder.create(false, true, new ProgressMonitorAdapter(logger));
+                folder.create(false, true, new ProgressMonitorAdapter(logger)); // TODO (HIGH) add full logging
             } catch (CoreException exception) {
                 logger.fatal(exception);
             }

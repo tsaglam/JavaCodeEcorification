@@ -18,14 +18,14 @@ public final class ResourceRefresher {
     private static final Logger logger = LogManager.getLogger(ResourceRefresher.class.getName());
 
     private ResourceRefresher() {
-        // private constructor.
+        throw new AssertionError("Suppress default constructor for noninstantiability");
     }
 
     /**
      * Refreshes a specific {@link IResource}.
      * @param resource is the {@link IResource}.
      */
-    public static void refresh(IResource resource) {
+    public static void refresh(IResource resource) { // TODO (HIGH) add full logging
         try {
             resource.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
         } catch (CoreException exception) {

@@ -18,7 +18,7 @@ public final class PackageFilter {
     private static final Logger logger = LogManager.getLogger(PackageFilter.class.getName());
 
     private PackageFilter() {
-        // private constructor.
+        throw new AssertionError("Suppress default constructor for noninstantiability");
     }
 
     /**
