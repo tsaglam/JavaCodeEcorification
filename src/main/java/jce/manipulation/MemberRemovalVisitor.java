@@ -8,7 +8,6 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
-import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
@@ -16,7 +15,8 @@ import eme.generator.GeneratedEcoreMetamodel;
 import jce.util.MetamodelSearcher;
 
 /**
- * {@link ASTVisitor} class for {@link Type}s to the manipulate inheritance relations.
+ * {@link ASTVisitor} that removes all private non-static fields and their access methods from a compilation unit that
+ * have a counterpart in the Ecore metamodel which was extracted from the origin code.
  * @author Timur Saglam
  */
 public class MemberRemovalVisitor extends ASTVisitor {
