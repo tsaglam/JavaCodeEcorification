@@ -20,11 +20,6 @@ public class FieldEncapsulator extends OriginCodeManipulator {
         super(properties);
     }
 
-    /**
-     * Visits all types of an {@link ICompilationUnit} to encapsulate all fields.
-     * @param unit is the {@link ICompilationUnit}.
-     * @throws JavaModelException if there is a problem with the JDT API.
-     */
     @Override
     protected void manipulate(ICompilationUnit unit) throws JavaModelException {
         FieldEncapsulationVisitor visitor = new FieldEncapsulationVisitor(properties);

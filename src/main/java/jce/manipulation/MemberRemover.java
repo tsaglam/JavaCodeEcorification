@@ -7,7 +7,8 @@ import eme.generator.GeneratedEcoreMetamodel;
 import jce.properties.EcorificationProperties;
 
 /**
- * Changes the inheritance of the original Java classes.
+ * Removes all private non-static fields and their access methods from the origin code that have a counterpart in the
+ * Ecore metamodel which was extracted from the origin code.
  * @author Timur Saglam
  */
 public class MemberRemover extends OriginCodeManipulator {
@@ -30,11 +31,6 @@ public class MemberRemover extends OriginCodeManipulator {
         this.metamodel = metamodel;
     }
 
-    /**
-     * Visits all types of an {@link ICompilationUnit} to remove all non-static fields and their access methods.
-     * @param unit is the {@link ICompilationUnit}.
-     * @throws JavaModelException if there is a problem with the JDT API.
-     */
     @Override
     protected void manipulate(ICompilationUnit unit) throws JavaModelException {
         if (metamodel == null) {

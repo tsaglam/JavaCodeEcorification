@@ -41,9 +41,9 @@ public class PathHelper {
     }
 
     /**
-     * Cuts the first parent from a path.
+     * Cuts the first parent from a path. The first parent is the first segment of the path.
      * @param path is the path.
-     * @return the cut path, or the original if it has no parents.
+     * @return the path without the first parent, or the original if it has no parents.
      */
     public String cutParent(String path) {
         if (path.contains(Character.toString(separator))) {
