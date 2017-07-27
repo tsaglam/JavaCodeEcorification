@@ -18,16 +18,8 @@ public class MemberRemover extends OriginCodeManipulator {
      * Simple constructor that sets the properties.
      * @param properties are the {@link EcorificationProperties}.
      */
-    public MemberRemover(EcorificationProperties properties) {
+    public MemberRemover(GeneratedEcoreMetamodel metamodel, EcorificationProperties properties) {
         super(properties);
-    }
-
-    /**
-     * Setter for the {@link GeneratedEcoreMetamodel}. Has to be set before calling
-     * {@link OriginCodeManipulator#manipulate(org.eclipse.core.resources.IProject))}.
-     * @param metamodel is the metamodel to set.
-     */
-    public void setMetamodel(GeneratedEcoreMetamodel metamodel) {
         this.metamodel = metamodel;
     }
 

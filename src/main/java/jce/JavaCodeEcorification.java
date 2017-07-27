@@ -43,7 +43,6 @@ public class JavaCodeEcorification {
     private final FieldEncapsulator fieldEncapsulator;
     private final GenModelGenerator genModelGenerator;
     private final InheritanceManipulator inheritanceManipulator;
-    private final MemberRemover memberRemover;
     private final EcoreMetamodelExtraction metamodelGenerator;
     private final EcorificationProperties properties;
     private final WrapperGenerator wrapperGenerator;
@@ -58,7 +57,6 @@ public class JavaCodeEcorification {
         genModelGenerator = new GenModelGenerator();
         wrapperGenerator = new WrapperGenerator(properties);
         fieldEncapsulator = new FieldEncapsulator(properties);
-        memberRemover = new MemberRemover(properties);
         importOrganizer = new ImportOrganizer(properties);
         inheritanceManipulator = new InheritanceManipulator(properties);
         configureExtraction(metamodelGenerator.getProperties());
@@ -86,8 +84,7 @@ public class JavaCodeEcorification {
         wrapperGenerator.buildWrappers(metamodel, project);
         // 3. adapt origin code:
         fieldEncapsulator.manipulate(project);
-        memberRemover.setMetamodel(metamodel);
-        memberRemover.manipulate(project);
+        new MemberRemover(metamodel, properties).manipulate(project);
         importOrganizer.manipulate(project);
         inheritanceManipulator.manipulate(project);
         // 4. build project and make changes visible in the Eclipse IDE:
@@ -145,7 +142,7 @@ public class JavaCodeEcorification {
             project.build(IncrementalProjectBuilder.CLEAN_BUILD, monitor);
             project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
             IFolder xtendFolder = project.getFolder("src" + File.separator + "main" + File.separator + "xtend-gen");
-            ResourceRefresher.refresh(project); 
+            ResourceRefresher.refresh(project);
             xtendFolder.delete(true, monitor);
         } catch (CoreException exception) {
             exception.printStackTrace();
