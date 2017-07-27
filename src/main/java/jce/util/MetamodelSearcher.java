@@ -24,8 +24,8 @@ public final class MetamodelSearcher {
      * @return the {@link EClass} or null if there is none with the specified name.
      */
     public static EClass findEClass(String fullName, EPackage ePackage) {
-        String eClassName = PATH.nameOf(fullName);
-        EPackage parent = findEPackage(PATH.parentOf(fullName), ePackage);
+        String eClassName = PATH.getLastSegment(fullName);
+        EPackage parent = findEPackage(PATH.cutLastSegment(fullName), ePackage);
         for (EClassifier classifier : parent.getEClassifiers()) {
             if (classifier instanceof EClass && isSame(classifier, eClassName)) {
                 return (EClass) classifier;
@@ -42,11 +42,11 @@ public final class MetamodelSearcher {
      */
     public static EPackage findEPackage(String fullName, EPackage ePackage) {
         for (EPackage subpackage : ePackage.getESubpackages()) {
-            if (isSame(subpackage, PATH.firstParent(fullName))) {
-                if (!PATH.hasParent(fullName)) {
+            if (isSame(subpackage, PATH.getFirstSegment(fullName))) {
+                if (!PATH.hasMultipleSegments(fullName)) {
                     return subpackage;
                 } else {
-                    return findEPackage(PATH.cutParent(fullName), subpackage);
+                    return findEPackage(PATH.cutFirstSegment(fullName), subpackage);
                 }
             }
         }

@@ -100,7 +100,7 @@ final class WrapperGenerator {
 	 */
 	def private void createXtendWrapper(String path, String name, String superClass) {
 		val currentPackage = path.replace(File.separatorChar, '.') // path to package declaration
-		var factoryName = '''«capitalize(packageUtil.nameOf(currentPackage))»Factory''' // name of the ecore factory of the package
+		var factoryName = '''«capitalize(packageUtil.getLastSegment(currentPackage))»Factory''' // name of the ecore factory of the package
 		val className = properties.get(WRAPPER_PREFIX) + capitalize(name) + properties.get(WRAPPER_SUFFIX) // name of the wrapper class
 		val content = wrapperContent(name, className, factoryName, currentPackage, superClass) // content of the class
 		createFile(path, '''«className».xtend''', content)
@@ -142,7 +142,7 @@ final class WrapperGenerator {
 			package = packageUtil.append(current.name, package)
 			current = current.ESuperPackage
 		}
-		return packageUtil.cutParent(package)
+		return packageUtil.cutFirstSegment(package)
 	}
 
 	/**
@@ -179,7 +179,7 @@ final class WrapperGenerator {
 		/**
 		 * Unification class for the class «className»
 		 */
-		class «wrapperName» extends «IF superClass === null»MinimalEObjectImpl.Container«ELSE»«packageUtil.nameOf(superClass)»«ENDIF» implements «className» {
+		class «wrapperName» extends «IF superClass === null»MinimalEObjectImpl.Container«ELSE»«packageUtil.getLastSegment(superClass)»«ENDIF» implements «className» {
 			«IF superClass === null»
 				@Delegate
 			«ELSE»

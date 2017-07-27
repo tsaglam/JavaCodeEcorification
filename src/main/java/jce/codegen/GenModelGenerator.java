@@ -65,7 +65,7 @@ public class GenModelGenerator {
             SavingInformation information = metamodel.getSavingInformation();
             String modelName = information.getFileName();
             String modelPath = information.getFilePath();
-            String projectName = SLASH + pathHelper.nameOf(pathHelper.parentOf(modelPath));
+            String projectName = SLASH + pathHelper.getLastSegment(pathHelper.cutLastSegment(modelPath));
             GenModel genModel = GenModelFactory.eINSTANCE.createGenModel();
             genModel.setModelDirectory(projectName + "/src");
             genModel.setModelPluginID(projectName.substring(1));

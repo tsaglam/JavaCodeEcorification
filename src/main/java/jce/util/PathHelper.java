@@ -41,11 +41,11 @@ public class PathHelper {
     }
 
     /**
-     * Cuts the first parent from a path. The first parent is the first segment of the path.
+     * Cuts the first segment of a path.
      * @param path is the path.
-     * @return the path without the first parent, or the original if it has no parents.
+     * @return the path without the first segment, or the original if it has no parents.
      */
-    public String cutParent(String path) {
+    public String cutFirstSegment(String path) {
         if (path.contains(Character.toString(separator))) {
             return path.substring(path.indexOf(separator) + 1);
         }
@@ -53,61 +53,59 @@ public class PathHelper {
     }
 
     /**
-     * Checks whether a path has at least one parent.
-     * @param path is the path.
-     * @return true if it has one.
+     * Cuts the last segment of a path. If the path ends on a separator, it gets removed first.
+     * @param path is the original path.
+     * @return the path without the last segment.
      */
-    public boolean hasParent(String path) {
-        return path.contains(Character.toString(separator));
+    public String cutLastSegment(String path) {
+        if (path.endsWith(Character.toString(separator))) {
+            return path.substring(0, path.lastIndexOf(separator, path.length() - 2));
+        }
+        return path.substring(0, path.lastIndexOf(separator));
     }
 
     /**
-     * Returns first parent of path. This is the first segment of the path.
+     * Returns the original path without the last n segments. If the path ends on a separator, it gets removed first.
      * @param path is the original path.
-     * @return the last parent path. If it has no parent, it return the original path.
+     * @param segments specifies the parent index.
+     * @return the path without the last n segments.
      */
-    public String firstParent(String path) {
-        if (hasParent(path)) {
+    public String cutLastSegments(String path, int segments) {
+        String result = path;
+        for (int i = 0; i < segments; i++) {
+            result = cutLastSegment(result);
+        }
+        return result;
+    }
+
+    /**
+     * Returns the first segment of the path.
+     * @param path is the original path.
+     * @return the first segment, or the original path if it has only one segment.
+     */
+    public String getFirstSegment(String path) {
+        if (hasMultipleSegments(path)) {
             return path.substring(0, path.indexOf(separator));
         }
         return path;
     }
 
     /**
-     * Returns the name of the original path. That is the last segment of the original path.
+     * Returns the last segment of the original path.
      * @param path is the original path.
      * @return the name.
      */
-    public String nameOf(String path) {
+    public String getLastSegment(String path) {
         return path.substring(path.lastIndexOf(separator) + 1);
     }
 
     /**
-     * Returns the n-th parent of the original path. That is the original path without the last n - 1 segments. If the
-     * path ends on a separator, it gets removed first.
-     * @param path is the original path.
-     * @param n specifies the parent index.
-     * @return the parent path.
+     * Checks whether a path has at least two segments.
+     * @param path is the path.
+     * @return true if it multiple.
      */
-    public String nthParentOf(String path, int n) {
-        String result = path;
-        for (int i = 0; i < n; i++) {
-            result = parentOf(result);
-        }
-        return result;
-    }
-
-    /**
-     * Returns the parent of the original path. That is the original path without the last segment. If the path ends on
-     * a separator, it gets removed first.
-     * @param path is the original path.
-     * @return the parent.
-     */
-    public String parentOf(String path) {
-        if (path.endsWith(Character.toString(separator))) {
-            return path.substring(0, path.lastIndexOf(separator, path.length() - 2));
-        }
-        return path.substring(0, path.lastIndexOf(separator));
+    public boolean hasMultipleSegments(String path) {
+        return path.contains(Character.toString(separator));
     }
 
     /**

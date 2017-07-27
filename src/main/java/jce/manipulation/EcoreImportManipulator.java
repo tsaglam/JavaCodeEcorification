@@ -9,7 +9,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
 import eme.generator.GeneratedEcoreMetamodel;
@@ -50,7 +49,7 @@ public class EcoreImportManipulator extends CodeManipulator {
     private void edit(IImportDeclaration importDeclaration, ImportRewrite importRewrite) {
         String name = importDeclaration.getElementName();
         if (importRewrite.removeImport(name)) { // remove old import
-            String referencedType = importRewrite.addImport(path.cutParent(name)); // add adapted import
+            String referencedType = importRewrite.addImport(path.cutFirstSegment(name)); // add adapted import
             if (properties.get(BinaryProperty.FULL_LOGGING)) {
                 logger.info("Adapted Ecore import " + name + " to " + referencedType);
             }
