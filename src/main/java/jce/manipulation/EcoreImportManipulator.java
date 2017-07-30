@@ -9,6 +9,9 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
 import eme.generator.GeneratedEcoreMetamodel;
@@ -33,6 +36,7 @@ public class EcoreImportManipulator extends CodeManipulator {
 
     /**
      * Simple constructor that sets the properties.
+     * @param metamodel is the extracted Ecore metamodel. It is needed to decide which imports to manipulate.
      * @param properties are the {@link EcorificationProperties}.
      */
     public EcoreImportManipulator(GeneratedEcoreMetamodel metamodel, EcorificationProperties properties) {
@@ -63,8 +67,30 @@ public class EcoreImportManipulator extends CodeManipulator {
      * interface and implementation class, the factory interface and implementation class, the switch class and the
      * adapter factory of an Ecore package.
      */
-    private boolean isEcorePackageType(ICompilationUnit unit) {
-        return true; // TODO (HIGH) implement this method.
+    private boolean isEcorePackageType(ICompilationUnit unit) throws JavaModelException {
+        CompilationUnit parsedUnit = parse(unit);
+        TypeNameResolver visitor = new TypeNameResolver();
+        parsedUnit.accept(visitor);
+        String typeName = path.cutFirstSegment(visitor.getTypeName());
+        if (MetamodelSearcher.findEClass(typeName, metamodel.getRoot()) == null) {
+            if (isImplementationClass(typeName)) {
+                typeName = path.append(path.cutLastSegments(typeName, 2), path.getLastSegment(typeName));
+                typeName = typeName.substring(0, typeName.length() - 4);
+                return MetamodelSearcher.findEClass(typeName, metamodel.getRoot()) == null;
+            }
+        } else { // TODO (HIGH) comment & optimize
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Checks whether a fully qualified type name identifies a type which could be part of an Ecore implementation
+     * package. That means the last package of the type name is called impl.
+     */
+    private boolean isImplementationClass(String typeName) {
+        System.err.println("   is impl? " + typeName); // TODO
+        return path.getLastSegment(path.cutLastSegment(typeName)).equals("impl") && typeName.endsWith("Impl");
     }
 
     /**
@@ -77,7 +103,8 @@ public class EcoreImportManipulator extends CodeManipulator {
         if (importDeclaration.isOnDemand()) {
             return false; // EMF imports the Ecore classes directly, not with .*
         }
-        return MetamodelSearcher.findEClass(importDeclaration.getElementName(), metamodel.getRoot()) != null;
+        String typeName = path.cutFirstSegment(importDeclaration.getElementName());
+        return MetamodelSearcher.findEClass(typeName, metamodel.getRoot()) != null;
     }
 
     @Override
@@ -92,6 +119,7 @@ public class EcoreImportManipulator extends CodeManipulator {
             ImportRewrite importRewrite = ImportRewrite.create(unit, true);
             for (IImportDeclaration importDeclaration : importDeclarations) {
                 if (isProblematic(importDeclaration)) { // edit every problematic import declaration
+                    System.err.println("Edit import " + importDeclaration.getElementName() + " in file " + unit.getElementName()); // TODO
                     edit(importDeclaration, importRewrite);
                 }
             }
@@ -100,6 +128,30 @@ public class EcoreImportManipulator extends CodeManipulator {
             } catch (CoreException exception) {
                 exception.printStackTrace();
             }
+        }
+    }
+
+    /**
+     * AST visitor that resolves the name of the package member type of the compilation unit.
+     * @author Timur Saglam
+     */
+    private class TypeNameResolver extends ASTVisitor {
+        private String typeName;
+
+        @Override
+        public boolean visit(TypeDeclaration node) {
+            if (node.isPackageMemberTypeDeclaration()) {
+                typeName = node.getName().resolveTypeBinding().getQualifiedName(); // fully qualified name of class
+            }
+            return super.visit(node);
+        }
+
+        /**
+         * Getter for the resolved type name.
+         * @return the fully qualified name of the resolved type binding of the type declaration.
+         */
+        public String getTypeName() {
+            return typeName;
         }
     }
 }
