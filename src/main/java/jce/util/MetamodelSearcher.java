@@ -24,11 +24,13 @@ public final class MetamodelSearcher {
      * @return the {@link EClass} or null if there is none with the specified name.
      */
     public static EClass findEClass(String fullName, EPackage ePackage) {
-        String eClassName = PATH.getLastSegment(fullName);
-        EPackage parent = findEPackage(PATH.cutLastSegment(fullName), ePackage);
-        for (EClassifier classifier : parent.getEClassifiers()) {
-            if (classifier instanceof EClass && isSame(classifier, eClassName)) {
-                return (EClass) classifier;
+        String eClassName = PATH.getLastSegment(fullName); // get EClass name
+        EPackage parent = findEPackage(PATH.cutLastSegment(fullName), ePackage); // search EPackage.
+        if (parent != null) { // if EPackage was found.
+            for (EClassifier classifier : parent.getEClassifiers()) { // for every EClassifier:
+                if (classifier instanceof EClass && isSame(classifier, eClassName)) {
+                    return (EClass) classifier; // search for the right EClass.
+                }
             }
         }
         return null;
@@ -41,12 +43,12 @@ public final class MetamodelSearcher {
      * @return the subpackage or null if there is none with the specified name.
      */
     public static EPackage findEPackage(String fullName, EPackage ePackage) {
-        for (EPackage subpackage : ePackage.getESubpackages()) {
-            if (isSame(subpackage, PATH.getFirstSegment(fullName))) {
+        for (EPackage subpackage : ePackage.getESubpackages()) { // for every subpackage
+            if (isSame(subpackage, PATH.getFirstSegment(fullName))) { // if is the right subpackage
                 if (!PATH.hasMultipleSegments(fullName)) {
-                    return subpackage;
+                    return subpackage; // return package if the are no more segments in the path
                 } else {
-                    return findEPackage(PATH.cutFirstSegment(fullName), subpackage);
+                    return findEPackage(PATH.cutFirstSegment(fullName), subpackage); // search further for every segment
                 }
             }
         }
@@ -78,8 +80,8 @@ public final class MetamodelSearcher {
      */
     public static EStructuralFeature findEStructuralFeature(String fullName, String eClassName, EPackage ePackage) {
         EClass eClass = findEClass(eClassName, ePackage);
-        if (eClass != null) {
-            return findEStructuralFeature(fullName, eClass);
+        if (eClass != null) { // if class was found
+            return findEStructuralFeature(fullName, eClass); // search for feature
         }
         return null;
     }
