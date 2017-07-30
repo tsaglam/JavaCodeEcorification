@@ -26,7 +26,7 @@ import jce.util.MonitorFactory;
 import jce.util.ResourceRefresher;
 
 public abstract class CodeManipulator {
-    protected static final Logger logger = LogManager.getLogger(InheritanceManipulator.class.getName());
+    protected static final Logger logger = LogManager.getLogger(CodeManipulator.class.getName());
     protected final IProgressMonitor monitor;
     protected final EcorificationProperties properties;
 
