@@ -9,10 +9,11 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import jce.util.PathHelper;
-import jce.util.RawTypeUtil;;
+import jce.util.RawTypeUtil;
 
 /**
- * {@link ASTVisitor} class for {@link Type}s to the manipulate inheritance relations of the origin code.
+ * {@link ASTVisitor} class that retains the super interface declarations of the Ecore implementation classes. The
+ * declaration is made independent from the imports of the class.
  * @author Timur Saglam
  */
 public class InterfaceRetentionVisitor extends ASTVisitor {
@@ -38,24 +39,23 @@ public class InterfaceRetentionVisitor extends ASTVisitor {
 
     /**
      * Changes the super interface reference of a {@link TypeDeclaration}.
-     * @param declaration is the type declaration.
-     * @param qualifiedName is the qualified name.
      */
     private void changeSuperInterface(TypeDeclaration declaration) {
         List<Type> superInterfaces = RawTypeUtil.castList(Type.class, declaration.superInterfaceTypes());
         SimpleType ecoreInterface = getEcoreInterface(superInterfaces, declaration);
-        System.err.println("OLD: " + ecoreInterface.getName()); // TODO
         AST ast = declaration.getAST();
         String newName = path.append(path.cutLastSegment(currentPackage), ecoreInterface.getName().getFullyQualifiedName());
-        System.err.println("NEW: " + newName); // TODO
         Type newSuperType = ast.newSimpleType(ast.newName(newName));
         superInterfaces.remove(ecoreInterface);
         superInterfaces.add(newSuperType);
     }
 
+    /**
+     * Returns the simple type of the Ecore interface.
+     */
     private SimpleType getEcoreInterface(List<Type> superInterfaces, TypeDeclaration declaration) {
         for (Type type : superInterfaces) {
-            if (type.isSimpleType()) { // TODO if is superclass of impl
+            if (type.isSimpleType()) { // TODO (HIGH) if is superclass of impl
                 return (SimpleType) type;
             }
         }
