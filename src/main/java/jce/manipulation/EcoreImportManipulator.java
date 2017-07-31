@@ -97,14 +97,8 @@ public class EcoreImportManipulator extends CodeManipulator {
      */
     private void edit(IImportDeclaration importDeclaration, ImportRewrite importRewrite) {
         String name = importDeclaration.getElementName();
-        System.err.println("edit " + name); // TODO
         if (importRewrite.removeImport(name)) { // remove old import
-            System.err.println("new import name " + path.cutFirstSegment(name)); // TODO
-            String referencedType = importRewrite.addImport(path.cutFirstSegment(name)); // add adapted import
-            System.err.println("result " + referencedType); // TODO
-            if (properties.get(BinaryProperty.FULL_LOGGING)) {
-                logger.info("Adapted Ecore import " + name + " to " + referencedType);
-            }
+            importRewrite.addImport(path.cutFirstSegment(name)); // add adapted import
         } else {
             logger.fatal("Could not remove Ecore import " + name);
         }
@@ -172,6 +166,7 @@ public class EcoreImportManipulator extends CodeManipulator {
     @Override
     protected void manipulate(ICompilationUnit unit) throws JavaModelException {
         if (!isEcorePackageType(unit)) { // is interface or implementation class of an EClass
+            applyVisitorModifications(unit, new InterfaceRetentionVisitor(unit.getParent().getElementName()));
             IImportDeclaration[] importDeclarations = unit.getImports();
             ImportRewrite importRewrite = ImportRewrite.create(unit, true);
             for (IImportDeclaration importDeclaration : importDeclarations) {
