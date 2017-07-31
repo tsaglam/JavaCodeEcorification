@@ -25,6 +25,11 @@ import jce.properties.EcorificationProperties;
 import jce.util.MonitorFactory;
 import jce.util.ResourceRefresher;
 
+/**
+ * Base class for code manipulation. Can be extended for specific code manipulator classes. Offers functionality for
+ * applying text edits and visitor modifications to any {@link ICompilationUnit}.
+ * @author Timur Saglam
+ */
 public abstract class CodeManipulator {
     protected static final Logger logger = LogManager.getLogger(CodeManipulator.class.getName());
     protected final IProgressMonitor monitor;
@@ -61,18 +66,13 @@ public abstract class CodeManipulator {
     }
 
     /**
-     * Visits all types of any {@link ICompilationUnit} of a {@link IPackageFragment} with a specific {@link ASTVisitor}
-     * and applies all recorded modifications to the Java files.
+     * Applies an {@link TextEdit} instance to an {@link ICompilationUnit}.
+     * @param edits is the {@link TextEdit} instance.
      * @param unit is the {@link ICompilationUnit}.
-     * @param visitor is the specific {@link ASTVisitor}.
      * @throws JavaModelException if there is a problem with the JDT API.
      */
-    protected void applyVisitorModifications(ICompilationUnit unit, ASTVisitor visitor) throws JavaModelException {
-        CompilationUnit parsedUnit = parse(unit);
+    protected void applyEdits(TextEdit edits, ICompilationUnit unit) throws JavaModelException {
         IDocument document = new Document(unit.getSource());
-        parsedUnit.recordModifications();
-        parsedUnit.accept(visitor);
-        TextEdit edits = parsedUnit.rewrite(document, null);
         try {
             edits.apply(document);
         } catch (MalformedTreeException exception) {
@@ -82,6 +82,21 @@ public abstract class CodeManipulator {
         }
         unit.getBuffer().setContents(document.get());
         unit.commitWorkingCopy(true, monitor);
+    }
+
+    /**
+     * Visits all types of any {@link ICompilationUnit} of a {@link IPackageFragment} with a specific {@link ASTVisitor}
+     * and applies all recorded modifications to the Java files.
+     * @param unit is the {@link ICompilationUnit}.
+     * @param visitor is the specific {@link ASTVisitor}.
+     * @throws JavaModelException if there is a problem with the JDT API.
+     */
+    protected void applyVisitorModifications(ICompilationUnit unit, ASTVisitor visitor) throws JavaModelException {
+        CompilationUnit parsedUnit = parse(unit);
+        parsedUnit.recordModifications();
+        parsedUnit.accept(visitor);
+        TextEdit edits = parsedUnit.rewrite(new Document(unit.getSource()), null);
+        applyEdits(edits, unit);
     }
 
     /**

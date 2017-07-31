@@ -1,5 +1,6 @@
 package jce.manipulation;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
@@ -13,6 +14,8 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.text.edits.MalformedTreeException;
+import org.eclipse.text.edits.TextEdit;
 
 import eme.generator.GeneratedEcoreMetamodel;
 import jce.properties.BinaryProperty;
@@ -30,8 +33,33 @@ import jce.util.PathHelper;
  * @author Timur Saglam
  */
 public class EcoreImportManipulator extends CodeManipulator {
+    /**
+     * AST visitor that resolves the name of the package member type of the compilation unit.
+     * @author Timur Saglam
+     */
+    private class TypeNameResolver extends ASTVisitor {
+        private String typeName;
+
+        /**
+         * Getter for the resolved type name.
+         * @return the fully qualified name of the resolved type binding of the type declaration.
+         */
+        public String getTypeName() {
+            return typeName;
+        }
+
+        @Override
+        public boolean visit(TypeDeclaration node) {
+            if (node.isPackageMemberTypeDeclaration()) {
+                typeName = node.getName().resolveTypeBinding().getQualifiedName(); // fully qualified name of class
+            }
+            return super.visit(node);
+        }
+    }
+
     private final GeneratedEcoreMetamodel metamodel;
     private final IProgressMonitor monitor;
+
     private final PathHelper path;
 
     /**
@@ -52,8 +80,11 @@ public class EcoreImportManipulator extends CodeManipulator {
      */
     private void edit(IImportDeclaration importDeclaration, ImportRewrite importRewrite) {
         String name = importDeclaration.getElementName();
+        System.err.println("edit " + name); // TODO
         if (importRewrite.removeImport(name)) { // remove old import
+            System.err.println("new import name " + path.cutFirstSegment(name)); // TODO
             String referencedType = importRewrite.addImport(path.cutFirstSegment(name)); // add adapted import
+            System.err.println("result " + referencedType); // TODO
             if (properties.get(BinaryProperty.FULL_LOGGING)) {
                 logger.info("Adapted Ecore import " + name + " to " + referencedType);
             }
@@ -89,7 +120,6 @@ public class EcoreImportManipulator extends CodeManipulator {
      * package. That means the last package of the type name is called impl.
      */
     private boolean isImplementationClass(String typeName) {
-        System.err.println("   is impl? " + typeName); // TODO
         return path.getLastSegment(path.cutLastSegment(typeName)).equals("impl") && typeName.endsWith("Impl");
     }
 
@@ -107,6 +137,16 @@ public class EcoreImportManipulator extends CodeManipulator {
         return MetamodelSearcher.findEClass(typeName, metamodel.getRoot()) != null;
     }
 
+    /**
+     * Logs the changed import if full logging is enabled in the {@link EcorificationProperties}.
+     */
+    private void logChange(ICompilationUnit unit, ImportRewrite rewrite) {
+        if (properties.get(BinaryProperty.FULL_LOGGING)) {
+            logger.info(unit.getElementName() + ": removed " + Arrays.toString(rewrite.getRemovedImports()) + ", added "
+                    + Arrays.toString(rewrite.getAddedImports()));
+        }
+    }
+
     @Override
     protected List<IPackageFragment> filterPackages(IProject project, EcorificationProperties properties) {
         return PackageFilter.startsWith(project, properties.get(TextProperty.ECORE_PACKAGE));
@@ -119,39 +159,18 @@ public class EcoreImportManipulator extends CodeManipulator {
             ImportRewrite importRewrite = ImportRewrite.create(unit, true);
             for (IImportDeclaration importDeclaration : importDeclarations) {
                 if (isProblematic(importDeclaration)) { // edit every problematic import declaration
-                    System.err.println("Edit import " + importDeclaration.getElementName() + " in file " + unit.getElementName()); // TODO
                     edit(importDeclaration, importRewrite);
                 }
             }
+            logChange(unit, importRewrite); // log the changed imports
             try {
-                importRewrite.rewriteImports(monitor); // apply changes.
+                TextEdit edits = importRewrite.rewriteImports(monitor); // apply changes.
+                applyEdits(edits, unit);
+            } catch (MalformedTreeException exception) {
+                logger.fatal(exception);
             } catch (CoreException exception) {
-                exception.printStackTrace();
+                logger.fatal(exception);
             }
-        }
-    }
-
-    /**
-     * AST visitor that resolves the name of the package member type of the compilation unit.
-     * @author Timur Saglam
-     */
-    private class TypeNameResolver extends ASTVisitor {
-        private String typeName;
-
-        @Override
-        public boolean visit(TypeDeclaration node) {
-            if (node.isPackageMemberTypeDeclaration()) {
-                typeName = node.getName().resolveTypeBinding().getQualifiedName(); // fully qualified name of class
-            }
-            return super.visit(node);
-        }
-
-        /**
-         * Getter for the resolved type name.
-         * @return the fully qualified name of the resolved type binding of the type declaration.
-         */
-        public String getTypeName() {
-            return typeName;
         }
     }
 }
