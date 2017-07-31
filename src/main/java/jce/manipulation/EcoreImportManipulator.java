@@ -75,6 +75,23 @@ public class EcoreImportManipulator extends CodeManipulator {
     }
 
     /**
+     * Applies all recorded changes of an {@link ImportRewrite} to an {@link ICompilationUnit}.
+     */
+    private void applyChanges(ICompilationUnit unit, ImportRewrite importRewrite) {
+        if (importRewrite.hasRecordedChanges()) { // apply changes if existing
+            logChange(unit, importRewrite); // log the changed imports
+            try {
+                TextEdit edits = importRewrite.rewriteImports(monitor); // create text edit
+                applyEdits(edits, unit); // apply text edit to compilation unit.
+            } catch (MalformedTreeException exception) {
+                logger.fatal(exception);
+            } catch (CoreException exception) {
+                logger.fatal(exception);
+            }
+        }
+    }
+
+    /**
      * Edits an {@link IImportDeclaration} with the help of an {@link ImportRewrite} instance to refer to the origin
      * code instead to the Ecore code.
      */
@@ -96,7 +113,7 @@ public class EcoreImportManipulator extends CodeManipulator {
     /**
      * Checks whether an {@link ICompilationUnit} is an Ecore package type. Ecore package types are the package
      * interface and implementation class, the factory interface and implementation class, the switch class and the
-     * adapter factory of an Ecore package.
+     * adapter factory of an Ecore package. The import declarations in Ecore package types should not be modified.
      */
     private boolean isEcorePackageType(ICompilationUnit unit) throws JavaModelException {
         CompilationUnit parsedUnit = parse(unit);
@@ -162,15 +179,7 @@ public class EcoreImportManipulator extends CodeManipulator {
                     edit(importDeclaration, importRewrite);
                 }
             }
-            logChange(unit, importRewrite); // log the changed imports
-            try {
-                TextEdit edits = importRewrite.rewriteImports(monitor); // apply changes.
-                applyEdits(edits, unit);
-            } catch (MalformedTreeException exception) {
-                logger.fatal(exception);
-            } catch (CoreException exception) {
-                logger.fatal(exception);
-            }
+            applyChanges(unit, importRewrite);
         }
     }
 }
