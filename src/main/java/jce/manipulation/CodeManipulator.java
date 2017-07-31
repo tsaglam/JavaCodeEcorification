@@ -31,7 +31,7 @@ import jce.util.ResourceRefresher;
  * @author Timur Saglam
  */
 public abstract class CodeManipulator {
-    protected static final Logger logger = LogManager.getLogger(CodeManipulator.class.getName());
+    protected static Logger logger;
     protected final IProgressMonitor monitor;
     protected final EcorificationProperties properties;
 
@@ -41,6 +41,7 @@ public abstract class CodeManipulator {
      */
     public CodeManipulator(EcorificationProperties properties) {
         this.properties = properties;
+        logger = LogManager.getLogger(this.getClass().getName());
         monitor = MonitorFactory.createProgressMonitor(logger, properties);
     }
 

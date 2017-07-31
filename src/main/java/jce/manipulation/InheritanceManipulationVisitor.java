@@ -13,7 +13,7 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import jce.properties.EcorificationProperties;;
 
 /**
- * {@link ASTVisitor} class for {@link Type}s to the manipulate inheritance relations.
+ * {@link ASTVisitor} class for {@link Type}s to the manipulate inheritance relations of the origin code.
  * @author Timur Saglam
  */
 public class InheritanceManipulationVisitor extends ASTVisitor {
