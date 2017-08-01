@@ -82,6 +82,7 @@ public class JavaCodeEcorification {
         wrapperGenerator.buildWrappers(metamodel, project);
         // 3. adapt Ecore code
         new EcoreImportManipulator(metamodel, properties).manipulate(project);
+        importOrganizer.manipulate(project);
         // 4. adapt origin code:
         fieldEncapsulator.manipulate(project);
         new MemberRemover(metamodel, properties).manipulate(project);

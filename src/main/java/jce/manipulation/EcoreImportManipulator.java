@@ -8,7 +8,10 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -28,39 +31,17 @@ import jce.util.PathHelper;
 
 /**
  * Base class for the adaption of problematic import declarations in the Ecore code. A problematic import declaration is
- * any import declaration that references a type from the ecore package which has a counterpart in the Ecore metamodel
+ * any import declaration that references a type from the Ecore package which has a counterpart in the Ecore metamodel
  * and the origin code. Unproblematic is any import declaration referencing Ecore package types or Ecore factory types.
+ * This class basically changes all problematic imports in all Ecore implementation classes and adds the changed imports
+ * to the correlating Ecore interfaces while retaining the correct super interfaces of the implementation classes.
  * @author Timur Saglam
  */
 public class EcoreImportManipulator extends CodeManipulator {
-    /**
-     * AST visitor that resolves the name of the package member type of the compilation unit.
-     * @author Timur Saglam
-     */
-    private class TypeNameResolver extends ASTVisitor {
-        private String typeName;
-
-        /**
-         * Getter for the resolved type name.
-         * @return the fully qualified name of the resolved type binding of the type declaration.
-         */
-        public String getTypeName() {
-            return typeName;
-        }
-
-        @Override
-        public boolean visit(TypeDeclaration node) {
-            if (node.isPackageMemberTypeDeclaration()) {
-                typeName = node.getName().resolveTypeBinding().getQualifiedName(); // fully qualified name of class
-            }
-            return super.visit(node);
-        }
-    }
-
     private final GeneratedEcoreMetamodel metamodel;
     private final IProgressMonitor monitor;
-
     private final PathHelper path;
+    private IJavaProject project;
 
     /**
      * Simple constructor that sets the properties.
@@ -72,6 +53,12 @@ public class EcoreImportManipulator extends CodeManipulator {
         this.metamodel = metamodel;
         monitor = MonitorFactory.createProgressMonitor(logger, properties);
         path = new PathHelper('.'); // package helper
+    }
+
+    @Override
+    public void manipulate(IProject project) {
+        this.project = JavaCore.create(project); // makes the project instance available in this class.
+        super.manipulate(project);
     }
 
     /**
@@ -95,42 +82,65 @@ public class EcoreImportManipulator extends CodeManipulator {
      * Edits an {@link IImportDeclaration} with the help of an {@link ImportRewrite} instance to refer to the origin
      * code instead to the Ecore code.
      */
-    private void edit(IImportDeclaration importDeclaration, ImportRewrite importRewrite) {
+    private void edit(IImportDeclaration importDeclaration, ImportRewrite implementationRewrite, ImportRewrite interfaceRewrite) {
         String name = importDeclaration.getElementName();
-        if (importRewrite.removeImport(name)) { // remove old import
-            importRewrite.addImport(path.cutFirstSegment(name)); // add adapted import
+        if (implementationRewrite.removeImport(name)) { // remove old import
+            name = path.cutFirstSegment(name); // generate new import string
+            implementationRewrite.addImport(name); // add to implementation class
+            interfaceRewrite.addImport(name); // add to Ecore interface
         } else {
             logger.fatal("Could not remove Ecore import " + name);
         }
     }
 
     /**
-     * Checks whether an {@link ICompilationUnit} is an Ecore package type. Ecore package types are the package
-     * interface and implementation class, the factory interface and implementation class, the switch class and the
-     * adapter factory of an Ecore package. The import declarations in Ecore package types should not be modified.
+     * Finds the Ecore interface of an {@link ICompilationUnit} which is an Ecor eimplementation class.
      */
-    private boolean isEcorePackageType(ICompilationUnit unit) throws JavaModelException {
+    private ICompilationUnit findEcoreInterface(ICompilationUnit unit) throws JavaModelException {
+        String interfaceName = getInterfaceName(getPackageMemberName(unit));
+        IType iType = project.findType(interfaceName);
+        return iType.getCompilationUnit();
+    }
+
+    /**
+     * Returns the name of the Ecore interface of an Ecore implementation class name. E.g. returns "model.Main" when
+     * given "model.impl.MainImpl".
+     */
+    private String getInterfaceName(String typeName) {
+        String interfaceName = path.append(path.cutLastSegments(typeName, 2), path.getLastSegment(typeName));
+        return interfaceName.substring(0, interfaceName.length() - 4); // remove "Impl" suffix
+    }
+
+    /**
+     * Returns the name of the package member type of a compilation unit. E.g. "model.Main" from "Main.java"
+     */
+    private String getPackageMemberName(ICompilationUnit unit) throws JavaModelException {
         CompilationUnit parsedUnit = parse(unit);
         TypeNameResolver visitor = new TypeNameResolver();
         parsedUnit.accept(visitor);
-        String typeName = path.cutFirstSegment(visitor.getTypeName());
-        if (MetamodelSearcher.findEClass(typeName, metamodel.getRoot()) == null) {
-            if (isImplementationClass(typeName)) {
-                typeName = path.append(path.cutLastSegments(typeName, 2), path.getLastSegment(typeName));
-                typeName = typeName.substring(0, typeName.length() - 4);
-                return MetamodelSearcher.findEClass(typeName, metamodel.getRoot()) == null;
-            }
-        } else { // TODO (HIGH) comment & optimize
-            return false;
+        return visitor.getTypeName();
+    }
+
+    /**
+     * Checks whether an {@link ICompilationUnit} is an Ecore implementation class. Ecore implementation classes are the
+     * classes that implement the Ecore interfaces. The Ecore implementation classes are the types whose imports should
+     * be edited. This method first checks the compilation unit on correct naming and then on the existence of a
+     * counterpart in the Ecore metamodel
+     */
+    private boolean isEcoreImplementation(ICompilationUnit unit) throws JavaModelException {
+        String typeName = path.cutFirstSegment(getPackageMemberName(unit));
+        if (isEcoreImplementationName(typeName)) { // if has Ecore implementation name and package
+            typeName = getInterfaceName(typeName); // get name of Ecore interface and EClass
+            return MetamodelSearcher.findEClass(typeName, metamodel.getRoot()) != null; // search metamodel counterpart
         }
-        return true;
+        return false; // Does not have Ecore implementation name and package
     }
 
     /**
      * Checks whether a fully qualified type name identifies a type which could be part of an Ecore implementation
-     * package. That means the last package of the type name is called impl.
+     * package. That means the last package of the type name is called impl and the type name end with the suffix Impl.
      */
-    private boolean isImplementationClass(String typeName) {
+    private boolean isEcoreImplementationName(String typeName) {
         return path.getLastSegment(path.cutLastSegment(typeName)).equals("impl") && typeName.endsWith("Impl");
     }
 
@@ -165,16 +175,43 @@ public class EcoreImportManipulator extends CodeManipulator {
 
     @Override
     protected void manipulate(ICompilationUnit unit) throws JavaModelException {
-        if (!isEcorePackageType(unit)) { // is interface or implementation class of an EClass
+        if (isEcoreImplementation(unit)) { // is interface or implementation class of an EClass
             applyVisitorModifications(unit, new InterfaceRetentionVisitor(unit.getParent().getElementName()));
             IImportDeclaration[] importDeclarations = unit.getImports();
-            ImportRewrite importRewrite = ImportRewrite.create(unit, true);
+            ICompilationUnit interfaceUnit = findEcoreInterface(unit);
+            ImportRewrite implementationRewrite = ImportRewrite.create(unit, true);
+            ImportRewrite interfaceRewrite = ImportRewrite.create(interfaceUnit, true);
             for (IImportDeclaration importDeclaration : importDeclarations) {
                 if (isProblematic(importDeclaration)) { // edit every problematic import declaration
-                    edit(importDeclaration, importRewrite);
+                    edit(importDeclaration, implementationRewrite, interfaceRewrite);
                 }
             }
-            applyChanges(unit, importRewrite);
+            applyChanges(unit, implementationRewrite);
+            applyChanges(interfaceUnit, interfaceRewrite);
+        }
+    }
+
+    /**
+     * AST visitor that resolves the name of the package member type of the compilation unit.
+     * @author Timur Saglam
+     */
+    private class TypeNameResolver extends ASTVisitor {
+        private String typeName;
+    
+        /**
+         * Getter for the resolved type name.
+         * @return the fully qualified name of the resolved type binding of the type declaration.
+         */
+        public String getTypeName() {
+            return typeName;
+        }
+    
+        @Override
+        public boolean visit(TypeDeclaration node) {
+            if (node.isPackageMemberTypeDeclaration()) {
+                typeName = node.getName().resolveTypeBinding().getQualifiedName(); // fully qualified name of class
+            }
+            return super.visit(node);
         }
     }
 }
