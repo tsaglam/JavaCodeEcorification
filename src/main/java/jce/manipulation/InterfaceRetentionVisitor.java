@@ -40,14 +40,15 @@ public class InterfaceRetentionVisitor extends ASTVisitor {
     /**
      * Changes the super interface reference of a {@link TypeDeclaration}.
      */
+    @SuppressWarnings("unchecked")
     private void changeSuperInterface(TypeDeclaration declaration) {
         List<Type> superInterfaces = RawTypeUtil.castList(Type.class, declaration.superInterfaceTypes());
         SimpleType ecoreInterface = getEcoreInterface(superInterfaces, declaration);
         AST ast = declaration.getAST();
         String newName = path.append(path.cutLastSegment(currentPackage), ecoreInterface.getName().getFullyQualifiedName());
         Type newSuperType = ast.newSimpleType(ast.newName(newName));
-        superInterfaces.remove(ecoreInterface);
-        superInterfaces.add(newSuperType);
+        declaration.superInterfaceTypes().remove(ecoreInterface);
+        declaration.superInterfaceTypes().add(newSuperType); // TODO (HIGH) Type safety warning
     }
 
     /**
