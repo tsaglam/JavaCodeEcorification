@@ -1,9 +1,13 @@
 package jce.manipulation;
 
+import java.util.List;
+
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -12,14 +16,16 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.text.edits.TextEdit;
 
 import jce.properties.EcorificationProperties;
+import jce.properties.TextProperty;
 import jce.util.MonitorFactory;
+import jce.util.PackageFilter;
 
 /**
  * Organizes the imports of the origin code.
  * @author Timur Saglam
  */
 @SuppressWarnings("restriction")  // TODO (LOW) This class uses LTK classes & methods that are not marked as API
-public class ImportOrganizer extends OriginCodeManipulator {
+public class ImportOrganizer extends CodeManipulator {
 
     private IProgressMonitor monitor;
 
@@ -47,5 +53,10 @@ public class ImportOrganizer extends OriginCodeManipulator {
         } catch (CoreException exception) {
             exception.printStackTrace();
         }
+    }
+
+    @Override
+    protected List<IPackageFragment> filterPackages(IProject project, EcorificationProperties properties) {
+        return PackageFilter.startsNotWith(project, properties.get(TextProperty.WRAPPER_PACKAGE));
     }
 }
