@@ -1,4 +1,4 @@
-package jce.util;
+package jce.util.logging;
 
 import org.apache.log4j.Logger;
 import org.eclipse.core.runtime.IProgressMonitor;

@@ -1,12 +1,12 @@
-package jce.codegen
+package jce.generators
 
 import eme.generator.GeneratedEcoreMetamodel
 import java.io.ByteArrayInputStream
 import java.io.File
 import jce.properties.EcorificationProperties
-import jce.util.MonitorFactory
 import jce.util.PathHelper
 import jce.util.ResourceRefresher
+import jce.util.logging.MonitorFactory
 import org.apache.log4j.LogManager
 import org.apache.log4j.Logger
 import org.eclipse.core.resources.IFolder

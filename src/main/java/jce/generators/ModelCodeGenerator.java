@@ -1,4 +1,4 @@
-package jce.codegen;
+package jce.generators;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -7,7 +7,7 @@ import org.eclipse.emf.codegen.ecore.genmodel.GenModel;
 import org.eclipse.emf.codegen.ecore.genmodel.generator.GenBaseGeneratorAdapter;
 
 import jce.properties.EcorificationProperties;
-import jce.util.MonitorFactory;
+import jce.util.logging.MonitorFactory;
 
 /**
  * Class for code generation (e.g generating Java code from Ecore GenModels).

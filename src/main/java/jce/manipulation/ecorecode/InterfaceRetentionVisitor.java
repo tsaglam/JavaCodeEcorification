@@ -1,4 +1,4 @@
-package jce.manipulation;
+package jce.manipulation.ecorecode;
 
 import java.util.List;
 

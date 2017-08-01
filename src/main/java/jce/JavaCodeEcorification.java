@@ -19,18 +19,18 @@ import eme.generator.saving.SavingInformation;
 import eme.properties.BinaryProperty;
 import eme.properties.ExtractionProperties;
 import eme.properties.TextProperty;
-import jce.codegen.GenModelGenerator;
-import jce.codegen.ModelCodeGenerator;
-import jce.codegen.WrapperGenerator;
-import jce.codegen.XtendLibraryHelper;
-import jce.manipulation.EcoreImportManipulator;
-import jce.manipulation.FieldEncapsulator;
+import jce.generators.GenModelGenerator;
+import jce.generators.ModelCodeGenerator;
+import jce.generators.WrapperGenerator;
+import jce.generators.XtendLibraryHelper;
 import jce.manipulation.ImportOrganizer;
-import jce.manipulation.InheritanceManipulator;
-import jce.manipulation.MemberRemover;
+import jce.manipulation.ecorecode.EcoreImportManipulator;
+import jce.manipulation.origincode.FieldEncapsulator;
+import jce.manipulation.origincode.InheritanceManipulator;
+import jce.manipulation.origincode.MemberRemover;
 import jce.properties.EcorificationProperties;
-import jce.util.MonitorFactory;
 import jce.util.ResourceRefresher;
+import jce.util.logging.MonitorFactory;
 
 /**
  * Main class for Java code ecorification.

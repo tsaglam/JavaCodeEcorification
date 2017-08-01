@@ -1,4 +1,4 @@
-package jce.codegen;
+package jce.generators;
 
 import java.io.File;
 import java.io.IOException;

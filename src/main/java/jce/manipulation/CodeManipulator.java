@@ -22,8 +22,8 @@ import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
 
 import jce.properties.EcorificationProperties;
-import jce.util.MonitorFactory;
 import jce.util.ResourceRefresher;
+import jce.util.logging.MonitorFactory;
 
 /**
  * Base class for code manipulation. Can be extended for specific code manipulator classes. Offers functionality for

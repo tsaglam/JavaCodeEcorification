@@ -1,4 +1,4 @@
-package jce.manipulation;
+package jce.manipulation.origincode;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -19,7 +19,7 @@ import org.eclipse.ltk.core.refactoring.PerformChangeOperation;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import jce.properties.EcorificationProperties;
-import jce.util.MonitorFactory;
+import jce.util.logging.MonitorFactory;
 
 /**
  * {@link ASTVisitor} class for the encapsulation of fields. Encapsulates all field of an class upon visiting.

@@ -1,4 +1,4 @@
-package jce.codegen;
+package jce.generators;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -31,9 +31,9 @@ import org.eclipse.pde.core.plugin.IPluginModelBase;
 import org.eclipse.pde.core.plugin.PluginRegistry;
 
 import jce.properties.EcorificationProperties;
-import jce.util.MonitorFactory;
-import jce.util.ProgressMonitorAdapter;
 import jce.util.ResourceRefresher;
+import jce.util.logging.MonitorFactory;
+import jce.util.logging.ProgressMonitorAdapter;
 
 /**
  * Helper class that edits an project do add the Xtend dependencies.

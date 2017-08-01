@@ -17,8 +17,8 @@ import org.eclipse.text.edits.TextEdit;
 
 import jce.properties.EcorificationProperties;
 import jce.properties.TextProperty;
-import jce.util.MonitorFactory;
 import jce.util.PackageFilter;
+import jce.util.logging.MonitorFactory;
 
 /**
  * Organizes the imports of the origin code.

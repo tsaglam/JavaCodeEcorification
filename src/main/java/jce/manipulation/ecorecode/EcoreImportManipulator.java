@@ -1,4 +1,4 @@
-package jce.manipulation;
+package jce.manipulation.ecorecode;
 
 import java.util.Arrays;
 import java.util.List;
@@ -21,13 +21,14 @@ import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
 
 import eme.generator.GeneratedEcoreMetamodel;
+import jce.manipulation.CodeManipulator;
 import jce.properties.BinaryProperty;
 import jce.properties.EcorificationProperties;
 import jce.properties.TextProperty;
 import jce.util.MetamodelSearcher;
-import jce.util.MonitorFactory;
 import jce.util.PackageFilter;
 import jce.util.PathHelper;
+import jce.util.logging.MonitorFactory;
 
 /**
  * Base class for the adaption of problematic import declarations in the Ecore code. A problematic import declaration is
@@ -197,7 +198,7 @@ public class EcoreImportManipulator extends CodeManipulator {
      */
     private class TypeNameResolver extends ASTVisitor {
         private String typeName;
-    
+
         /**
          * Getter for the resolved type name.
          * @return the fully qualified name of the resolved type binding of the type declaration.
@@ -205,7 +206,7 @@ public class EcoreImportManipulator extends CodeManipulator {
         public String getTypeName() {
             return typeName;
         }
-    
+
         @Override
         public boolean visit(TypeDeclaration node) {
             if (node.isPackageMemberTypeDeclaration()) {
