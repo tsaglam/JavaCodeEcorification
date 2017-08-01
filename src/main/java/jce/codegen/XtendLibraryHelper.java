@@ -32,6 +32,7 @@ import org.eclipse.pde.core.plugin.PluginRegistry;
 
 import jce.properties.EcorificationProperties;
 import jce.util.MonitorFactory;
+import jce.util.ProgressMonitorAdapter;
 import jce.util.ResourceRefresher;
 
 /**
@@ -181,7 +182,7 @@ public final class XtendLibraryHelper {
      * Adds the xtext nature and builder command to the .project file of the project.
      */
     private static void updateProjectDescription(IProject project) {
-        String builderName = " org.eclipse.xtext.ui.shared.xtextBuilder";
+        String builderName = "org.eclipse.xtext.ui.shared.xtextBuilder";
         String xtextNature = "org.eclipse.xtext.ui.shared.xtextNature";
         IProjectDescription description = null;
         try {
@@ -210,6 +211,11 @@ public final class XtendLibraryHelper {
             System.arraycopy(natures, 0, newNatures, 0, natures.length);
             newNatures[natures.length] = xtextNature;
             description.setNatureIds(newNatures);
+        }
+        try {
+            project.setDescription(description, new ProgressMonitorAdapter(logger));
+        } catch (CoreException exception) {
+            logger.fatal(exception);
         }
     }
 
