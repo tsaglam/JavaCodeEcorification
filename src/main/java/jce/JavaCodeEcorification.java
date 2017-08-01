@@ -3,11 +3,8 @@ package jce;
 import static jce.properties.TextProperty.ECORE_PACKAGE;
 import static jce.properties.TextProperty.PROJECT_SUFFIX;
 
-import java.io.File;
-
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
@@ -26,6 +23,7 @@ import jce.codegen.GenModelGenerator;
 import jce.codegen.ModelCodeGenerator;
 import jce.codegen.WrapperGenerator;
 import jce.codegen.XtendLibraryHelper;
+import jce.manipulation.EcoreImportManipulator;
 import jce.manipulation.FieldEncapsulator;
 import jce.manipulation.ImportOrganizer;
 import jce.manipulation.InheritanceManipulator;
@@ -82,14 +80,15 @@ public class JavaCodeEcorification {
         XtendLibraryHelper.addXtendLibs(project, properties);
         ResourceRefresher.refresh(project);
         wrapperGenerator.buildWrappers(metamodel, project);
-        // 3. adapt origin code:
+        // 3. adapt Ecore code
+        new EcoreImportManipulator(metamodel, properties).manipulate(project);
+        // 4. adapt origin code:
         fieldEncapsulator.manipulate(project);
         new MemberRemover(metamodel, properties).manipulate(project);
         importOrganizer.manipulate(project);
         inheritanceManipulator.manipulate(project);
-        // 4. build project and make changes visible in the Eclipse IDE:
+        // 5. build project and make changes visible in the Eclipse IDE:
         rebuild(project, properties);
-        ResourceRefresher.refresh(project);
         logger.info("Ecorification complete!");
     }
 
@@ -136,14 +135,10 @@ public class JavaCodeEcorification {
      * Tries to build the project.
      */
     private void rebuild(IProject project, EcorificationProperties properties) {
-        IProgressMonitor monitor = MonitorFactory.createProgressMonitor(logger, properties);
         ResourceRefresher.refresh(project);
-        try { // TODO (MEDIUM) fix Xtend build.
-            project.build(IncrementalProjectBuilder.CLEAN_BUILD, monitor);
+        IProgressMonitor monitor = MonitorFactory.createProgressMonitor(logger, properties);
+        try {
             project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
-            IFolder xtendFolder = project.getFolder("src" + File.separator + "main" + File.separator + "xtend-gen");
-            ResourceRefresher.refresh(project);
-            xtendFolder.delete(true, monitor);
         } catch (CoreException exception) {
             exception.printStackTrace();
         }
