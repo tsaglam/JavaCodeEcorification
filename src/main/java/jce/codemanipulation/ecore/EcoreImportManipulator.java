@@ -1,4 +1,4 @@
-package jce.manipulation.ecorecode;
+package jce.codemanipulation.ecore;
 
 import java.util.Arrays;
 import java.util.List;
@@ -19,7 +19,7 @@ import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
 
 import eme.generator.GeneratedEcoreMetamodel;
-import jce.manipulation.CodeManipulator;
+import jce.codemanipulation.CodeManipulator;
 import jce.properties.BinaryProperty;
 import jce.properties.EcorificationProperties;
 import jce.properties.TextProperty;

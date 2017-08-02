@@ -1,11 +1,11 @@
-package jce.manipulation.origincode;
+package jce.codemanipulation.origin;
 
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IPackageFragment;
 
-import jce.manipulation.CodeManipulator;
+import jce.codemanipulation.CodeManipulator;
 import jce.properties.EcorificationProperties;
 import jce.properties.TextProperty;
 import jce.util.PackageFilter;

@@ -1,4 +1,4 @@
-package jce.manipulation.origincode;
+package jce.codemanipulation.origin;
 
 import java.util.LinkedList;
 import java.util.List;

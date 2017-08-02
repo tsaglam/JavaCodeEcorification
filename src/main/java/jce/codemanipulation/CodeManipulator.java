@@ -1,4 +1,4 @@
-package jce.manipulation;
+package jce.codemanipulation;
 
 import java.util.List;
 

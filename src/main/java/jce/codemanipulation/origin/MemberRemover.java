@@ -1,4 +1,4 @@
-package jce.manipulation.origincode;
+package jce.codemanipulation.origin;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;

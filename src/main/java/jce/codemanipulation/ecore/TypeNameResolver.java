@@ -1,4 +1,4 @@
-package jce.manipulation.ecorecode;
+package jce.codemanipulation.ecore;
 
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
