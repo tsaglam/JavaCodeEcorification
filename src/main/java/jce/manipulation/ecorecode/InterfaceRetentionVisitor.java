@@ -42,8 +42,7 @@ public class InterfaceRetentionVisitor extends ASTVisitor {
      */
     @SuppressWarnings("unchecked")
     private void changeSuperInterface(TypeDeclaration declaration) {
-        List<Type> superInterfaces = RawTypeUtil.castList(Type.class, declaration.superInterfaceTypes());
-        SimpleType ecoreInterface = getEcoreInterface(superInterfaces, declaration);
+        SimpleType ecoreInterface = getEcoreInterface(declaration);
         AST ast = declaration.getAST();
         String newName = path.append(path.cutLastSegment(currentPackage), ecoreInterface.getName().getFullyQualifiedName());
         Type newSuperType = ast.newSimpleType(ast.newName(newName));
@@ -54,13 +53,26 @@ public class InterfaceRetentionVisitor extends ASTVisitor {
     /**
      * Returns the simple type of the Ecore interface.
      */
-    private SimpleType getEcoreInterface(List<Type> superInterfaces, TypeDeclaration declaration) {
-        for (Type type : superInterfaces) {
-            if (type.isSimpleType()) { // TODO (HIGH) if is superclass of impl
-                return (SimpleType) type;
+    private SimpleType getEcoreInterface(TypeDeclaration declaration) {
+        List<Type> superInterfaces = RawTypeUtil.castList(Type.class, declaration.superInterfaceTypes());
+        for (Type type : superInterfaces) { // Search interfaces for Ecore interface.
+            if (type.isSimpleType() && isEcoreInterface((SimpleType) type, declaration)) {
+                return (SimpleType) type; // return type casted to simple type.
             }
         }
         return null;
+    }
+
+    /**
+     * Checks whether a {@link SimpleType} is the Ecore interface of an {@link TypeDeclaration} which is an Ecore
+     * implementation class.
+     */
+    private boolean isEcoreInterface(SimpleType superInterface, TypeDeclaration implementation) {
+        String interfaceName = superInterface.getName().getFullyQualifiedName();
+        interfaceName = path.getLastSegment(interfaceName);
+        String implementationName = implementation.getName().getFullyQualifiedName();
+        implementationName = path.getLastSegment(implementationName);
+        return interfaceName.equals(implementationName.substring(0, implementationName.length() - 4));
     }
 
 }
