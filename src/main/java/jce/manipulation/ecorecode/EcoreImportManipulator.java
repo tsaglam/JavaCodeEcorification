@@ -13,9 +13,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
@@ -189,30 +187,6 @@ public class EcoreImportManipulator extends CodeManipulator {
             }
             applyChanges(unit, implementationRewrite);
             applyChanges(interfaceUnit, interfaceRewrite);
-        }
-    }
-
-    /**
-     * AST visitor that resolves the name of the package member type of the compilation unit.
-     * @author Timur Saglam
-     */
-    private class TypeNameResolver extends ASTVisitor {
-        private String typeName;
-
-        /**
-         * Getter for the resolved type name.
-         * @return the fully qualified name of the resolved type binding of the type declaration.
-         */
-        public String getTypeName() {
-            return typeName;
-        }
-
-        @Override
-        public boolean visit(TypeDeclaration node) {
-            if (node.isPackageMemberTypeDeclaration()) {
-                typeName = node.getName().resolveTypeBinding().getQualifiedName(); // fully qualified name of class
-            }
-            return super.visit(node);
         }
     }
 }

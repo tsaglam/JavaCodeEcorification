@@ -27,8 +27,7 @@ public final class ResourceRefresher {
      */
     public static void refresh(IResource resource) {
         try {
-            resource.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor()); // not detailed logging
-            logger.info("Refreshed " + resource.getClass().getSimpleName() + " " + resource.getName());
+            resource.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor()); // no logging here
         } catch (CoreException exception) {
             logger.warn("Could not refresh. Try refreshing manually!", exception);
         }
