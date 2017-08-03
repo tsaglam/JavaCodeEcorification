@@ -22,6 +22,15 @@ public final class ResourceRefresher {
     }
 
     /**
+     * Refreshes a folder of an {@link IProject}.
+     * @param project is the {@link IProject}.
+     * @param folderName is the name of the {@link IFolder} to refresh.
+     */
+    public static void refresh(IProject project, String folderName) {
+        refresh(project.getFolder(folderName));
+    }
+
+    /**
      * Refreshes a specific {@link IResource}.
      * @param resource is the {@link IResource}.
      */
@@ -31,15 +40,6 @@ public final class ResourceRefresher {
         } catch (CoreException exception) {
             logger.warn("Could not refresh. Try refreshing manually!", exception);
         }
-    }
-
-    /**
-     * Refreshes a folder of an {@link IProject}.
-     * @param project is the {@link IProject}.
-     * @param folderName is the name of the {@link IFolder} to refresh.
-     */
-    public static void refresh(IProject project, String folderName) {
-        refresh(project.getFolder(folderName));
     }
 
     /**

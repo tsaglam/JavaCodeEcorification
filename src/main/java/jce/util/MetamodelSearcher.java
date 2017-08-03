@@ -11,7 +11,7 @@ import org.eclipse.emf.ecore.EStructuralFeature;
  * @author Timur Saglam
  */
 public final class MetamodelSearcher {
-    private final static PathHelper PATH = new PathHelper('.');
+    private static final PathHelper PATH = new PathHelper('.');
 
     private MetamodelSearcher() {
         throw new AssertionError("Suppress default constructor for noninstantiability");

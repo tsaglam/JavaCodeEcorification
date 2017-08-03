@@ -2,6 +2,10 @@ package jce.properties;
 
 import eme.properties.IBinaryProperty;
 
+/**
+ * Binary properties that can be accessed in the Extraction properties.
+ * @author Timur Saglam
+ */
 public enum BinaryProperty implements IBinaryProperty {
     FULL_LOGGING("FullLogging", false);
 

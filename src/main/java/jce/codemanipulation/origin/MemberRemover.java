@@ -16,6 +16,7 @@ public class MemberRemover extends OriginCodeManipulator {
 
     /**
      * Simple constructor that sets the properties.
+     * @param metamodel is the Ecore metamodel which was extracted from the origin code.
      * @param properties are the {@link EcorificationProperties}.
      */
     public MemberRemover(GeneratedEcoreMetamodel metamodel, EcorificationProperties properties) {

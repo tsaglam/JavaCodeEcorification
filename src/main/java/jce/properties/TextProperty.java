@@ -2,6 +2,10 @@ package jce.properties;
 
 import eme.properties.ITextProperty;
 
+/**
+ * Text properties that can be accessed in the Extraction properties.
+ * @author Timur Saglam
+ */
 public enum TextProperty implements ITextProperty {
     ECORE_PACKAGE("EcorePackageName", "ecore"),
     WRAPPER_PACKAGE("WrapperPackageName", "unification"),

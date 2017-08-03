@@ -22,6 +22,7 @@ public final class ModelCodeGenerator {
     /**
      * Uses a specific GenModel to generate Java Code.
      * @param genModel is the specific GenModel.
+     * @param properties are the Ecorification properties.
      */
     public static void generate(GenModel genModel, EcorificationProperties properties) {
         if (genModel == null) {

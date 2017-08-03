@@ -23,6 +23,7 @@ public class InheritanceManipulationVisitor extends ASTVisitor {
     /**
      * Basic constructor.
      * @param currentPackage is the current package.
+     * @param properties are the Ecorification properties.
      */
     public InheritanceManipulationVisitor(String currentPackage, EcorificationProperties properties) {
         this.currentPackage = currentPackage;

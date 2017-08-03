@@ -30,6 +30,10 @@ public class FieldEncapsulationVisitor extends ASTVisitor {
     private static final Logger logger = LogManager.getLogger(FieldEncapsulationVisitor.class.getName());
     private IProgressMonitor monitor;
 
+    /**
+     * Basic constructor.
+     * @param properties are the Ecorification properties.
+     */
     public FieldEncapsulationVisitor(EcorificationProperties properties) {
         monitor = MonitorFactory.createProgressMonitor(logger, properties);
     }
