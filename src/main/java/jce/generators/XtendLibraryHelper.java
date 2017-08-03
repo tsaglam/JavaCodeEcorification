@@ -44,13 +44,14 @@ public final class XtendLibraryHelper {
     private static final char SLASH = File.separatorChar;
     private static final String XTEND = "xtend-gen"; // Xtend folder name
 
-    public XtendLibraryHelper() {
+    private XtendLibraryHelper() {
         throw new AssertionError("Suppress default constructor for noninstantiability");
     }
 
     /**
      * Adds the Xtend dependencies to a project and creates the xtend-gen source folder.
      * @param project is the {@link IProject} instance of the project.
+     * @param properties are the Ecorification properties.
      */
     public static void addXtendLibs(IProject project, EcorificationProperties properties) {
         logger.info("Adding Xtend dependencies...");
