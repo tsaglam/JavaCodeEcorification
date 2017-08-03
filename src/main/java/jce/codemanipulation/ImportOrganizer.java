@@ -39,6 +39,11 @@ public class ImportOrganizer extends CodeManipulator {
     }
 
     @Override
+    protected List<IPackageFragment> filterPackages(IProject project, EcorificationProperties properties) {
+        return PackageFilter.startsNotWith(project, properties.get(TextProperty.WRAPPER_PACKAGE));
+    }
+
+    @Override
     protected void manipulate(ICompilationUnit unit) throws JavaModelException {
         unit.becomeWorkingCopy(monitor); // changes compilation unit handle to working copy
         CompilationUnit reconciledUnit = unit.reconcile(AST.JLS8, false, null, monitor); // don't ask me
@@ -53,10 +58,5 @@ public class ImportOrganizer extends CodeManipulator {
         } catch (CoreException exception) {
             exception.printStackTrace();
         }
-    }
-
-    @Override
-    protected List<IPackageFragment> filterPackages(IProject project, EcorificationProperties properties) {
-        return PackageFilter.startsNotWith(project, properties.get(TextProperty.WRAPPER_PACKAGE));
     }
 }
