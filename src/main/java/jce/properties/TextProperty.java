@@ -11,7 +11,8 @@ public enum TextProperty implements ITextProperty {
     WRAPPER_PACKAGE("WrapperPackageName", "unification"),
     WRAPPER_PREFIX("WrapperPrefix", "Unified"),
     WRAPPER_SUFFIX("WrapperSuffix", ""),
-    PROJECT_SUFFIX("ProjectSuffix", "Ecorified");
+    PROJECT_SUFFIX("ProjectSuffix", "Ecorified"),
+    SOURCE_FOLDER("SourceFolder", "src");
 
     private final String defaultValue;
     private final String key;
