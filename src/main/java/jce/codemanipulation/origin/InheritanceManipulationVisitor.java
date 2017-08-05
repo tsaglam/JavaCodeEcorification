@@ -35,7 +35,7 @@ public class InheritanceManipulationVisitor extends ASTVisitor {
         if (!node.isInterface()) { // if is class, manipulate inheritance:
             setSuperClass(node, getPackage() + "." + getName(node));
         }
-        return super.visit(node);
+        return false;
     }
 
     /**
