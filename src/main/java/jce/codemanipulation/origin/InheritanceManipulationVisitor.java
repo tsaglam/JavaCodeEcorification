@@ -10,7 +10,7 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
-import jce.properties.EcorificationProperties;;
+import jce.properties.EcorificationProperties;
 
 /**
  * {@link ASTVisitor} class that manipulates the inheritance relations of the origin code.

@@ -31,7 +31,7 @@ import jce.util.logging.MonitorFactory;
  * @author Timur Saglam
  */
 public abstract class CodeManipulator {
-    protected static Logger logger;
+    protected Logger logger;
     protected final IProgressMonitor monitor;
     protected final EcorificationProperties properties;
 
