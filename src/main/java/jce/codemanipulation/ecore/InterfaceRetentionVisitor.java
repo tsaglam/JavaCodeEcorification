@@ -38,16 +38,18 @@ public class InterfaceRetentionVisitor extends ASTVisitor {
     }
 
     /**
-     * Changes the super interface reference of a {@link TypeDeclaration}.
+     * Changes the super interface reference of a {@link TypeDeclaration} if possible.
      */
     @SuppressWarnings("unchecked")
     private void changeSuperInterface(TypeDeclaration declaration) {
         SimpleType ecoreInterface = getEcoreInterface(declaration);
-        AST ast = declaration.getAST();
-        String newName = path.append(path.cutLastSegment(currentPackage), ecoreInterface.getName().getFullyQualifiedName());
-        Type newSuperType = ast.newSimpleType(ast.newName(newName));
-        declaration.superInterfaceTypes().remove(ecoreInterface);
-        declaration.superInterfaceTypes().add(newSuperType); // TODO (HIGH) Type safety warning
+        if (ecoreInterface != null) {
+            AST ast = declaration.getAST();
+            String newName = path.append(path.cutLastSegment(currentPackage), ecoreInterface.getName().getFullyQualifiedName());
+            Type newSuperType = ast.newSimpleType(ast.newName(newName));
+            declaration.superInterfaceTypes().remove(ecoreInterface);
+            declaration.superInterfaceTypes().add(newSuperType); // TODO (HIGH) Type safety warning
+        }
     }
 
     /**
@@ -59,7 +61,7 @@ public class InterfaceRetentionVisitor extends ASTVisitor {
             if (type.isSimpleType() && isEcoreInterface((SimpleType) type, declaration)) {
                 return (SimpleType) type; // return type casted to simple type.
             }
-        }
+        } // TODO (HIGH) Fix detection of generic classes like CustomGenericClass<A,B>
         return null;
     }
 
