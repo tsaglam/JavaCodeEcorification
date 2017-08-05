@@ -89,15 +89,59 @@ final class WrapperGenerator {
 	}
 
 	/**
+	 * Builds the content of a wrapper class.
+	 */
+	def private String createWrapperContent(String className, String wrapperName, String factoryName,
+		String currentPackage, String superClass) '''
+		package «packageUtil.append(properties.get(WRAPPER_PACKAGE), currentPackage)»
+		
+		import «packageUtil.append(properties.get(ECORE_PACKAGE), currentPackage)».«className»
+		import «packageUtil.append(properties.get(ECORE_PACKAGE), currentPackage)».«factoryName»
+		«IF superClass === null»
+			import org.eclipse.emf.ecore.impl.MinimalEObjectImpl
+			import org.eclipse.xtend.lib.annotations.Delegate
+		«ELSE»
+			import edu.kit.ipd.sdq.activextendannotations.DelegateDeclared
+			import «superClass»
+		«ENDIF»
+		
+		/**
+		 * Unification class for the class «className»
+		 */
+		class «wrapperName» extends «createSuperType(superClass)» implements «className» {
+			«IF superClass === null»
+				@Delegate
+			«ELSE»
+				@DelegateDeclared
+			«ENDIF»
+			private var «className» ecoreImplementation
+		
+			new() {
+				ecoreImplementation = «factoryName».eINSTANCE.create«className»()
+			}
+		}
+	'''
+
+	/**
 	 * Creates a Xtend Wrapper in a package path with a specific name. 
 	 */
 	def private void createXtendWrapper(String path, String name, String superClass) {
 		val currentPackage = path.replace(File.separatorChar, '.') // path to package declaration
 		var factoryName = '''«PathHelper.capitalize(packageUtil.getLastSegment(currentPackage))»Factory''' // name of the ecore factory of the package
 		val className = properties.get(WRAPPER_PREFIX) + PathHelper.capitalize(name) + properties.get(WRAPPER_SUFFIX) // name of the wrapper class
-		val content = wrapperContent(name, className, factoryName, currentPackage, superClass) // content of the class
+		val content = createWrapperContent(name, className, factoryName, currentPackage, superClass) // content of the class
 		createFile(path, '''«className».xtend''', content)
 		monitor.subTask(''' Created «currentPackage».«className».xtend''') // detailed logging
+	}
+
+	/**
+	 * Builds the super type declaration of a wrapper from a String that is either the super type or null.
+	 */
+	def private String createSuperType(String superClass) {
+		if (superClass === null) {
+			return "MinimalEObjectImpl.Container";
+		}
+		return packageUtil.getLastSegment(superClass)
 	}
 
 	/**
@@ -152,37 +196,4 @@ final class WrapperGenerator {
 		return containsEClass
 	}
 
-	/**
-	 * Builds the content of a wrapper class.
-	 */
-	def private String wrapperContent(String className, String wrapperName, String factoryName, String currentPackage,
-		String superClass) '''
-		package «packageUtil.append(properties.get(WRAPPER_PACKAGE), currentPackage)»
-		
-		import «packageUtil.append(properties.get(ECORE_PACKAGE), currentPackage)».«className»
-		import «packageUtil.append(properties.get(ECORE_PACKAGE), currentPackage)».«factoryName»
-		«IF superClass === null»
-			import org.eclipse.emf.ecore.impl.MinimalEObjectImpl
-			import org.eclipse.xtend.lib.annotations.Delegate
-		«ELSE»
-			import edu.kit.ipd.sdq.activextendannotations.DelegateDeclared
-			import «superClass»
-		«ENDIF»
-		
-		/**
-		 * Unification class for the class «className»
-		 */
-		class «wrapperName» extends «IF superClass === null»MinimalEObjectImpl.Container«ELSE»«packageUtil.getLastSegment(superClass)»«ENDIF» implements «className» {
-			«IF superClass === null»
-				@Delegate
-			«ELSE»
-				@DelegateDeclared
-			«ENDIF»
-			private var «className» ecoreImplementation
-		
-			new() {
-				ecoreImplementation = «factoryName».eINSTANCE.create«className»()
-			}
-		}
-	'''
 }
