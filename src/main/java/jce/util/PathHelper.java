@@ -6,6 +6,7 @@ package jce.util;
  */
 public class PathHelper {
     private final char separator;
+    private final String separatorString;
 
     /**
      * Basic constructor.
@@ -13,6 +14,7 @@ public class PathHelper {
      */
     public PathHelper(char separator) {
         this.separator = separator;
+        separatorString = Character.toString(separator);
     }
 
     /**
@@ -46,7 +48,7 @@ public class PathHelper {
      * @return the path without the first segment, or the original if it has no parents.
      */
     public String cutFirstSegment(String path) {
-        if (path.contains(Character.toString(separator))) {
+        if (path.contains(separatorString)) {
             return path.substring(path.indexOf(separator) + 1);
         }
         return path;
@@ -58,10 +60,11 @@ public class PathHelper {
      * @return the path without the last segment.
      */
     public String cutLastSegment(String path) {
-        if (path.endsWith(Character.toString(separator))) {
-            return path.substring(0, path.lastIndexOf(separator, path.length() - 2));
+        String newPath = removeTrailingSeparator(path);
+        if (newPath.contains(separatorString)) {
+            return newPath.substring(0, newPath.lastIndexOf(separator));
         }
-        return path.substring(0, path.lastIndexOf(separator));
+        return newPath;
     }
 
     /**
@@ -91,12 +94,13 @@ public class PathHelper {
     }
 
     /**
-     * Returns the last segment of the original path.
+     * Returns the last segment of the original path. If the path ends on a separator, it gets removed first.
      * @param path is the original path.
      * @return the name.
      */
     public String getLastSegment(String path) {
-        return path.substring(path.lastIndexOf(separator) + 1);
+        String newPath = removeTrailingSeparator(path);
+        return newPath.substring(newPath.lastIndexOf(separator) + 1);
     }
 
     /**
@@ -105,7 +109,7 @@ public class PathHelper {
      * @return true if it multiple.
      */
     public boolean hasMultipleSegments(String path) {
-        return path.contains(Character.toString(separator));
+        return path.contains(separatorString);
     }
 
     /**
@@ -114,7 +118,17 @@ public class PathHelper {
      * @return true if it does.
      */
     public boolean startsWithSeparator(String path) {
-        return path.startsWith(Character.toString(separator));
+        return path.startsWith(separatorString);
+    }
+
+    /**
+     * Cuts trailing separator if there is one.
+     */
+    private String removeTrailingSeparator(String path) {
+        if (path.endsWith(separatorString)) {
+            return path.substring(0, path.length() - 1);
+        }
+        return path;
     }
 
     /**
