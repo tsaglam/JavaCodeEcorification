@@ -1,6 +1,10 @@
 package jce.codemanipulation.ecore;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 /**
@@ -8,6 +12,7 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
  * @author Timur Saglam
  */
 public class TypeNameResolver extends ASTVisitor {
+    private static final Logger logger = LogManager.getLogger(TypeNameResolver.class.getName());
     private String typeName;
 
     /**
@@ -23,9 +28,25 @@ public class TypeNameResolver extends ASTVisitor {
 
     @Override
     public boolean visit(TypeDeclaration node) {
-        if (node.isPackageMemberTypeDeclaration()) {
-            typeName = node.getName().resolveTypeBinding().getQualifiedName(); // fully qualified name of class
+        resolve(node);
+        return false;
+    }
+
+    @Override
+    public boolean visit(EnumDeclaration node) {
+        resolve(node);
+        return false;
+    }
+
+    /**
+     * Visits a {@link TypeDeclaration} or {@link EnumDeclaration} and resolves the name.
+     */
+    private void resolve(AbstractTypeDeclaration type) {
+        if (type.isPackageMemberTypeDeclaration()) {
+            typeName = type.getName().resolveTypeBinding().getQualifiedName(); // fully qualified name of class
+            if (typeName == null || "".equals(typeName)) {
+                logger.fatal("Could not resolve fully qualified name of " + type.getName());
+            }
         }
-        return super.visit(node);
     }
 }
