@@ -116,4 +116,18 @@ public class PathHelper {
     public boolean startsWithSeparator(String path) {
         return path.startsWith(Character.toString(separator));
     }
+
+    /**
+     * Capitalizes the first letter of a {@link String}.
+     * @param input is the {@link String} to capitalize.
+     * @return the capitalized {@link String}.
+     */
+    public static String capitalize(String input) {
+        if (input == null) {
+            throw new IllegalArgumentException("Input string cannot be null!");
+        } else if (input.length() < 2) {
+            return input.toUpperCase();
+        }
+        return input.substring(0, 1).toUpperCase() + input.substring(1);
+    }
 }

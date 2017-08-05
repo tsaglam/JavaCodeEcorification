@@ -13,6 +13,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import eme.generator.GeneratedEcoreMetamodel;
 import jce.util.MetamodelSearcher;
+import jce.util.PathHelper;
 
 /**
  * {@link ASTVisitor} that removes all private non-static fields and their access methods from a compilation unit that
@@ -42,20 +43,13 @@ public class MemberRemovalVisitor extends ASTVisitor {
     }
 
     /**
-     * Capitalizes the first letter of a String.
-     */
-    private String capitalize(String input) {
-        return input.substring(0, 1).toUpperCase() + input.substring(1);
-    }
-
-    /**
      * Checks whether a {@link MethodDeclaration} is an access method.
      */
     private boolean isAccessMethod(MethodDeclaration method) {
         String[] prefixes = { "get", "set", "is" }; // access method prefixes
         for (String prefix : prefixes) {
             for (String field : removedFields) {
-                if (method.getName().getIdentifier().equals(prefix + capitalize(field))) {
+                if (method.getName().getIdentifier().equals(prefix + PathHelper.capitalize(field))) {
                     return true; // is access method if method name matches prefix + field name once
                 }
             }

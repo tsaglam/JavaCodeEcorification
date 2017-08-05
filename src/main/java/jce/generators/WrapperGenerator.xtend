@@ -28,7 +28,7 @@ import static jce.properties.TextProperty.WRAPPER_SUFFIX
  */
 final class WrapperGenerator {
 	static final Logger logger = LogManager.getLogger(WrapperGenerator.getName)
-	static final String SRC_FOLDER = "src"
+	static final String SRC_FOLDER = "src" // TODO (HIGH) use source folder property
 	final IProgressMonitor monitor
 	final PathHelper packageUtil
 	final PathHelper pathUtil
@@ -79,13 +79,6 @@ final class WrapperGenerator {
 	}
 
 	/**
-	 * Capitalizes the first letter of a String.
-	 */
-	def private String capitalize(String input) { // TODO (MEDIUM) move to utility class
-		return input.substring(0, 1).toUpperCase() + input.substring(1)
-	}
-
-	/**
 	 * Creates an {@link IFolder} in the project with a project relative path.
 	 */
 	def private void createFolder(String path) {
@@ -100,8 +93,8 @@ final class WrapperGenerator {
 	 */
 	def private void createXtendWrapper(String path, String name, String superClass) {
 		val currentPackage = path.replace(File.separatorChar, '.') // path to package declaration
-		var factoryName = '''«capitalize(packageUtil.getLastSegment(currentPackage))»Factory''' // name of the ecore factory of the package
-		val className = properties.get(WRAPPER_PREFIX) + capitalize(name) + properties.get(WRAPPER_SUFFIX) // name of the wrapper class
+		var factoryName = '''«PathHelper.capitalize(packageUtil.getLastSegment(currentPackage))»Factory''' // name of the ecore factory of the package
+		val className = properties.get(WRAPPER_PREFIX) + PathHelper.capitalize(name) + properties.get(WRAPPER_SUFFIX) // name of the wrapper class
 		val content = wrapperContent(name, className, factoryName, currentPackage, superClass) // content of the class
 		createFile(path, '''«className».xtend''', content)
 		monitor.subTask(''' Created «currentPackage».«className».xtend''') // detailed logging
