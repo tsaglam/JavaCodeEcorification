@@ -18,6 +18,7 @@ import org.eclipse.emf.ecore.EClassifier
 import org.eclipse.emf.ecore.EPackage
 
 import static jce.properties.TextProperty.ECORE_PACKAGE
+import static jce.properties.TextProperty.SOURCE_FOLDER
 import static jce.properties.TextProperty.WRAPPER_PACKAGE
 import static jce.properties.TextProperty.WRAPPER_PREFIX
 import static jce.properties.TextProperty.WRAPPER_SUFFIX
@@ -28,7 +29,7 @@ import static jce.properties.TextProperty.WRAPPER_SUFFIX
  */
 final class WrapperGenerator {
 	static final Logger logger = LogManager.getLogger(WrapperGenerator.getName)
-	static final String SRC_FOLDER = "src" // TODO (HIGH) use source folder property
+	final String sourceFolder
 	final IProgressMonitor monitor
 	final PathHelper packageUtil
 	final PathHelper pathUtil
@@ -36,12 +37,16 @@ final class WrapperGenerator {
 	IProject project
 	final EcorificationProperties properties
 
+	/**
+	 * Basic constructor, sets the properties.
+	 */
 	new(EcorificationProperties properties) {
 		this.properties = properties
 		monitor = MonitorFactory.createProgressMonitor(logger, properties)
 		packageUtil = new PathHelper(Character.valueOf('.').charValue)
 		pathUtil = new PathHelper(File.separatorChar)
-		wrapperFolder = pathUtil.append(SRC_FOLDER, properties.get(WRAPPER_PACKAGE))
+		sourceFolder = properties.get(SOURCE_FOLDER)
+		wrapperFolder = pathUtil.append(sourceFolder, properties.get(WRAPPER_PACKAGE))
 	}
 
 	/** 
@@ -54,7 +59,7 @@ final class WrapperGenerator {
 		this.project = project
 		createFolder(wrapperFolder) // build wrapper base folder
 		buildWrappers(metamodel.root, "")
-		ResourceRefresher.refresh(project, SRC_FOLDER) // makes wrappers visible in the Eclipse IDE
+		ResourceRefresher.refresh(project, sourceFolder) // makes wrappers visible in the Eclipse IDE
 	}
 
 	/** 
@@ -148,7 +153,7 @@ final class WrapperGenerator {
 	 * Creates an IFile from a project relative path, a file name and creates the file content.
 	 */
 	def private void createFile(String path, String name, String content) {
-		var folder = project.getFolder(pathUtil.append(SRC_FOLDER, properties.get(WRAPPER_PACKAGE), path))
+		var folder = project.getFolder(pathUtil.append(sourceFolder, properties.get(WRAPPER_PACKAGE), path))
 		var file = folder.getFile(name)
 		if (!file.exists) {
 			val source = new ByteArrayInputStream(content.bytes)
