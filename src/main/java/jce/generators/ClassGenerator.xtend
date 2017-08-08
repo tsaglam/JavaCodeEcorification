@@ -11,13 +11,14 @@ import org.eclipse.core.resources.IFolder
 import org.eclipse.core.resources.IProject
 import org.eclipse.core.resources.IResource
 import org.eclipse.core.runtime.IProgressMonitor
+
 import static jce.properties.TextProperty.SOURCE_FOLDER
 
 class ClassGenerator { // TODO (HIGH) Use in wrapper generator.
 	static final Logger logger = LogManager.getLogger(ClassGenerator.getName)
 	final protected PathHelper packageUtil
 	final protected PathHelper pathUtil
-	final IProgressMonitor monitor
+	final protected IProgressMonitor monitor
 	final EcorificationProperties properties
 
 	/**

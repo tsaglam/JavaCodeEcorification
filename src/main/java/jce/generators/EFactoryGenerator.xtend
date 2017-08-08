@@ -1,7 +1,14 @@
 package jce.generators
 
 import jce.properties.EcorificationProperties
+import java.util.List
+import java.io.File
+import org.eclipse.core.resources.IProject
 
+/**
+ * Generator class for the generation of Ecore factory interfaces.
+ * @author Timur Saglam
+ */
 class EFactoryGenerator extends ClassGenerator {
 
 	/**
@@ -9,54 +16,63 @@ class EFactoryGenerator extends ClassGenerator {
 	 */
 	new(EcorificationProperties properties) {
 		super(properties)
-	} // TODO (HIGH) Add main method for class.
+	}
 
-	def private String createFactoryContent(String currentPackage, String packageName) '''
+	/**
+	 * Creates a Ecore Factory in a package path with a specific name. 
+	 */
+	def public void createEFactory(String path, List<String> packageTypes, IProject project) {
+		val currentPackage = path.replace(File.separatorChar, '.') // path to package declaration
+		val packageName = pathUtil.getLastSegment(currentPackage)
+		val content = createFactoryContent(currentPackage, packageName, packageTypes)
+		createClass(path, '''«packageName»Factory.java''', content, project)
+		monitor.subTask(''' Created «packageName»Factory.java''') // detailed logging
+	}
+
+	/**
+	 * Creates the content of an Ecore factory.
+	 */
+	def private String createFactoryContent(String currentPackage, String packageName, List<String> packageTypes) '''
 		package «currentPackage»;
 		
 		import org.eclipse.emf.ecore.EFactory;
 		
 		/**
-		 * <!-- begin-user-doc -->
 		 * The <b>Factory</b> for the model.
 		 * It provides a create method for each non-abstract class of the model.
-		 * <!-- end-user-doc -->
 		 * @see «currentPackage».«packageName»Package
 		 * @generated
 		 */
 		public interface «packageName»Factory extends EFactory {
 		    /**
 		     * The singleton instance of the factory.
-		     * <!-- begin-user-doc -->
-		     * <!-- end-user-doc -->
 		     * @generated
 		     */
 		    «packageName»Factory eINSTANCE = «currentPackage».impl.«packageName»FactoryImpl.init();
 		
-		
-		«createFactoryMethod("TEST") /* TODO factory methods. */ »
-		
+		«FOR type : packageTypes»
+			«createFactoryMethod(type)»
+		«ENDFOR»
 		    /**
-		     * Returns the package supported by this factory.
-		     * <!-- begin-user-doc -->
-		     * <!-- end-user-doc -->
-		     * @return the package supported by this factory.
-		     * @generated
-		     */
-		    «packageName»Package get«packageName»Package();
+		 	 * Returns the package supported by this factory.
+			 * @return the package supported by this factory.
+			 * @generated
+			 */
+			«packageName»Package get«packageName»Package();
 		
 		} //«packageName»Factory
 	'''
 
+	/**
+	 * Creates the content of an Ecore factory method.
+	 */
 	def private String createFactoryMethod(String className) '''
 		/**
-				     * Returns a new object of class '<em>«className»</em>'.
-				     * <!-- begin-user-doc -->
-				     * <!-- end-user-doc -->
-				     * @return a new object of class '<em>«className»</em>'.
-				     * @generated
-				     */
-				    «className» create«className»();
-				    
+		 * Returns a new object of class '<em>«className»</em>'.
+		 * @return a new object of class '<em>«className»</em>'.
+		 * @generated
+		 */
+		«className» create«className»();
+			    
 	'''
 }
