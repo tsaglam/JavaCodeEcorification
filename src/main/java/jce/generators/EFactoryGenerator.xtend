@@ -2,7 +2,7 @@ package jce.generators
 
 import jce.properties.EcorificationProperties
 
-class EcoreFactoryGenerator extends ClassGenerator {
+class EFactoryGenerator extends ClassGenerator {
 
 	/**
 	 * Basic constructor, sets the properties.
