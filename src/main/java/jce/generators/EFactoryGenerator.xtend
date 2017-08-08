@@ -1,8 +1,8 @@
 package jce.generators
 
-import jce.properties.EcorificationProperties
-import java.util.List
 import java.io.File
+import java.util.List
+import jce.properties.EcorificationProperties
 import org.eclipse.core.resources.IProject
 
 /**
@@ -21,7 +21,7 @@ class EFactoryGenerator extends ClassGenerator {
 	/**
 	 * Creates a Ecore Factory in a package path with a specific name. 
 	 */
-	def public void createEFactory(String path, List<String> packageTypes, IProject project) {
+	def public void create(String path, List<String> packageTypes, IProject project) {
 		val currentPackage = path.replace(File.separatorChar, '.') // path to package declaration
 		val packageName = pathUtil.getLastSegment(currentPackage)
 		val content = createFactoryContent(currentPackage, packageName, packageTypes)
