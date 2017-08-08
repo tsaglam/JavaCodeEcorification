@@ -16,7 +16,6 @@ import org.eclipse.emf.ecore.EPackage
 
 import static jce.properties.TextProperty.ECORE_PACKAGE
 import static jce.properties.TextProperty.SOURCE_FOLDER
-import static jce.properties.TextProperty.WRAPPER_PACKAGE
 
 /** 
  * Creates and manages custom EFactories. Every EFactory has an interface and an implementation class.
@@ -24,10 +23,8 @@ import static jce.properties.TextProperty.WRAPPER_PACKAGE
  */
 final class EcoreFactoryGenerator {
 	static final Logger logger = LogManager.getLogger(WrapperGenerator.getName)
-	final String sourceFolder
 	final IProgressMonitor monitor
 	final PathHelper pathUtil
-	final String wrapperFolder
 	final EcorificationProperties properties
 	final EFactoryGenerator factoryGenerator
 	final EFactoryImplementationGenerator factoryImplementationGenerator
@@ -41,8 +38,6 @@ final class EcoreFactoryGenerator {
 		factoryImplementationGenerator = new EFactoryImplementationGenerator(properties)
 		monitor = MonitorFactory.createProgressMonitor(logger, properties)
 		pathUtil = new PathHelper(File.separatorChar)
-		sourceFolder = properties.get(SOURCE_FOLDER)
-		wrapperFolder = pathUtil.append(sourceFolder, properties.get(WRAPPER_PACKAGE))
 	}
 
 	/** 
@@ -55,7 +50,7 @@ final class EcoreFactoryGenerator {
 		for (subpackage : metamodel.root.ESubpackages) {
 			buildFactories(subpackage, pathUtil.append(properties.get(ECORE_PACKAGE), subpackage.name), project)
 		}
-		ResourceRefresher.refresh(project, sourceFolder) // makes wrappers visible in the Eclipse IDE
+		ResourceRefresher.refresh(project, properties.get(SOURCE_FOLDER)) // makes wrappers visible in the Eclipse IDE
 	}
 
 	/** 

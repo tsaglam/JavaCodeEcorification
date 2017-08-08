@@ -31,7 +31,7 @@ class EFactoryImplementationGenerator extends ClassGenerator {
 
 	/**
 	 * Creates the content of an Ecore factory.
-	 */
+	 */ // TODO (HIGH) Customize the factory code to create origin code.
 	def private String createFactoryContent(String currentPackage, String packageName, List<String> packageTypes) '''
 		package «currentPackage».impl;
 		
@@ -87,7 +87,6 @@ class EFactoryImplementationGenerator extends ClassGenerator {
 		        switch (eClass.getClassifierID()) {
 		            case «packageName»Package.«packageName.toUpperCase»: return create«packageName»();
 		            case «packageName»Package.«packageName.toUpperCase»_CONTAINER: return create«packageName»Container();
-		            case «packageName»Package.MEMBER: return createMember();«/* TODO (HIGH) package types */»
 		            «FOR type : packageTypes»
 		            	case «packageName»Package.«constantName(type)»: return createMember();
 		            «ENDFOR»
