@@ -62,7 +62,7 @@ final class EcoreFactoryGenerator {
 		val types = new LinkedList<String>()
 		for (eClassifier : ePackage.EClassifiers) { // for every classifier
 			if (eClassifier instanceof EClass) { // if is EClass
-				if (!eClassifier.interface) { // if is not interface
+				if (!eClassifier.interface && !eClassifier.abstract) { // if is not interface
 					types.add(eClassifier.name) // store name
 				}
 			}
