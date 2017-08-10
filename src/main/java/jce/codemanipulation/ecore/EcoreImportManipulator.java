@@ -167,26 +167,40 @@ public class EcoreImportManipulator extends CodeManipulator {
         }
     }
 
+    /**
+     * Retains the super interface declarations of a Ecore implementation class and its Ecore interface.
+     */
+    private void retainInterfaces(ICompilationUnit implementation, ICompilationUnit ecoreInterface) throws JavaModelException {
+        applyVisitorModifications(implementation, new InterfaceRetentionVisitor(implementation.getImports()));
+        applyVisitorModifications(ecoreInterface, new InterfaceRetentionVisitor(ecoreInterface.getImports()));
+    }
+
     @Override
     protected List<IPackageFragment> filterPackages(IProject project, EcorificationProperties properties) {
         return PackageFilter.startsWith(project, properties.get(TextProperty.ECORE_PACKAGE));
     }
 
+    /**
+     * Changes the imports of a compilation unit and its Ecore interface if it is an Ecore implementation class. The
+     * super interface declarations of the classes are retained, while the import declarations of the Ecore type are
+     * changed to the relating types of the origin code.
+     * @param unit is the {@link ICompilationUnit}.
+     * @throws JavaModelException if there are problems with the Java model.
+     */
     @Override
     protected void manipulate(ICompilationUnit unit) throws JavaModelException {
         if (isEcoreImplementation(unit)) { // is interface or implementation class of an EClass
-            applyVisitorModifications(unit, new InterfaceRetentionVisitor(unit.getParent().getElementName()));
-            IImportDeclaration[] importDeclarations = unit.getImports();
-            ICompilationUnit interfaceUnit = findEcoreInterface(unit);
+            ICompilationUnit ecoreInterface = findEcoreInterface(unit); // get ecore interface
+            retainInterfaces(unit, ecoreInterface); // retain the super interfaces of both
             ImportRewrite implementationRewrite = ImportRewrite.create(unit, true);
-            ImportRewrite interfaceRewrite = ImportRewrite.create(interfaceUnit, true);
-            for (IImportDeclaration importDeclaration : importDeclarations) {
+            ImportRewrite interfaceRewrite = ImportRewrite.create(ecoreInterface, true);
+            for (IImportDeclaration importDeclaration : unit.getImports()) {
                 if (isProblematic(importDeclaration)) { // edit every problematic import declaration
                     edit(importDeclaration, implementationRewrite, interfaceRewrite);
                 }
             }
             applyChanges(unit, implementationRewrite);
-            applyChanges(interfaceUnit, interfaceRewrite);
+            applyChanges(ecoreInterface, interfaceRewrite);
         }
     }
 }

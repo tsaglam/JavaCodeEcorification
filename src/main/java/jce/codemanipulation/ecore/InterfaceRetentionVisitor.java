@@ -2,13 +2,16 @@ package jce.codemanipulation.ecore;
 
 import java.util.List;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+import org.eclipse.emf.ecore.EObject;
+import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
-import jce.util.PathHelper;
 import jce.util.RawTypeUtil;
 
 /**
@@ -17,64 +20,61 @@ import jce.util.RawTypeUtil;
  * @author Timur Saglam
  */
 public class InterfaceRetentionVisitor extends ASTVisitor {
-    private final String currentPackage;
-    private final PathHelper path;
+    private static final Logger logger = LogManager.getLogger(InterfaceRetentionVisitor.class.getName());
+    private final IImportDeclaration[] imports;
 
     /**
      * Basic constructor.
-     * @param currentPackage is the current package.
+     * @param imports are the import declaration from which the full interface names are resolved.
      */
-    public InterfaceRetentionVisitor(String currentPackage) {
-        this.currentPackage = currentPackage;
-        path = new PathHelper('.');
+    public InterfaceRetentionVisitor(IImportDeclaration[] imports) {
+        this.imports = imports;
     }
 
     @Override
     public boolean visit(TypeDeclaration node) {
-        if (!node.isInterface()) { // if is class, manipulate inheritance:
-            changeSuperInterface(node);
+        AST ast = node.getAST();
+        List<Type> interfaces = RawTypeUtil.castList(Type.class, node.superInterfaceTypes());
+        for (Type superInterface : interfaces) {
+            changeSuperInterface(superInterface, node, ast);
         }
-        return super.visit(node);
+        return false;
     }
 
     /**
-     * Changes the super interface reference of a {@link TypeDeclaration} if possible.
+     * Changes the a super interface declaration of a {@link TypeDeclaration} to contain the fully qualified name.
      */
     @SuppressWarnings("unchecked")
-    private void changeSuperInterface(TypeDeclaration declaration) {
-        SimpleType ecoreInterface = getEcoreInterface(declaration);
-        if (ecoreInterface != null) {
-            AST ast = declaration.getAST();
-            String newName = path.append(path.cutLastSegment(currentPackage), ecoreInterface.getName().getFullyQualifiedName());
-            Type newSuperType = ast.newSimpleType(ast.newName(newName));
-            declaration.superInterfaceTypes().remove(ecoreInterface);
-            declaration.superInterfaceTypes().add(newSuperType); // TODO (HIGH) Type safety warning
+    private void changeSuperInterface(Type superInterface, TypeDeclaration node, AST ast) {
+        if (superInterface.isSimpleType()) {
+            SimpleType interfaceType = (SimpleType) superInterface;
+            if (isNotEObject(interfaceType)) {
+                String newName = getName(interfaceType);
+                Type newSuperType = ast.newSimpleType(ast.newName(newName));
+                node.superInterfaceTypes().remove(superInterface);
+                node.superInterfaceTypes().add(newSuperType); // TODO (HIGH) Type safety warning
+            }
         }
     }
 
     /**
-     * Returns the simple type of the Ecore interface.
+     * Returns fully qualified name of a {@link SimpleType}. The name is resolved from the import declarations.
      */
-    private SimpleType getEcoreInterface(TypeDeclaration declaration) {
-        List<Type> superInterfaces = RawTypeUtil.castList(Type.class, declaration.superInterfaceTypes());
-        for (Type type : superInterfaces) { // Search interfaces for Ecore interface.
-            if (type.isSimpleType() && isEcoreInterface((SimpleType) type, declaration)) {
-                return (SimpleType) type; // return type casted to simple type.
+    private String getName(SimpleType type) {
+        String typeName = type.getName().getFullyQualifiedName();
+        for (IImportDeclaration declaration : imports) {
+            if (declaration.getElementName().endsWith(typeName)) {
+                return declaration.getElementName();
             }
-        } // TODO (HIGH) Fix detection of generic classes like CustomGenericClass<A,B>
-        return null;
-    }
+        }
+        logger.fatal("Could not retain " + typeName + " because the related import was not found.");
+        return typeName;
+    } // TODO (HIGH) Fix detection of generic classes like CustomGenericClass<A,B>
 
     /**
-     * Checks whether a {@link SimpleType} is the Ecore interface of an {@link TypeDeclaration} which is an Ecore
-     * implementation class.
+     * Checks whether a type name matches the name of {@link EObject}.
      */
-    private boolean isEcoreInterface(SimpleType superInterface, TypeDeclaration implementation) {
-        String interfaceName = superInterface.getName().getFullyQualifiedName();
-        interfaceName = path.getLastSegment(interfaceName);
-        String implementationName = implementation.getName().getFullyQualifiedName();
-        implementationName = path.getLastSegment(implementationName);
-        return interfaceName.equals(implementationName.substring(0, implementationName.length() - 4));
+    private boolean isNotEObject(SimpleType type) {
+        return !EObject.class.getSimpleName().equals(type.getName().getFullyQualifiedName());
     }
-
 }
