@@ -168,11 +168,10 @@ public class EcoreImportManipulator extends CodeManipulator {
     }
 
     /**
-     * Retains the super interface declarations of a Ecore implementation class and its Ecore interface.
+     * Retains the super interface declarations of an compilation unit. .
      */
-    private void retainInterfaces(ICompilationUnit implementation, ICompilationUnit ecoreInterface) throws JavaModelException {
-        applyVisitorModifications(implementation, new InterfaceRetentionVisitor(implementation.getImports()));
-        applyVisitorModifications(ecoreInterface, new InterfaceRetentionVisitor(ecoreInterface.getImports()));
+    private void retainInterface(ICompilationUnit unit) throws JavaModelException {
+        applyVisitorModifications(unit, new InterfaceRetentionVisitor(unit.getImports(), unit.getParent().getElementName()));
     }
 
     @Override
@@ -191,7 +190,8 @@ public class EcoreImportManipulator extends CodeManipulator {
     protected void manipulate(ICompilationUnit unit) throws JavaModelException {
         if (isEcoreImplementation(unit)) { // is interface or implementation class of an EClass
             ICompilationUnit ecoreInterface = findEcoreInterface(unit); // get ecore interface
-            retainInterfaces(unit, ecoreInterface); // retain the super interfaces of both
+            retainInterface(unit); // retain the super interfaces of both
+            retainInterface(ecoreInterface);
             ImportRewrite implementationRewrite = ImportRewrite.create(unit, true);
             ImportRewrite interfaceRewrite = ImportRewrite.create(ecoreInterface, true);
             for (IImportDeclaration importDeclaration : unit.getImports()) {

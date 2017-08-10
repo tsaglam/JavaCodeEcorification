@@ -2,8 +2,6 @@ package jce.codemanipulation.ecore;
 
 import java.util.List;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.dom.AST;
@@ -12,6 +10,7 @@ import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
+import jce.util.PathHelper;
 import jce.util.RawTypeUtil;
 
 /**
@@ -20,15 +19,18 @@ import jce.util.RawTypeUtil;
  * @author Timur Saglam
  */
 public class InterfaceRetentionVisitor extends ASTVisitor {
-    private static final Logger logger = LogManager.getLogger(InterfaceRetentionVisitor.class.getName());
+    private final String currentPackage;
     private final IImportDeclaration[] imports;
+    private final PathHelper pathHelper;
 
     /**
      * Basic constructor.
      * @param imports are the import declaration from which the full interface names are resolved.
      */
-    public InterfaceRetentionVisitor(IImportDeclaration[] imports) {
+    public InterfaceRetentionVisitor(IImportDeclaration[] imports, String currentPackage) {
         this.imports = imports;
+        this.currentPackage = currentPackage;
+        pathHelper = new PathHelper('.');
     }
 
     @Override
@@ -67,8 +69,7 @@ public class InterfaceRetentionVisitor extends ASTVisitor {
                 return declaration.getElementName();
             }
         }
-        logger.fatal("Could not retain " + typeName + " because the related import was not found.");
-        return typeName;
+        return pathHelper.append(currentPackage, typeName);
     } // TODO (HIGH) Fix detection of generic classes like CustomGenericClass<A,B>
 
     /**

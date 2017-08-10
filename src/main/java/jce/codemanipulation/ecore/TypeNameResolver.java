@@ -27,13 +27,13 @@ public class TypeNameResolver extends ASTVisitor {
     }
 
     @Override
-    public boolean visit(TypeDeclaration node) {
+    public boolean visit(EnumDeclaration node) {
         resolve(node);
         return false;
     }
 
     @Override
-    public boolean visit(EnumDeclaration node) {
+    public boolean visit(TypeDeclaration node) {
         resolve(node);
         return false;
     }
