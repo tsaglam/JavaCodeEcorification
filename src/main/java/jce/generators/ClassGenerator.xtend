@@ -14,12 +14,12 @@ import org.eclipse.core.runtime.IProgressMonitor
 
 import static jce.properties.TextProperty.SOURCE_FOLDER
 
-class ClassGenerator { // TODO (HIGH) Use in wrapper generator.
+class ClassGenerator {
 	static final Logger logger = LogManager.getLogger(ClassGenerator.getName)
 	final protected PathHelper packageUtil
 	final protected PathHelper pathUtil
 	final protected IProgressMonitor monitor
-	final EcorificationProperties properties
+	final protected EcorificationProperties properties
 
 	/**
 	 * Basic constructor, sets the properties.

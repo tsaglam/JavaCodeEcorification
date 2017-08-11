@@ -1,7 +1,6 @@
 package jce.generators
 
 import eme.generator.GeneratedEcoreMetamodel
-import java.io.ByteArrayInputStream
 import java.io.File
 import jce.properties.EcorificationProperties
 import jce.util.PathHelper
@@ -9,9 +8,7 @@ import jce.util.ResourceRefresher
 import jce.util.logging.MonitorFactory
 import org.apache.log4j.LogManager
 import org.apache.log4j.Logger
-import org.eclipse.core.resources.IFolder
 import org.eclipse.core.resources.IProject
-import org.eclipse.core.resources.IResource
 import org.eclipse.core.runtime.IProgressMonitor
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EClassifier
@@ -27,7 +24,7 @@ import static jce.properties.TextProperty.WRAPPER_SUFFIX
  * Creates and manages wrappers for the classes of the original Java project with is ecorified.
  * @author Timur Saglam
  */
-final class WrapperGenerator {
+final class WrapperGenerator extends ClassGenerator {
 	static final Logger logger = LogManager.getLogger(WrapperGenerator.getName)
 	final String sourceFolder
 	final IProgressMonitor monitor
@@ -35,13 +32,12 @@ final class WrapperGenerator {
 	final PathHelper pathUtil
 	final String wrapperFolder
 	IProject project
-	final EcorificationProperties properties
 
 	/**
 	 * Basic constructor, sets the properties.
 	 */
 	new(EcorificationProperties properties) {
-		this.properties = properties
+		super(properties)
 		monitor = MonitorFactory.createProgressMonitor(logger, properties)
 		packageUtil = new PathHelper(Character.valueOf('.').charValue)
 		pathUtil = new PathHelper(File.separatorChar)
@@ -57,7 +53,7 @@ final class WrapperGenerator {
 	def void buildWrappers(GeneratedEcoreMetamodel metamodel, IProject project) {
 		logger.info("Starting the wrapper generation...")
 		this.project = project
-		createFolder(wrapperFolder) // build wrapper base folder
+		createFolder(wrapperFolder, project) // build wrapper base folder
 		buildWrappers(metamodel.root, "")
 		ResourceRefresher.refresh(project, sourceFolder) // makes wrappers visible in the Eclipse IDE
 	}
@@ -69,7 +65,7 @@ final class WrapperGenerator {
 	 */
 	def private void buildWrappers(EPackage ePackage, String path) {
 		if (containsEClass(ePackage)) { // avoids empty folders
-			createFolder(pathUtil.append(wrapperFolder, path))
+			createFolder(pathUtil.append(wrapperFolder, path), project)
 		}
 		for (eClassifier : ePackage.EClassifiers) { // for every classifier
 			if (eClassifier instanceof EClass) { // if is EClass
@@ -80,16 +76,6 @@ final class WrapperGenerator {
 		}
 		for (eSubpackage : ePackage.ESubpackages) { // for every subpackage
 			buildWrappers(eSubpackage, pathUtil.append(path, eSubpackage.name)) // do the same
-		}
-	}
-
-	/**
-	 * Creates an {@link IFolder} in the project with a project relative path.
-	 */
-	def private void createFolder(String path) {
-		var IFolder folder = project.getFolder(path)
-		if (!folder.exists) {
-			folder.create(false, true, monitor)
 		}
 	}
 
@@ -135,7 +121,7 @@ final class WrapperGenerator {
 		var factoryName = '''«PathHelper.capitalize(packageUtil.getLastSegment(currentPackage))»Factory''' // name of the ecore factory of the package
 		val className = properties.get(WRAPPER_PREFIX) + PathHelper.capitalize(name) + properties.get(WRAPPER_SUFFIX) // name of the wrapper class
 		val content = createWrapperContent(name, className, factoryName, currentPackage, superClass) // content of the class
-		createFile(path, '''«className».xtend''', content)
+		createClass(path, '''«className».xtend''', content, project)
 		monitor.subTask(''' Created «currentPackage».«className».xtend''') // detailed logging
 	}
 
@@ -147,19 +133,6 @@ final class WrapperGenerator {
 			return "MinimalEObjectImpl.Container";
 		}
 		return packageUtil.getLastSegment(superClass)
-	}
-
-	/**
-	 * Creates an IFile from a project relative path, a file name and creates the file content.
-	 */
-	def private void createFile(String path, String name, String content) {
-		var folder = project.getFolder(pathUtil.append(sourceFolder, properties.get(WRAPPER_PACKAGE), path))
-		var file = folder.getFile(name)
-		if (!file.exists) {
-			val source = new ByteArrayInputStream(content.bytes)
-			file.create(source, IResource.NONE, monitor)
-			file.touch(monitor)
-		}
 	}
 
 	/**
