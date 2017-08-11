@@ -5,11 +5,7 @@ import java.io.File
 import jce.properties.EcorificationProperties
 import jce.util.PathHelper
 import jce.util.ResourceRefresher
-import jce.util.logging.MonitorFactory
-import org.apache.log4j.LogManager
-import org.apache.log4j.Logger
 import org.eclipse.core.resources.IProject
-import org.eclipse.core.runtime.IProgressMonitor
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EClassifier
 import org.eclipse.emf.ecore.EPackage
@@ -25,11 +21,7 @@ import static jce.properties.TextProperty.WRAPPER_SUFFIX
  * @author Timur Saglam
  */
 final class WrapperGenerator extends ClassGenerator {
-	static final Logger logger = LogManager.getLogger(WrapperGenerator.getName)
 	final String sourceFolder
-	final IProgressMonitor monitor
-	final PathHelper packageUtil
-	final PathHelper pathUtil
 	final String wrapperFolder
 	IProject project
 
@@ -38,9 +30,6 @@ final class WrapperGenerator extends ClassGenerator {
 	 */
 	new(EcorificationProperties properties) {
 		super(properties)
-		monitor = MonitorFactory.createProgressMonitor(logger, properties)
-		packageUtil = new PathHelper(Character.valueOf('.').charValue)
-		pathUtil = new PathHelper(File.separatorChar)
 		sourceFolder = properties.get(SOURCE_FOLDER)
 		wrapperFolder = pathUtil.append(sourceFolder, properties.get(WRAPPER_PACKAGE))
 	}
@@ -121,7 +110,8 @@ final class WrapperGenerator extends ClassGenerator {
 		var factoryName = '''«PathHelper.capitalize(packageUtil.getLastSegment(currentPackage))»Factory''' // name of the ecore factory of the package
 		val className = properties.get(WRAPPER_PREFIX) + PathHelper.capitalize(name) + properties.get(WRAPPER_SUFFIX) // name of the wrapper class
 		val content = createWrapperContent(name, className, factoryName, currentPackage, superClass) // content of the class
-		createClass(path, '''«className».xtend''', content, project)
+		val wrapperPath = pathUtil.append(properties.get(WRAPPER_PACKAGE), path)
+		createClass(wrapperPath, '''«className».xtend''', content, project) // add wrapper folder.
 		monitor.subTask(''' Created «currentPackage».«className».xtend''') // detailed logging
 	}
 
@@ -130,7 +120,7 @@ final class WrapperGenerator extends ClassGenerator {
 	 */
 	def private String createSuperType(String superClass) {
 		if (superClass === null) {
-			return "MinimalEObjectImpl.Container";
+			return "MinimalEObjectImpl.Container"
 		}
 		return packageUtil.getLastSegment(superClass)
 	}

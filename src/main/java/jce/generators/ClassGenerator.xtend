@@ -15,11 +15,11 @@ import org.eclipse.core.runtime.IProgressMonitor
 import static jce.properties.TextProperty.SOURCE_FOLDER
 
 class ClassGenerator {
-	static final Logger logger = LogManager.getLogger(ClassGenerator.getName)
-	final protected PathHelper packageUtil
-	final protected PathHelper pathUtil
-	final protected IProgressMonitor monitor
-	final protected EcorificationProperties properties
+	protected static final Logger logger = LogManager.getLogger(ClassGenerator.getName)
+	protected final PathHelper packageUtil
+	protected final PathHelper pathUtil
+	protected final IProgressMonitor monitor
+	protected final EcorificationProperties properties
 
 	/**
 	 * Basic constructor, sets the properties.
