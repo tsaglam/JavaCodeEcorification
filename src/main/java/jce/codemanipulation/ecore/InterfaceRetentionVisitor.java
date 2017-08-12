@@ -28,6 +28,10 @@ public class InterfaceRetentionVisitor extends ASTVisitor {
      * @param imports are the import declaration from which the full interface names are resolved.
      */
     public InterfaceRetentionVisitor(IImportDeclaration[] imports, String currentPackage) {
+        super();
+        if (imports == null || currentPackage == null) {
+            throw new IllegalArgumentException("Parameters cannot be null.");
+        }
         this.imports = imports;
         this.currentPackage = currentPackage;
         pathHelper = new PathHelper('.');
