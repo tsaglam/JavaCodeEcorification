@@ -2,6 +2,8 @@ package jce.codemanipulation;
 
 import java.util.List;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -25,8 +27,8 @@ import jce.util.logging.MonitorFactory;
  * @author Timur Saglam
  */
 @SuppressWarnings("restriction")  // TODO (LOW) This class uses LTK classes & methods that are not marked as API
-public class ImportOrganizer extends CodeManipulator {
-
+public class ImportOrganizer extends AbstractCodeManipulator {
+    private static final Logger logger = LogManager.getLogger(AbstractCodeManipulator.class.getName());
     private IProgressMonitor monitor;
 
     /**
@@ -54,9 +56,9 @@ public class ImportOrganizer extends CodeManipulator {
             unit.commitWorkingCopy(true, monitor);
             unit.save(monitor, true);
         } catch (OperationCanceledException exception) {
-            exception.printStackTrace();
+            logger.error(exception);
         } catch (CoreException exception) {
-            exception.printStackTrace();
+            logger.error(exception);
         }
     }
 }
