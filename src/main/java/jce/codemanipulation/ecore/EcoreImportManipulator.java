@@ -19,7 +19,7 @@ import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
 
 import eme.generator.GeneratedEcoreMetamodel;
-import jce.codemanipulation.CodeManipulator;
+import jce.codemanipulation.AbstractCodeManipulator;
 import jce.properties.BinaryProperty;
 import jce.properties.EcorificationProperties;
 import jce.properties.TextProperty;
@@ -36,7 +36,7 @@ import jce.util.logging.MonitorFactory;
  * to the correlating Ecore interfaces while retaining the correct super interfaces of the implementation classes.
  * @author Timur Saglam
  */
-public class EcoreImportManipulator extends CodeManipulator {
+public class EcoreImportManipulator extends AbstractCodeManipulator {
     private final GeneratedEcoreMetamodel metamodel;
     private final IProgressMonitor monitor;
     private final PathHelper path;

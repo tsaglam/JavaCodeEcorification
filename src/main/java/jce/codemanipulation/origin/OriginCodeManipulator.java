@@ -5,7 +5,7 @@ import java.util.List;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IPackageFragment;
 
-import jce.codemanipulation.CodeManipulator;
+import jce.codemanipulation.AbstractCodeManipulator;
 import jce.properties.EcorificationProperties;
 import jce.properties.TextProperty;
 import jce.util.PackageFilter;
@@ -14,7 +14,7 @@ import jce.util.PackageFilter;
  * Base class for manipulating origin code.
  * @author Timur Saglam
  */
-public abstract class OriginCodeManipulator extends CodeManipulator {
+public abstract class OriginCodeManipulator extends AbstractCodeManipulator {
 
     /**
      * Simple constructor that sets the properties.

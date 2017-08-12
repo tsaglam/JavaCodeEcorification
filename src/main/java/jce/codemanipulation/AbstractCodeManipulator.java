@@ -32,7 +32,7 @@ import jce.util.logging.MonitorFactory;
  * applying text edits and visitor modifications to any {@link ICompilationUnit}.
  * @author Timur Saglam
  */
-public abstract class CodeManipulator {
+public abstract class AbstractCodeManipulator {
     protected Logger logger;
     protected final IProgressMonitor monitor;
     protected final EcorificationProperties properties;
@@ -41,7 +41,7 @@ public abstract class CodeManipulator {
      * Simple constructor that sets the properties.
      * @param properties are the {@link EcorificationProperties}.
      */
-    public CodeManipulator(EcorificationProperties properties) {
+    public AbstractCodeManipulator(EcorificationProperties properties) {
         this.properties = properties;
         logger = LogManager.getLogger(this.getClass().getName());
         monitor = MonitorFactory.createProgressMonitor(logger, properties);
