@@ -6,6 +6,7 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -52,14 +53,12 @@ public class InterfaceRetentionVisitor extends ASTVisitor {
      */
     @SuppressWarnings("unchecked")
     private void changeSuperInterface(Type superInterface, TypeDeclaration node, AST ast) {
-        if (superInterface.isSimpleType()) {
-            SimpleType interfaceType = (SimpleType) superInterface;
-            if (isNotEObject(interfaceType)) {
-                String newName = getName(interfaceType);
-                Type newSuperType = ast.newSimpleType(ast.newName(newName));
-                node.superInterfaceTypes().remove(superInterface);
-                node.superInterfaceTypes().add(newSuperType); // TODO (HIGH) Type safety warning
-            }
+        SimpleType interfaceType = getSimpleType(superInterface);
+        if (isNotEObject(interfaceType)) {
+            String newName = getName(interfaceType);
+            Type newSuperType = ast.newSimpleType(ast.newName(newName));
+            node.superInterfaceTypes().remove(superInterface);
+            node.superInterfaceTypes().add(newSuperType); // TODO (HIGH) Type safety warning
         }
     }
 
@@ -74,7 +73,20 @@ public class InterfaceRetentionVisitor extends ASTVisitor {
             }
         }
         return pathHelper.append(currentPackage, typeName);
-    } // TODO (HIGH) Fix detection of generic classes like CustomGenericClass<A,B>
+    }
+
+    /**
+     * Returns the {@link SimpleType} of a {@link Type}. If the {@link Type} is a {@link SimpleType} it is simply
+     * casted. If it is a {@link ParameterizedType}, its type gets resolved recusivley with this method.
+     */
+    private SimpleType getSimpleType(Type type) {
+        if (type.isSimpleType()) { // cast simple types
+            return (SimpleType) type;
+        } else if (type.isParameterizedType()) { // get simple types from parameterized types.
+            return getSimpleType(((ParameterizedType) type).getType());
+        } // not supported: primitive types, array types
+        throw new IllegalArgumentException("Cannot get simple type from  " + type);
+    }
 
     /**
      * Checks whether a type name matches the name of {@link EObject}.
