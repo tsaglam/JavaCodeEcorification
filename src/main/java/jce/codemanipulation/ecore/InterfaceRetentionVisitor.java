@@ -58,7 +58,7 @@ public class InterfaceRetentionVisitor extends ASTVisitor {
             String newName = getName(interfaceType);
             Type newSuperType = ast.newSimpleType(ast.newName(newName));
             node.superInterfaceTypes().remove(superInterface);
-            node.superInterfaceTypes().add(newSuperType); // TODO (HIGH) Type safety warning
+            node.superInterfaceTypes().add(newSuperType);
         }
     }
 
