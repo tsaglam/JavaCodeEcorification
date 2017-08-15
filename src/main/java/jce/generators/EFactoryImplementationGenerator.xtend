@@ -23,17 +23,21 @@ class EFactoryImplementationGenerator extends ClassGenerator {
 	 */
 	def public void create(String path, List<String> packageTypes, IProject project) {
 		val currentPackage = path.replace(File.separatorChar, '.') // path to package declaration
-		val packageName = pathUtil.getLastSegment(currentPackage)
-		val content = createFactoryContent(currentPackage, packageName, packageTypes)
-		createClass(path, '''«packageName»FactoryImpl.java''', content, project)
+		val interfacePackage = packageUtil.cutLastSegment(currentPackage)
+		val packageName = packageUtil.getLastSegment(interfacePackage).toFirstUpper
+		val content = createFactoryContent(currentPackage, packageName, interfacePackage, packageTypes)
+		createClass(path, '''«packageName»FactoryImpl2.java''', content, project)
 		monitor.subTask(''' Created «packageName»FactoryImpl.java''') // detailed logging
 	}
 
 	/**
 	 * Creates the content of an Ecore factory.
-	 */ // TODO (HIGH) Customize the factory code to create origin code.
-	def private String createFactoryContent(String currentPackage, String packageName, List<String> packageTypes) '''
-		package «currentPackage».impl;
+	 */
+	// TODO (HIGH) Customize the factory code to create origin code.
+	// TODO (HIGH) Remove 2s after the original factories were copied.
+	def private String createFactoryContent(String currentPackage, String packageName, String interfacePackage,
+		List<String> packageTypes) '''
+		package «currentPackage»;
 		
 		import org.eclipse.emf.ecore.EClass;
 		import org.eclipse.emf.ecore.EObject;
@@ -41,17 +45,17 @@ class EFactoryImplementationGenerator extends ClassGenerator {
 		import org.eclipse.emf.ecore.impl.EFactoryImpl;
 		import org.eclipse.emf.ecore.plugin.EcorePlugin;
 		
-		import «currentPackage».«packageName»Factory;
-		import «currentPackage».«packageName»Package;
+		import «interfacePackage».«packageName»Factory;
+		import «interfacePackage».«packageName»Package;
 		«FOR type : packageTypes»
-			import «currentPackage».«type»;
+			import «interfacePackage».«type»;
 		«ENDFOR»
 		
 		/**
 		 * An implementation of the model <b>Factory</b>.
 		 * @generated
 		 */
-		public class «packageName»FactoryImpl extends EFactoryImpl implements «packageName»Factory {
+		public class «packageName»FactoryImpl2 extends EFactoryImpl implements «packageName»Factory {
 		    /**
 		     * Creates the default factory implementation.
 		     * <!-- begin-user-doc -->
@@ -75,7 +79,7 @@ class EFactoryImplementationGenerator extends ClassGenerator {
 		     * Creates an instance of the factory.
 		     * @generated
 		     */
-		    public «packageName»FactoryImpl() {
+		    public «packageName»FactoryImpl2() {
 		        super();
 		    }
 		
@@ -85,8 +89,6 @@ class EFactoryImplementationGenerator extends ClassGenerator {
 		    @Override
 		    public EObject create(EClass eClass) {
 		        switch (eClass.getClassifierID()) {
-		            case «packageName»Package.«packageName.toUpperCase»: return create«packageName»();
-		            case «packageName»Package.«packageName.toUpperCase»_CONTAINER: return create«packageName»Container();
 		            «FOR type : packageTypes»
 		            	case «packageName»Package.«constantName(type)»: return createMember();
 		            «ENDFOR»
@@ -94,16 +96,16 @@ class EFactoryImplementationGenerator extends ClassGenerator {
 		                throw new IllegalArgumentException("The class '" + eClass.getName() + "' is not a valid classifier");
 		        }
 		    }
-		
 		«FOR type : packageTypes»
 			«createFactoryMethod(type)»
 		«ENDFOR»
+		
 			/**
-		 * @generated
-		 */
-		 public «packageName»Package get«packageName»Package() {
-		     return («packageName»Package)getEPackage();
-		 }
+			* @generated
+			*/
+			public «packageName»Package get«packageName»Package() {
+			return («packageName»Package)getEPackage();
+			}
 		
 		    /**
 		     * @deprecated
@@ -121,13 +123,14 @@ class EFactoryImplementationGenerator extends ClassGenerator {
 	 * Creates the content of an Ecore factory method.
 	 */
 	def private String createFactoryMethod(String className) '''
-		/**
-		 * @generated
-		 */
-		public «className» create«className»() {
-			«className»Impl «className.toLowerCase» = new «className»Impl();
-			return «className.toLowerCase»;
-		}
+		
+				/**
+				 * @generated
+				  */
+				public «className» create«className»() {
+					«className»Impl «className.toLowerCase» = new «className»Impl();
+					return «className.toLowerCase»;
+				}	
 	'''
 
 	/**
@@ -142,6 +145,6 @@ class EFactoryImplementationGenerator extends ClassGenerator {
 				constantName += Character.toUpperCase(letter) // letter to upper case
 			}
 		}
-		return constantName
+		return constantName.substring(1)
 	}
 }

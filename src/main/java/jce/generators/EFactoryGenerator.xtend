@@ -23,15 +23,17 @@ class EFactoryGenerator extends ClassGenerator {
 	 */
 	def public void create(String path, List<String> packageTypes, IProject project) {
 		val currentPackage = path.replace(File.separatorChar, '.') // path to package declaration
-		val packageName = pathUtil.getLastSegment(currentPackage)
+		val packageName = packageUtil.getLastSegment(currentPackage).toFirstUpper
 		val content = createFactoryContent(currentPackage, packageName, packageTypes)
-		createClass(path, '''«packageName»Factory.java''', content, project)
+		createClass(path, '''«packageName»Factory2.java''', content, project)
 		monitor.subTask(''' Created «packageName»Factory.java''') // detailed logging
 	}
 
 	/**
 	 * Creates the content of an Ecore factory.
-	 */ // TODO (HIGH) Customize the factory code to create origin code.
+	 */
+	// TODO (HIGH) Customize the factory code to create origin code.
+	// TODO (HIGH) Remove 2s after the original factories were copied.
 	def private String createFactoryContent(String currentPackage, String packageName, List<String> packageTypes) '''
 		package «currentPackage»;
 		
@@ -43,16 +45,16 @@ class EFactoryGenerator extends ClassGenerator {
 		 * @see «currentPackage».«packageName»Package
 		 * @generated
 		 */
-		public interface «packageName»Factory extends EFactory {
+		public interface «packageName»Factory2 extends EFactory {
 		    /**
 		     * The singleton instance of the factory.
 		     * @generated
 		     */
 		    «packageName»Factory eINSTANCE = «currentPackage».impl.«packageName»FactoryImpl.init();
-		
 		«FOR type : packageTypes»
 			«createFactoryMethod(type)»
 		«ENDFOR»
+		
 		    /**
 		 	 * Returns the package supported by this factory.
 			 * @return the package supported by this factory.
@@ -67,12 +69,13 @@ class EFactoryGenerator extends ClassGenerator {
 	 * Creates the content of an Ecore factory method.
 	 */
 	def private String createFactoryMethod(String className) '''
-		/**
-		 * Returns a new object of class '<em>«className»</em>'.
-		 * @return a new object of class '<em>«className»</em>'.
-		 * @generated
-		 */
-		«className» create«className»();
-			    
+		
+				/**
+				 * Returns a new object of class '<em>«className»</em>'.
+				 * @return a new object of class '<em>«className»</em>'.
+				 * @generated
+				 */
+				«className» create«className»();
+				    
 	'''
 }
