@@ -70,6 +70,7 @@ final class EcoreFactoryGenerator {
 		if (!types.empty) {
 			factoryGenerator.create(path, types, project) // create factory interface and implementation
 			factoryImplementationGenerator.create(pathUtil.append(path, "impl"), types, project)
+			monitor.subTask("Created factory interface and implementation for EPackage " + ePackage.name)
 		}
 		for (eSubpackage : ePackage.ESubpackages) { // for every subpackage
 			buildFactories(eSubpackage, pathUtil.append(path, eSubpackage.name), project) // do the same
