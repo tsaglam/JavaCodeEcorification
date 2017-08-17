@@ -48,7 +48,7 @@ class EFactoryImplementationGenerator extends ClassGenerator {
 		import «interfacePackage».«packageName»Factory;
 		import «interfacePackage».«packageName»Package;
 		«FOR type : packageTypes»
-			import «interfacePackage».«type»;
+			import «packageUtil.cutFirstSegment(interfacePackage)».«type»;
 		«ENDFOR»
 		
 		/**
@@ -90,7 +90,7 @@ class EFactoryImplementationGenerator extends ClassGenerator {
 		    public EObject create(EClass eClass) {
 		        switch (eClass.getClassifierID()) {
 		            «FOR type : packageTypes»
-		            	case «packageName»Package.«constantName(type)»: return createMember();
+		            	case «packageName»Package.«constantName(type)»: return create«type»();
 		            «ENDFOR»
 		            default:
 		                throw new IllegalArgumentException("The class '" + eClass.getName() + "' is not a valid classifier");
@@ -128,8 +128,7 @@ class EFactoryImplementationGenerator extends ClassGenerator {
 				 * @generated
 				  */
 				public «className» create«className»() {
-					«className»Impl «className.toLowerCase» = new «className»Impl();
-					return «className.toLowerCase»;
+					return new «className»(); // origin code instance
 				}	
 	'''
 

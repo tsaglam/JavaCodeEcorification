@@ -24,6 +24,7 @@ import jce.codemanipulation.ecore.EcoreImportManipulator;
 import jce.codemanipulation.origin.FieldEncapsulator;
 import jce.codemanipulation.origin.InheritanceManipulator;
 import jce.codemanipulation.origin.MemberRemover;
+import jce.generators.EcoreFactoryGenerator;
 import jce.generators.GenModelGenerator;
 import jce.generators.ModelCodeGenerator;
 import jce.generators.WrapperGenerator;
@@ -88,7 +89,9 @@ public class JavaCodeEcorification {
         new MemberRemover(metamodel, properties).manipulate(project);
         importOrganizer.manipulate(project);
         inheritanceManipulator.manipulate(project);
-        // 5. build project and make changes visible in the Eclipse IDE:
+        // 5. Build custom factories:
+        new EcoreFactoryGenerator(properties).buildFactories(metamodel, project);
+        // 6. build project and make changes visible in the Eclipse IDE:
         rebuild(project, properties);
         logger.info("Ecorification complete!");
     }
@@ -114,7 +117,9 @@ public class JavaCodeEcorification {
         properties.set(TextProperty.PROJECT_SUFFIX, this.properties.get(PROJECT_SUFFIX));
         properties.set(TextProperty.DEFAULT_PACKAGE, this.properties.get(ECORE_PACKAGE));
         properties.set(TextProperty.DATATYPE_PACKAGE, "datatypes");
+        properties.set(TextProperty.ROOT_NAME, "RootContainer");
         properties.set(BinaryProperty.DUMMY_CLASS, false);
+        properties.set(BinaryProperty.ROOT_CONTAINER, true);
     }
 
     /**
