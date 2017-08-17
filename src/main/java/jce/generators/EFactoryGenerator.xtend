@@ -32,7 +32,6 @@ class EFactoryGenerator extends ClassGenerator {
 	/**
 	 * Creates the content of an Ecore factory.
 	 */
-	// TODO (HIGH) Customize the factory code to create origin code.
 	// TODO (HIGH) Remove 2s after the original factories were copied.
 	def private String createFactoryContent(String currentPackage, String packageName, List<String> packageTypes) '''
 		package «currentPackage»;

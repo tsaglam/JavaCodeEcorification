@@ -33,7 +33,6 @@ class EFactoryImplementationGenerator extends ClassGenerator {
 	/**
 	 * Creates the content of an Ecore factory.
 	 */
-	// TODO (HIGH) Customize the factory code to create origin code.
 	// TODO (HIGH) Remove 2s after the original factories were copied.
 	def private String createFactoryContent(String currentPackage, String packageName, String interfacePackage,
 		List<String> packageTypes) '''
@@ -136,14 +135,23 @@ class EFactoryImplementationGenerator extends ClassGenerator {
 	 * Makes a type a name a constant name (MyType => MY_TYPE)
 	 */
 	def private String constantName(String typeName) {
+		val String[] words = typeName.split("(?=\\p{Upper})");
 		var constantName = "" // empty result string
-		for (letter : typeName.toCharArray) {
-			if (Character.isUpperCase(letter)) {
-				constantName += '_' + letter // separate camel case words
-			} else {
-				constantName += Character.toUpperCase(letter) // letter to upper case
+		var wasLowerCase = true // last word was lower case
+		for (String word : words) {
+			if (containsLowerCase(word) || wasLowerCase) { // if has or comes after lower case letter.
+				constantName += '_' // add separator
 			}
+			constantName += word.toUpperCase()
+			wasLowerCase = containsLowerCase(word)
 		}
 		return constantName.substring(1)
+	}
+
+	/**
+	 * Checks whether a String contains lower case characters. 
+	 */
+	def private boolean containsLowerCase(String string) {
+		return !string.equals(string.toUpperCase())
 	}
 }
