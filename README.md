@@ -1,6 +1,12 @@
 # JavaCodeEcorification
-This is a proof of concept for the automatic integration of Ecore functionality into Java code. The resulting code can be used exactly as before, but it also uses the modeling infrastructure and implements all interfaces for Ecore-based tooling.
-To achieve this, the original Java code will be interlaced with the generated model code of an Ecore metamodel that was extracted from the original Java code with the help of the [EcoreMetamodelExtraction project](https://github.com/tsaglam/EcoreMetamodelExtraction).
+This is a proof of concept for the automatic integration of Ecore functionality into Java code. We call this process Ecorification. The goal is to integrate Ecore functionality into Java code while preserving all of its original functionality. Preserving the original functionality of the Java code requires retaining the interfaces which are offered by the modules of the code and also retaining all internal functionality of the code. That means the product of the Ecorification is the original code, enriched with the desired Ecore functionality. It can be used exactly as before, but it also uses the modeling infrastructure and implements all interfaces for Ecore-based tooling.
+
+The basic idea of the Ecorification is to find an Ecore representation of the Java code, which is used to integrate its Ecore functionality into the Java code. The Ecore representation is obtained by creating an Ecore metamodel that represents the Java code as closely as possible (with the help of the [EcoreMetamodelExtraction project](https://github.com/tsaglam/EcoreMetamodelExtraction)). We use the Eclipse Modeling Framework to generate Ecore model code from the Ecore metamodel. We then interlace both the original Java code and the generated Ecore model code. This can be achieved by utilizing the separation of interface and implementation in the Ecore count to mount the original code into the super relation hierarchy of the model code. The combination of both codes then contains the implementation details of the original code and the Ecore functionality of the model code. This way, the Java Code Ecorification allows the integration of Ecore functionality.
+
+This process is depicted in the following diagram:
+<p align="center"> 
+<img alt="The Ecorification Process" src="https://www.lucidchart.com/publicSegments/view/19c5bae0-9aed-4e40-b805-dba516a92472/image.png" width="700">
+</p>
 
 ## How to install:
 1. Clone or download the project
