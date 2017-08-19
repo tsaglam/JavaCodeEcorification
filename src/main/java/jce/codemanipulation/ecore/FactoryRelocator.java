@@ -1,7 +1,7 @@
 package jce.codemanipulation.ecore;
 
-import static jce.properties.TextProperty.SOURCE_FOLDER;
 import static jce.properties.TextProperty.FACTORY_PACKAGE;
+import static jce.properties.TextProperty.SOURCE_FOLDER;
 
 import java.util.List;
 
@@ -36,8 +36,8 @@ import jce.util.PathHelper;
  */
 @SuppressWarnings("restriction")  // TODO (LOW) This class uses LTK classes & methods that are not marked as API
 public class FactoryRelocator extends AbstractCodeManipulator {
-    private PathHelper packageUtil;
     private final GeneratedEcoreMetamodel metamodel;
+    private PathHelper packageUtil;
 
     /**
      * Simple constructor, sets the properties.
@@ -47,6 +47,30 @@ public class FactoryRelocator extends AbstractCodeManipulator {
         super(properties);
         this.metamodel = metamodel;
         packageUtil = new PathHelper('.');
+    }
+
+    private boolean isEcoreFactory(ICompilationUnit unit) throws JavaModelException {
+        String fullName = getPackageMemberName(unit); // TODO
+        String typeName = packageUtil.cutFirstSegment(fullName);
+        String packageName = packageUtil.getLastSegment(packageUtil.cutLastSegments(fullName, 2));
+        if (typeName.endsWith(PathHelper.capitalize(packageName) + "FactoryImpl")) { // if has factory name
+            return MetamodelSearcher.findEClass(typeName, metamodel.getRoot()) == null; // search metamodel counterpart
+        }
+        return false; // Does not have Ecore implementation name and package
+    }
+
+    private void relocate(ICompilationUnit unit, IPackageFragment newPackage) throws CoreException {
+        CompositeChange composite = new DynamicValidationStateChange(RefactoringCoreMessages.ReorgPolicy_move);
+        MoveCuUpdateCreator creator = new MoveCuUpdateCreator(new ICompilationUnit[] { unit }, newPackage);
+        TextChangeManager changeManager = creator.createChangeManager(monitor, new RefactoringStatus());
+        composite.merge(new CompositeChange(RefactoringCoreMessages.MoveRefactoring_reorganize_elements, changeManager.getAllChanges()));
+        Change change = new MoveCompilationUnitChange(unit, newPackage);
+        if (change instanceof CompositeChange) {
+            composite.merge(((CompositeChange) change));
+        } else {
+            composite.add(change);
+        }
+        composite.perform(monitor);
     }
 
     @Override
@@ -68,29 +92,5 @@ public class FactoryRelocator extends AbstractCodeManipulator {
                 exception.printStackTrace();
             }
         }
-    }
-
-    private void relocate(ICompilationUnit unit, IPackageFragment newPackage) throws CoreException {
-        CompositeChange composite = new DynamicValidationStateChange(RefactoringCoreMessages.ReorgPolicy_move);
-        MoveCuUpdateCreator creator = new MoveCuUpdateCreator(new ICompilationUnit[] { unit }, newPackage);
-        TextChangeManager changeManager = creator.createChangeManager(monitor, new RefactoringStatus());
-        composite.merge(new CompositeChange(RefactoringCoreMessages.MoveRefactoring_reorganize_elements, changeManager.getAllChanges()));
-        Change change = new MoveCompilationUnitChange(unit, newPackage);
-        if (change instanceof CompositeChange) {
-            composite.merge(((CompositeChange) change));
-        } else {
-            composite.add(change);
-        }
-        composite.perform(monitor);
-    }
-
-    private boolean isEcoreFactory(ICompilationUnit unit) throws JavaModelException {
-        String fullName = getPackageMemberName(unit); // TODO
-        String typeName = packageUtil.cutFirstSegment(fullName);
-        String packageName = packageUtil.getLastSegment(packageUtil.cutLastSegments(fullName, 2));
-        if (typeName.endsWith(PathHelper.capitalize(packageName) + "FactoryImpl")) { // if has factory name
-            return MetamodelSearcher.findEClass(typeName, metamodel.getRoot()) == null; // search metamodel counterpart
-        }
-        return false; // Does not have Ecore implementation name and package
     }
 }
