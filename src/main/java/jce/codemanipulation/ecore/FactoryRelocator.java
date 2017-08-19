@@ -1,11 +1,17 @@
 package jce.codemanipulation.ecore;
 
+import static jce.properties.TextProperty.SOURCE_FOLDER;
+import static jce.properties.TextProperty.FACTORY_PACKAGE;
+
 import java.util.List;
 
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
@@ -52,8 +58,11 @@ public class FactoryRelocator extends AbstractCodeManipulator {
     protected void manipulate(ICompilationUnit unit) throws JavaModelException {
         if (isEcoreFactory(unit)) {
             System.err.println(unit.getElementName() + " gets moved!"); // TODO
+            IJavaProject javaProject = unit.getJavaProject();
+            IFolder folder = javaProject.getProject().getFolder(properties.get(SOURCE_FOLDER));
+            IPackageFragmentRoot root = javaProject.getPackageFragmentRoot(folder);
+            IPackageFragment newPackage = root.createPackageFragment(properties.get(FACTORY_PACKAGE), false, monitor);
             try {
-                IPackageFragment newPackage = null;  // TODO
                 relocate(unit, newPackage);
             } catch (CoreException exception) {
                 exception.printStackTrace();
