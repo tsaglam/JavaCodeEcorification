@@ -23,6 +23,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
 
+import jce.codemanipulation.ecore.TypeNameResolver;
 import jce.properties.EcorificationProperties;
 import jce.util.ResourceRefresher;
 import jce.util.logging.MonitorFactory;
@@ -110,6 +111,16 @@ public abstract class AbstractCodeManipulator {
      */
     protected abstract List<IPackageFragment> filterPackages(IProject project, EcorificationProperties properties);
 
+    /**
+     * Returns the name of the package member type of a compilation unit. E.g. "model.Main" from "Main.java"
+     */
+    protected String getPackageMemberName(ICompilationUnit unit) throws JavaModelException {
+        CompilationUnit parsedUnit = parse(unit);
+        TypeNameResolver visitor = new TypeNameResolver();
+        parsedUnit.accept(visitor);
+        return visitor.getTypeName();
+    }
+    
     /**
      * Executes the origin code manipulation on a compilation unit.
      * @param unit is the {@link ICompilationUnit}.

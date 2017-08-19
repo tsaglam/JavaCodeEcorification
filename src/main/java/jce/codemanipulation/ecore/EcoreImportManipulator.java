@@ -13,7 +13,6 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
@@ -39,7 +38,7 @@ import jce.util.logging.MonitorFactory;
 public class EcoreImportManipulator extends AbstractCodeManipulator {
     private final GeneratedEcoreMetamodel metamodel;
     private final IProgressMonitor monitor;
-    private final PathHelper path;
+    private final PathHelper packageUtil;
     private IJavaProject project;
 
     /**
@@ -51,7 +50,7 @@ public class EcoreImportManipulator extends AbstractCodeManipulator {
         super(properties);
         this.metamodel = metamodel;
         monitor = MonitorFactory.createProgressMonitor(logger, properties);
-        path = new PathHelper('.'); // package helper
+        packageUtil = new PathHelper('.'); // package helper
     }
 
     @Override
@@ -84,7 +83,7 @@ public class EcoreImportManipulator extends AbstractCodeManipulator {
     private void edit(IImportDeclaration importDeclaration, ImportRewrite implementationRewrite, ImportRewrite interfaceRewrite) {
         String name = importDeclaration.getElementName();
         if (implementationRewrite.removeImport(name)) { // remove old import
-            name = path.cutFirstSegment(name); // generate new import string
+            name = packageUtil.cutFirstSegment(name); // generate new import string
             implementationRewrite.addImport(name); // add to implementation class
             interfaceRewrite.removeImport(name);
             interfaceRewrite.addImport(name); // add to Ecore interface
@@ -107,18 +106,8 @@ public class EcoreImportManipulator extends AbstractCodeManipulator {
      * given "model.impl.MainImpl".
      */
     private String getInterfaceName(String typeName) {
-        String interfaceName = path.append(path.cutLastSegments(typeName, 2), path.getLastSegment(typeName));
+        String interfaceName = packageUtil.append(packageUtil.cutLastSegments(typeName, 2), packageUtil.getLastSegment(typeName));
         return interfaceName.substring(0, interfaceName.length() - 4); // remove "Impl" suffix
-    }
-
-    /**
-     * Returns the name of the package member type of a compilation unit. E.g. "model.Main" from "Main.java"
-     */
-    private String getPackageMemberName(ICompilationUnit unit) throws JavaModelException {
-        CompilationUnit parsedUnit = parse(unit);
-        TypeNameResolver visitor = new TypeNameResolver();
-        parsedUnit.accept(visitor);
-        return visitor.getTypeName();
     }
 
     /**
@@ -128,7 +117,7 @@ public class EcoreImportManipulator extends AbstractCodeManipulator {
      * counterpart in the Ecore metamodel
      */
     private boolean isEcoreImplementation(ICompilationUnit unit) throws JavaModelException {
-        String typeName = path.cutFirstSegment(getPackageMemberName(unit));
+        String typeName = packageUtil.cutFirstSegment(getPackageMemberName(unit));
         if (isEcoreImplementationName(typeName)) { // if has Ecore implementation name and package
             typeName = getInterfaceName(typeName); // get name of Ecore interface and EClass
             return MetamodelSearcher.findEClass(typeName, metamodel.getRoot()) != null; // search metamodel counterpart
@@ -141,7 +130,7 @@ public class EcoreImportManipulator extends AbstractCodeManipulator {
      * package. That means the last package of the type name is called impl and the type name end with the suffix Impl.
      */
     private boolean isEcoreImplementationName(String typeName) {
-        return path.getLastSegment(path.cutLastSegment(typeName)).equals("impl") && typeName.endsWith("Impl");
+        return packageUtil.getLastSegment(packageUtil.cutLastSegment(typeName)).equals("impl") && typeName.endsWith("Impl");
     }
 
     /**
@@ -154,7 +143,7 @@ public class EcoreImportManipulator extends AbstractCodeManipulator {
         if (importDeclaration.isOnDemand()) {
             return false; // EMF imports the Ecore classes directly, not with .*
         }
-        String typeName = path.cutFirstSegment(importDeclaration.getElementName());
+        String typeName = packageUtil.cutFirstSegment(importDeclaration.getElementName());
         return MetamodelSearcher.findEClass(typeName, metamodel.getRoot()) != null;
     }
 
