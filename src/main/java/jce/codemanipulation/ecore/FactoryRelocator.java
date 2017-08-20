@@ -40,7 +40,8 @@ public class FactoryRelocator extends AbstractCodeManipulator {
     private PathHelper packageUtil;
 
     /**
-     * Simple constructor, sets the properties.
+     * Simple constructor, sets the metamodel and the properties.
+     * @param metamodel is the extracted Ecore metamodel.
      * @param properties are the {@link EcorificationProperties}.
      */
     public FactoryRelocator(GeneratedEcoreMetamodel metamodel, EcorificationProperties properties) {
@@ -49,22 +50,28 @@ public class FactoryRelocator extends AbstractCodeManipulator {
         packageUtil = new PathHelper('.');
     }
 
+    /**
+     * Checks whether a {@link ICompilationUnit} is an Ecore factory implementation class.
+     */
     private boolean isEcoreFactory(ICompilationUnit unit) throws JavaModelException {
-        String fullName = getPackageMemberName(unit); // TODO
-        String typeName = packageUtil.cutFirstSegment(fullName);
+        String fullName = getPackageMemberName(unit); // get name of the type
         String packageName = packageUtil.getLastSegment(packageUtil.cutLastSegments(fullName, 2));
-        if (typeName.endsWith(PathHelper.capitalize(packageName) + "FactoryImpl")) { // if has factory name
-            return MetamodelSearcher.findEClass(typeName, metamodel.getRoot()) == null; // search metamodel counterpart
+        if (fullName.endsWith(PathHelper.capitalize(packageName) + "FactoryImpl")) { // if has factory name
+            String modelName = packageUtil.cutFirstSegment(fullName); // without ecore package
+            return MetamodelSearcher.findEClass(modelName, metamodel.getRoot()) == null; // search metamodel counterpart
         }
         return false; // Does not have Ecore implementation name and package
     }
 
+    /**
+     * Moves an {@link ICompilationUnit} into a new {@link IPackageFragment} while updating all references.
+     */
     private void relocate(ICompilationUnit unit, IPackageFragment newPackage) throws CoreException {
         CompositeChange composite = new DynamicValidationStateChange(RefactoringCoreMessages.ReorgPolicy_move);
         MoveCuUpdateCreator creator = new MoveCuUpdateCreator(new ICompilationUnit[] { unit }, newPackage);
         TextChangeManager changeManager = creator.createChangeManager(monitor, new RefactoringStatus());
         composite.merge(new CompositeChange(RefactoringCoreMessages.MoveRefactoring_reorganize_elements, changeManager.getAllChanges()));
-        Change change = new MoveCompilationUnitChange(unit, newPackage);
+        Change change = new MoveCompilationUnitChange(unit, newPackage); // This is all taken from Eclipse code.
         if (change instanceof CompositeChange) {
             composite.merge(((CompositeChange) change));
         } else {
@@ -81,13 +88,16 @@ public class FactoryRelocator extends AbstractCodeManipulator {
     @Override
     protected void manipulate(ICompilationUnit unit) throws JavaModelException {
         if (isEcoreFactory(unit)) {
-            System.err.println(unit.getElementName() + " gets moved!"); // TODO
             IJavaProject javaProject = unit.getJavaProject();
+            // get the source folder root:
             IFolder folder = javaProject.getProject().getFolder(properties.get(SOURCE_FOLDER));
             IPackageFragmentRoot root = javaProject.getPackageFragmentRoot(folder);
-            IPackageFragment newPackage = root.createPackageFragment(properties.get(FACTORY_PACKAGE), false, monitor);
-            try {
-                relocate(unit, newPackage);
+            // build the new package:
+            String currentPackage = unit.getParent().getElementName();
+            String newPackageName = packageUtil.append(currentPackage, properties.get(FACTORY_PACKAGE));
+            IPackageFragment factoryPackage = root.createPackageFragment(newPackageName, false, monitor);
+            try { // move factory to new package:
+                relocate(unit, factoryPackage);
             } catch (CoreException exception) {
                 exception.printStackTrace();
             }
