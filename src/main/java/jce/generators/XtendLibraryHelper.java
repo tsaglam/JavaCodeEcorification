@@ -96,15 +96,16 @@ public final class XtendLibraryHelper {
      */
     private static void addClasspathEntry(IProject project, IProgressMonitor monitor) {
         IJavaProject javaProject = JavaCore.create(project);
+        String xtendDirectory = SLASH + javaProject.getElementName() + SLASH + XTEND;
+        IClasspathEntry newEntry = JavaCore.newSourceEntry(new org.eclipse.core.runtime.Path(xtendDirectory));
         try {
             IClasspathEntry[] entries = javaProject.getRawClasspath();
-            String xtendDirectory = SLASH + javaProject.getElementName() + SLASH + XTEND;
-            if (Arrays.asList(entries).contains(xtendDirectory)) {
+            if (Arrays.asList(entries).contains(newEntry)) {
                 logger.warn(".classpath already contains " + xtendDirectory);
             } else {
                 IClasspathEntry[] newEntries = new IClasspathEntry[entries.length + 1];
                 System.arraycopy(entries, 0, newEntries, 0, entries.length);
-                newEntries[entries.length] = JavaCore.newSourceEntry(new org.eclipse.core.runtime.Path(xtendDirectory));
+                newEntries[entries.length] = newEntry;
                 javaProject.setRawClasspath(newEntries, monitor);
             }
         } catch (JavaModelException exception) {
