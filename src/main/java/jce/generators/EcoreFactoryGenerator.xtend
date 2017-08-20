@@ -28,11 +28,13 @@ final class EcoreFactoryGenerator {
 	final EcorificationProperties properties
 	final EFactoryGenerator factoryGenerator
 	final EFactoryImplementationGenerator factoryImplementationGenerator
+	final boolean buildInterfaces;
 
 	/**
 	 * Basic constructor, sets the properties.
 	 */
-	new(EcorificationProperties properties) {
+	new(boolean buildInterfaces, EcorificationProperties properties) {
+		this.buildInterfaces = buildInterfaces;
 		this.properties = properties
 		factoryGenerator = new EFactoryGenerator(properties)
 		factoryImplementationGenerator = new EFactoryImplementationGenerator(properties)
@@ -68,7 +70,9 @@ final class EcoreFactoryGenerator {
 			}
 		}
 		if (!types.empty) {
-			factoryGenerator.create(path, types, project) // create factory interface and implementation
+			if (buildInterfaces) {
+				factoryGenerator.create(path, types, project) // create factory interface and implementation
+			}
 			factoryImplementationGenerator.create(pathUtil.append(path, "impl"), types, project)
 			monitor.subTask("Created factory interface and implementation for EPackage " + ePackage.name)
 		}

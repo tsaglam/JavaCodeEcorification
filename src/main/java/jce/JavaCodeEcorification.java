@@ -89,8 +89,8 @@ public class JavaCodeEcorification {
         new MemberRemover(metamodel, properties).manipulate(project);
         importOrganizer.manipulate(project);
         inheritanceManipulator.manipulate(project);
-        // 5. Build custom factories:
-        new EcoreFactoryGenerator(properties).buildFactories(metamodel, project);
+        // 5. Build custom factories, move the old ones:
+        new EcoreFactoryGenerator(false, properties).buildFactories(metamodel, project);
         // 6. build project and make changes visible in the Eclipse IDE:
         rebuild(project, properties);
         logger.info("Ecorification complete!");
