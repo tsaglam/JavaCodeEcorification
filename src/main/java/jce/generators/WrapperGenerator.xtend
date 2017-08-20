@@ -3,6 +3,7 @@ package jce.generators
 import eme.generator.GeneratedEcoreMetamodel
 import java.io.File
 import jce.properties.EcorificationProperties
+import jce.properties.TextProperty
 import jce.util.PathHelper
 import jce.util.ResourceRefresher
 import org.eclipse.core.resources.IProject
@@ -15,7 +16,6 @@ import static jce.properties.TextProperty.SOURCE_FOLDER
 import static jce.properties.TextProperty.WRAPPER_PACKAGE
 import static jce.properties.TextProperty.WRAPPER_PREFIX
 import static jce.properties.TextProperty.WRAPPER_SUFFIX
-import jce.properties.TextProperty
 
 /** 
  * Creates and manages wrappers for the classes of the original Java project with is ecorified.

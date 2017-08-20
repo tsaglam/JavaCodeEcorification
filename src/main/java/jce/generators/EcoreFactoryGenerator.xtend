@@ -22,7 +22,7 @@ import static jce.properties.TextProperty.SOURCE_FOLDER
  * @author Timur Saglam
  */
 final class EcoreFactoryGenerator {
-	static final Logger logger = LogManager.getLogger(WrapperGenerator.getName)
+	static final Logger logger = LogManager.getLogger(EcoreFactoryGenerator.getName)
 	final IProgressMonitor monitor
 	final PathHelper pathUtil
 	final EcorificationProperties properties
