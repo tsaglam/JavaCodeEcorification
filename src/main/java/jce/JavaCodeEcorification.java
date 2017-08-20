@@ -2,6 +2,7 @@ package jce;
 
 import static jce.properties.TextProperty.ECORE_PACKAGE;
 import static jce.properties.TextProperty.PROJECT_SUFFIX;
+import static jce.properties.TextProperty.ROOT_CONTAINER;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -89,7 +90,9 @@ public class JavaCodeEcorification {
         new MemberRemover(metamodel, properties).manipulate(project);
         importOrganizer.manipulate(project);
         inheritanceManipulator.manipulate(project);
-        // 5. Build custom factories, move the old ones:
+        // 5. Build custom factories:
+        // TODO (HIGH) rename factories instead of moving them:
+        // new FactoryRelocator(metamodel, properties).manipulate(project);
         new EcoreFactoryGenerator(false, properties).buildFactories(metamodel, project);
         // 6. build project and make changes visible in the Eclipse IDE:
         rebuild(project, properties);
@@ -113,11 +116,11 @@ public class JavaCodeEcorification {
      * the class name.
      */
     private void configureExtraction(ExtractionProperties properties) {
-        properties.set(TextProperty.SAVING_STRATEGY, "CopyProject");
         properties.set(TextProperty.PROJECT_SUFFIX, this.properties.get(PROJECT_SUFFIX));
         properties.set(TextProperty.DEFAULT_PACKAGE, this.properties.get(ECORE_PACKAGE));
+        properties.set(TextProperty.ROOT_NAME, this.properties.get(ROOT_CONTAINER));
+        properties.set(TextProperty.SAVING_STRATEGY, "CopyProject");
         properties.set(TextProperty.DATATYPE_PACKAGE, "datatypes");
-        properties.set(TextProperty.ROOT_NAME, "RootContainer");
         properties.set(BinaryProperty.DUMMY_CLASS, false);
         properties.set(BinaryProperty.ROOT_CONTAINER, true);
     }

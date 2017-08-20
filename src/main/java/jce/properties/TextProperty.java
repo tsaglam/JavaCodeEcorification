@@ -13,7 +13,8 @@ public enum TextProperty implements ITextProperty {
     WRAPPER_SUFFIX("WrapperSuffix", ""),
     FACTORY_PACKAGE("FactoryPackageName", "original"),
     PROJECT_SUFFIX("ProjectSuffix", "Ecorified"),
-    SOURCE_FOLDER("SourceFolder", "src");
+    SOURCE_FOLDER("SourceFolder", "src"),
+    ROOT_CONTAINER("RootContainerName", "RootContainer");
 
     private final String defaultValue;
     private final String key;

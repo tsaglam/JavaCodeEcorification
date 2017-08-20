@@ -15,6 +15,7 @@ import static jce.properties.TextProperty.SOURCE_FOLDER
 import static jce.properties.TextProperty.WRAPPER_PACKAGE
 import static jce.properties.TextProperty.WRAPPER_PREFIX
 import static jce.properties.TextProperty.WRAPPER_SUFFIX
+import jce.properties.TextProperty
 
 /** 
  * Creates and manages wrappers for the classes of the original Java project with is ecorified.
@@ -58,7 +59,7 @@ final class WrapperGenerator extends ClassGenerator {
 		}
 		for (eClassifier : ePackage.EClassifiers) { // for every classifier
 			if (eClassifier instanceof EClass) { // if is EClass
-				if (!eClassifier.interface) { // if is not interface
+				if (!eClassifier.interface && !isRootContainer(eClassifier, path)) { // if is not interface or root
 					createXtendWrapper(path, eClassifier.name, getSuperClass(eClassifier)) // create wrapper class
 				}
 			}
@@ -66,6 +67,20 @@ final class WrapperGenerator extends ClassGenerator {
 		for (eSubpackage : ePackage.ESubpackages) { // for every subpackage
 			buildWrappers(eSubpackage, pathUtil.append(path, eSubpackage.name)) // do the same
 		}
+	}
+
+	/**
+	 * Checks whether the EPackage contains an EClass. An empty EPackage has no classifiers and only empty subpackages. 
+	 */
+	def private boolean containsEClass(EPackage ePackage) {
+		var containsEClass = false
+		for (EClassifier eClassifier : ePackage.EClassifiers) { // for every classifier
+			containsEClass = containsEClass || eClassifier instanceof EClass // check if is EClass
+		}
+		for (EPackage eSubpackage : ePackage.ESubpackages) { // for every subpackage
+			containsEClass = containsEClass || containsEClass(eSubpackage) // check if empty
+		}
+		return containsEClass
 	}
 
 	/**
@@ -151,17 +166,10 @@ final class WrapperGenerator extends ClassGenerator {
 	}
 
 	/**
-	 * Checks whether the EPackage contains an EClass. An empty EPackage has no classifiers and only empty subpackages. 
+	 * Checks whether a EClass at a given path is the root container element.
 	 */
-	def private boolean containsEClass(EPackage ePackage) {
-		var containsEClass = false
-		for (EClassifier eClassifier : ePackage.EClassifiers) { // for every classifier
-			containsEClass = containsEClass || eClassifier instanceof EClass // check if is EClass
-		}
-		for (EPackage eSubpackage : ePackage.ESubpackages) { // for every subpackage
-			containsEClass = containsEClass || containsEClass(eSubpackage) // check if empty
-		}
-		return containsEClass
+	def private boolean isRootContainer(EClass eClass, String path) {
+		return "" === path && eClass.name === properties.get(TextProperty.ROOT_CONTAINER);
 	}
 
 }
