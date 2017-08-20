@@ -77,7 +77,7 @@ class EFactoryImplementationGenerator extends ClassGenerator {
 		     * Creates an instance of the factory.
 		     * @generated
 		     */
-		    public «packageName»FactoryImpl2() {
+		    public «packageName»FactoryImpl() {
 		        super();
 		    }
 		
