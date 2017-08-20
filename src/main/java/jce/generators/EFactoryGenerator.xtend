@@ -25,14 +25,13 @@ class EFactoryGenerator extends ClassGenerator {
 		val currentPackage = path.replace(File.separatorChar, '.') // path to package declaration
 		val packageName = packageUtil.getLastSegment(currentPackage).toFirstUpper
 		val content = createFactoryContent(currentPackage, packageName, packageTypes)
-		createClass(path, '''«packageName»Factory2.java''', content, project)
+		createClass(path, '''«packageName»Factory.java''', content, project)
 		monitor.subTask(''' Created «packageName»Factory.java''') // detailed logging
 	}
 
 	/**
 	 * Creates the content of an Ecore factory.
 	 */
-	// TODO (HIGH) Remove 2s after the original factories were copied.
 	def private String createFactoryContent(String currentPackage, String packageName, List<String> packageTypes) '''
 		package «currentPackage»;
 		
@@ -44,7 +43,7 @@ class EFactoryGenerator extends ClassGenerator {
 		 * @see «currentPackage».«packageName»Package
 		 * @generated
 		 */
-		public interface «packageName»Factory2 extends EFactory {
+		public interface «packageName»Factory extends EFactory {
 		    /**
 		     * The singleton instance of the factory.
 		     * @generated

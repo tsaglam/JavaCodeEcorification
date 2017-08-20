@@ -26,14 +26,13 @@ class EFactoryImplementationGenerator extends ClassGenerator {
 		val interfacePackage = packageUtil.cutLastSegment(currentPackage)
 		val packageName = packageUtil.getLastSegment(interfacePackage).toFirstUpper
 		val content = createFactoryContent(currentPackage, packageName, interfacePackage, packageTypes)
-		createClass(path, '''«packageName»FactoryImpl2.java''', content, project)
+		createClass(path, '''«packageName»FactoryImpl.java''', content, project)
 		monitor.subTask(''' Created «packageName»FactoryImpl.java''') // detailed logging
 	}
 
 	/**
 	 * Creates the content of an Ecore factory.
 	 */
-	// TODO (HIGH) Remove 2s after the original factories were copied.
 	def private String createFactoryContent(String currentPackage, String packageName, String interfacePackage,
 		List<String> packageTypes) '''
 		package «currentPackage»;
@@ -54,7 +53,7 @@ class EFactoryImplementationGenerator extends ClassGenerator {
 		 * An implementation of the model <b>Factory</b>.
 		 * @generated
 		 */
-		public class «packageName»FactoryImpl2 extends EFactoryImpl implements «packageName»Factory {
+		public class «packageName»FactoryImpl extends EFactoryImpl implements «packageName»Factory {
 		    /**
 		     * Creates the default factory implementation.
 		     * <!-- begin-user-doc -->
