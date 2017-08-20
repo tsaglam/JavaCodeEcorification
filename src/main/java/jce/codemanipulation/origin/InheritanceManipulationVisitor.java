@@ -4,6 +4,8 @@ import static jce.properties.TextProperty.WRAPPER_PACKAGE;
 import static jce.properties.TextProperty.WRAPPER_PREFIX;
 import static jce.properties.TextProperty.WRAPPER_SUFFIX;
 
+import org.apache.log4j.LogManager;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Name;
@@ -11,6 +13,7 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import jce.properties.EcorificationProperties;
+import jce.util.logging.MonitorFactory;
 
 /**
  * {@link ASTVisitor} class that manipulates the inheritance relations of the origin code.
@@ -19,6 +22,7 @@ import jce.properties.EcorificationProperties;
 public class InheritanceManipulationVisitor extends ASTVisitor {
     private final String currentPackage;
     private final EcorificationProperties properties;
+    private final IProgressMonitor monitor;
 
     /**
      * Basic constructor.
@@ -28,12 +32,14 @@ public class InheritanceManipulationVisitor extends ASTVisitor {
     public InheritanceManipulationVisitor(String currentPackage, EcorificationProperties properties) {
         this.currentPackage = currentPackage;
         this.properties = properties;
+        monitor = MonitorFactory.createProgressMonitor(LogManager.getLogger(getClass().getName()), properties);
     }
 
     @Override
     public boolean visit(TypeDeclaration node) {
         if (!node.isInterface()) { // if is class, manipulate inheritance:
             setSuperClass(node, getPackage() + "." + getName(node));
+            monitor.beginTask("Changed super type of " + node.getName().getIdentifier(), 0);
         }
         return false;
     }

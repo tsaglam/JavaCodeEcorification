@@ -29,6 +29,6 @@ public class MemberRemover extends OriginCodeManipulator {
         if (metamodel == null) {
             throw new IllegalStateException("Please set the generated Ecore metamodel before calling manipulate().");
         }
-        applyVisitorModifications(unit, new MemberRemovalVisitor(metamodel));
+        applyVisitorModifications(unit, new MemberRemovalVisitor(metamodel, properties));
     }
 }

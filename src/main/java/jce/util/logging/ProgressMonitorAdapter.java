@@ -21,7 +21,7 @@ public class ProgressMonitorAdapter implements IProgressMonitor {
 
     @Override
     public void beginTask(String name, int totalWork) {
-        redirectToLogger(name);
+        redirectToLogger(name, true);
     }
 
     @Override
@@ -46,13 +46,13 @@ public class ProgressMonitorAdapter implements IProgressMonitor {
 
     @Override
     public void setTaskName(String name) {
-        redirectToLogger(name);
+        redirectToLogger(name, false);
 
     }
 
     @Override
     public void subTask(String name) {
-        redirectToLogger(name);
+        redirectToLogger(name, false);
 
     }
 
@@ -65,9 +65,13 @@ public class ProgressMonitorAdapter implements IProgressMonitor {
      * Redirects a message to the logger if it is not null or only one character.
      * @param message is the message that gets redirected.
      */
-    private void redirectToLogger(String message) {
+    private void redirectToLogger(String message, boolean important) {
         if (message != null && message.length() > 1) {
-            logger.info(message);
+            if (important) {
+                logger.info(message);
+            } else {
+                logger.debug(message);
+            }
         }
     }
 }

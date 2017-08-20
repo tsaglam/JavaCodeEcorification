@@ -3,6 +3,8 @@ package jce.codemanipulation.origin;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.log4j.LogManager;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
@@ -12,8 +14,10 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import eme.generator.GeneratedEcoreMetamodel;
+import jce.properties.EcorificationProperties;
 import jce.util.MetamodelSearcher;
 import jce.util.PathHelper;
+import jce.util.logging.MonitorFactory;
 
 /**
  * {@link ASTVisitor} that removes all private non-static fields and their access methods from a compilation unit that
@@ -23,13 +27,15 @@ import jce.util.PathHelper;
 public class MemberRemovalVisitor extends ASTVisitor {
     private final GeneratedEcoreMetamodel metamodel;
     private final List<String> removedFields;
+    private final IProgressMonitor monitor;
 
     /**
      * Basic constructor.
      * @param metamodel is the Ecore metamodel which was extracted from the origin code.
      */
-    public MemberRemovalVisitor(GeneratedEcoreMetamodel metamodel) {
+    public MemberRemovalVisitor(GeneratedEcoreMetamodel metamodel, EcorificationProperties properties) {
         this.metamodel = metamodel;
+        monitor = MonitorFactory.createProgressMonitor(LogManager.getLogger(getClass().getName()), properties);
         removedFields = new LinkedList<>();
     }
 
@@ -38,6 +44,7 @@ public class MemberRemovalVisitor extends ASTVisitor {
         if (!node.isInterface()) { // if is class, manipulate inheritance:
             removeFields(node);
             removeAccessMethods(node);
+            monitor.beginTask("Removed fields with their access methods from " + node.getName().getIdentifier() + ": " + removedFields, 0);
         }
         return super.visit(node);
     }

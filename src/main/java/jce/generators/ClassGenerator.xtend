@@ -40,7 +40,6 @@ class ClassGenerator {
 		if (!file.exists) {
 			val source = new ByteArrayInputStream(content.bytes)
 			file.create(source, IResource.NONE, monitor)
-			file.touch(monitor)
 		}
 	}
 

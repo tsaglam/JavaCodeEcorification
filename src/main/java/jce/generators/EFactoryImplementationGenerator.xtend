@@ -27,7 +27,7 @@ class EFactoryImplementationGenerator extends ClassGenerator {
 		val packageName = packageUtil.getLastSegment(interfacePackage).toFirstUpper
 		val content = createFactoryContent(currentPackage, packageName, interfacePackage, packageTypes)
 		createClass(path, '''«packageName»FactoryImpl.java''', content, project)
-		monitor.subTask(''' Created «packageName»FactoryImpl.java''') // detailed logging
+		monitor.beginTask(''' Created «packageName»FactoryImpl.java''', 0) // detailed logging
 	}
 
 	/**

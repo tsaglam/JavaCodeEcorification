@@ -127,7 +127,6 @@ final class WrapperGenerator extends ClassGenerator {
 		val content = createWrapperContent(name, className, factoryName, currentPackage, superClass) // content of the class
 		val wrapperPath = pathUtil.append(properties.get(WRAPPER_PACKAGE), path)
 		createClass(wrapperPath, '''«className».xtend''', content, project) // add wrapper folder.
-		monitor.subTask(''' Created «currentPackage».«className».xtend''') // detailed logging
 	}
 
 	/**

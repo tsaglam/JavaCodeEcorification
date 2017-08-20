@@ -11,6 +11,10 @@ import jce.JavaCodeEcorification;
  */
 public class EcorificationHandler extends MainHandler {
 
+    public EcorificationHandler() {
+        super("JavaCodeEcorification");
+    }
+
     /**
      * @see eme.handlers.MainHandler#startExtraction(org.eclipse.core.resources.IProject)
      */

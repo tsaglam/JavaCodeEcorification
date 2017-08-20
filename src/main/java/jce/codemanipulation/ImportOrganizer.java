@@ -45,28 +45,6 @@ public class ImportOrganizer extends AbstractCodeManipulator {
         monitor = MonitorFactory.createProgressMonitor(logger, properties);
     }
 
-    @Override
-    protected List<IPackageFragment> filterPackages(IProject project, EcorificationProperties properties) {
-        return PackageFilter.startsNotWith(project, properties.get(TextProperty.WRAPPER_PACKAGE));
-    }
-
-    @Override
-    protected void manipulate(ICompilationUnit unit) throws JavaModelException {
-        unit.becomeWorkingCopy(monitor); // changes unit handle to working copy
-        CompilationUnit reconciledUnit = unit.reconcile(AST.JLS8, false, null, monitor); // Don't ask me.
-        try {
-            OrganizeImportsOperation operation = new OrganizeImportsOperation(unit, reconciledUnit, true, true, true, null);
-            TextEdit edit = operation.createTextEdit(monitor);
-            applyEdit(unit, edit);
-            unit.commitWorkingCopy(true, monitor);
-            unit.save(monitor, true);
-        } catch (OperationCanceledException exception) {
-            logger.error(exception);
-        } catch (CoreException exception) {
-            logger.error(exception);
-        }
-    }
-
     /**
      * Applies {@link TextEdit} to {@link ICompilationUnit} and saves the changes. Taken from JavaModelUtil, because
      * {@link JavaModelUtil#applyEdit()} applyEdit is gone in Oxygen.
@@ -87,6 +65,28 @@ public class ImportOrganizer extends AbstractCodeManipulator {
             } finally {
                 monitor.done();
             }
+        }
+    }
+
+    @Override
+    protected List<IPackageFragment> filterPackages(IProject project, EcorificationProperties properties) {
+        return PackageFilter.startsNotWith(project, properties.get(TextProperty.WRAPPER_PACKAGE));
+    }
+
+    @Override
+    protected void manipulate(ICompilationUnit unit) throws JavaModelException {
+        unit.becomeWorkingCopy(monitor); // changes unit handle to working copy
+        CompilationUnit reconciledUnit = unit.reconcile(AST.JLS8, false, null, monitor); // Don't ask me.
+        try {
+            OrganizeImportsOperation operation = new OrganizeImportsOperation(unit, reconciledUnit, true, true, true, null);
+            TextEdit edit = operation.createTextEdit(monitor);
+            applyEdit(unit, edit);
+            unit.commitWorkingCopy(true, monitor);
+            unit.save(monitor, true);
+        } catch (OperationCanceledException exception) {
+            logger.error(exception);
+        } catch (CoreException exception) {
+            logger.error(exception);
         }
     }
 }

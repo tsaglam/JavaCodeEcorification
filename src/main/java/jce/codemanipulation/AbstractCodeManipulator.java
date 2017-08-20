@@ -57,7 +57,7 @@ public abstract class AbstractCodeManipulator {
      * @param project is the given {@link IProject}.
      */
     public void manipulate(IProject project) {
-        logger.info("Starting the code manipulation " + getClass().getSimpleName());
+        logger.info("Starting the code manipulation " + getClass().getSimpleName() + "...");
         ResourceRefresher.refresh(project);
         List<IPackageFragment> packages = filterPackages(project, properties);
         try {
