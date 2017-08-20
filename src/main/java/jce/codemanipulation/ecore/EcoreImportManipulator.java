@@ -1,11 +1,8 @@
 package jce.codemanipulation.ecore;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaProject;
@@ -14,18 +11,14 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
-import org.eclipse.text.edits.MalformedTreeException;
-import org.eclipse.text.edits.TextEdit;
 
 import eme.generator.GeneratedEcoreMetamodel;
 import jce.codemanipulation.AbstractCodeManipulator;
-import jce.properties.BinaryProperty;
 import jce.properties.EcorificationProperties;
 import jce.properties.TextProperty;
 import jce.util.MetamodelSearcher;
 import jce.util.PackageFilter;
 import jce.util.PathHelper;
-import jce.util.logging.MonitorFactory;
 
 /**
  * Base class for the adaption of problematic import declarations in the Ecore code. A problematic import declaration is
@@ -37,7 +30,6 @@ import jce.util.logging.MonitorFactory;
  */
 public class EcoreImportManipulator extends AbstractCodeManipulator {
     private final GeneratedEcoreMetamodel metamodel;
-    private final IProgressMonitor monitor;
     private final PathHelper packageUtil;
     private IJavaProject project;
 
@@ -49,7 +41,6 @@ public class EcoreImportManipulator extends AbstractCodeManipulator {
     public EcoreImportManipulator(GeneratedEcoreMetamodel metamodel, EcorificationProperties properties) {
         super(properties);
         this.metamodel = metamodel;
-        monitor = MonitorFactory.createProgressMonitor(logger, properties);
         packageUtil = new PathHelper('.'); // package helper
     }
 
@@ -57,23 +48,6 @@ public class EcoreImportManipulator extends AbstractCodeManipulator {
     public void manipulate(IProject project) {
         this.project = JavaCore.create(project); // makes the project instance available in this class.
         super.manipulate(project);
-    }
-
-    /**
-     * Applies all recorded changes of an {@link ImportRewrite} to an {@link ICompilationUnit}.
-     */
-    private void applyChanges(ICompilationUnit unit, ImportRewrite importRewrite) {
-        if (importRewrite.hasRecordedChanges()) { // apply changes if existing
-            logChange(unit, importRewrite); // log the changed imports
-            try {
-                TextEdit edits = importRewrite.rewriteImports(monitor); // create text edit
-                applyEdits(edits, unit); // apply text edit to compilation unit.
-            } catch (MalformedTreeException exception) {
-                logger.fatal(exception);
-            } catch (CoreException exception) {
-                logger.fatal(exception);
-            }
-        }
     }
 
     /**
@@ -93,7 +67,7 @@ public class EcoreImportManipulator extends AbstractCodeManipulator {
     }
 
     /**
-     * Finds the Ecore interface of an {@link ICompilationUnit} which is an Ecor eimplementation class.
+     * Finds the Ecore interface of an {@link ICompilationUnit} which is an Ecore implementation class.
      */
     private ICompilationUnit findEcoreInterface(ICompilationUnit unit) throws JavaModelException {
         String interfaceName = getInterfaceName(getPackageMemberName(unit));
@@ -148,16 +122,6 @@ public class EcoreImportManipulator extends AbstractCodeManipulator {
     }
 
     /**
-     * Logs the changed import if full logging is enabled in the {@link EcorificationProperties}.
-     */
-    private void logChange(ICompilationUnit unit, ImportRewrite rewrite) {
-        if (properties.get(BinaryProperty.FULL_LOGGING)) {
-            logger.info(unit.getElementName() + ": removed " + Arrays.toString(rewrite.getRemovedImports()) + ", added "
-                    + Arrays.toString(rewrite.getAddedImports()));
-        }
-    }
-
-    /**
      * Retains the super interface declarations of an compilation unit. .
      */
     private void retainInterface(ICompilationUnit unit) throws JavaModelException {
@@ -189,8 +153,8 @@ public class EcoreImportManipulator extends AbstractCodeManipulator {
                     edit(importDeclaration, implementationRewrite, interfaceRewrite);
                 }
             }
-            applyChanges(unit, implementationRewrite);
-            applyChanges(ecoreInterface, interfaceRewrite);
+            applyImportRewrite(unit, implementationRewrite);
+            applyImportRewrite(ecoreInterface, interfaceRewrite);
         }
     }
 }

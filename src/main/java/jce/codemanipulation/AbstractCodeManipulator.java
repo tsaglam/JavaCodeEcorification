@@ -1,11 +1,13 @@
 package jce.codemanipulation;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -17,6 +19,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
@@ -24,6 +27,7 @@ import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
 
 import jce.codemanipulation.ecore.TypeNameResolver;
+import jce.properties.BinaryProperty;
 import jce.properties.EcorificationProperties;
 import jce.util.ResourceRefresher;
 import jce.util.logging.MonitorFactory;
@@ -70,12 +74,41 @@ public abstract class AbstractCodeManipulator {
     }
 
     /**
+     * Logs the changed import if full logging is enabled in the {@link EcorificationProperties}.
+     */
+    private void logChange(ICompilationUnit unit, ImportRewrite rewrite) {
+        if (properties.get(BinaryProperty.FULL_LOGGING)) {
+            logger.info(unit.getElementName() + ": removed " + Arrays.toString(rewrite.getRemovedImports()) + ", added "
+                    + Arrays.toString(rewrite.getAddedImports()));
+        }
+    }
+
+    /**
+     * Applies all recorded changes of an {@link ImportRewrite} to an {@link ICompilationUnit}.
+     * @param unit is the {@link ICompilationUnit}.
+     * @param importRewrite is the {@link ImportRewrite}.
+     */
+    protected void applyImportRewrite(ICompilationUnit unit, ImportRewrite importRewrite) {
+        if (importRewrite.hasRecordedChanges()) { // apply changes if existing
+            logChange(unit, importRewrite); // log the changed imports
+            try {
+                TextEdit edits = importRewrite.rewriteImports(monitor); // create text edit
+                applyTextEdit(edits, unit); // apply text edit to compilation unit.
+            } catch (MalformedTreeException exception) {
+                logger.fatal(exception);
+            } catch (CoreException exception) {
+                logger.fatal(exception);
+            }
+        }
+    }
+
+    /**
      * Applies an {@link TextEdit} instance to an {@link ICompilationUnit}.
      * @param edits is the {@link TextEdit} instance.
      * @param unit is the {@link ICompilationUnit}.
      * @throws JavaModelException if there is a problem with the JDT API.
      */
-    protected void applyEdits(TextEdit edits, ICompilationUnit unit) throws JavaModelException {
+    protected void applyTextEdit(TextEdit edits, ICompilationUnit unit) throws JavaModelException {
         IDocument document = new Document(unit.getSource());
         try {
             edits.apply(document);
@@ -100,7 +133,7 @@ public abstract class AbstractCodeManipulator {
         parsedUnit.recordModifications();
         parsedUnit.accept(visitor);
         TextEdit edits = parsedUnit.rewrite(new Document(unit.getSource()), null);
-        applyEdits(edits, unit);
+        applyTextEdit(edits, unit);
     }
 
     /**
@@ -115,12 +148,12 @@ public abstract class AbstractCodeManipulator {
      * Returns the name of the package member type of a compilation unit. E.g. "model.Main" from "Main.java"
      */
     protected String getPackageMemberName(ICompilationUnit unit) throws JavaModelException {
-        CompilationUnit parsedUnit = parse(unit);
+        CompilationUnit parsedUnit = parse(unit); // TODO (MEDIUM) replace with getParent().getName()
         TypeNameResolver visitor = new TypeNameResolver();
         parsedUnit.accept(visitor);
         return visitor.getTypeName();
     }
-    
+
     /**
      * Executes the origin code manipulation on a compilation unit.
      * @param unit is the {@link ICompilationUnit}.
