@@ -51,6 +51,21 @@ public class FactoryRelocator extends AbstractCodeManipulator {
     }
 
     /**
+     * Creates a new factory package in the original package of the {@link ICompilationUnit}. Returns the
+     * {@link IPackageFragment}.
+     */
+    private IPackageFragment createFactoryPackage(ICompilationUnit unit) throws JavaModelException {
+        IJavaProject javaProject = unit.getJavaProject();
+        // get the source folder root:
+        IFolder folder = javaProject.getProject().getFolder(properties.get(SOURCE_FOLDER));
+        IPackageFragmentRoot root = javaProject.getPackageFragmentRoot(folder);
+        // build the new package:
+        String currentPackage = unit.getParent().getElementName();
+        String newPackageName = packageUtil.append(currentPackage, properties.get(FACTORY_PACKAGE));
+        return root.createPackageFragment(newPackageName, false, monitor);
+    }
+
+    /**
      * Checks whether a {@link ICompilationUnit} is an Ecore factory implementation class.
      */
     private boolean isEcoreFactory(ICompilationUnit unit) throws JavaModelException {
@@ -88,14 +103,7 @@ public class FactoryRelocator extends AbstractCodeManipulator {
     @Override
     protected void manipulate(ICompilationUnit unit) throws JavaModelException {
         if (isEcoreFactory(unit)) {
-            IJavaProject javaProject = unit.getJavaProject();
-            // get the source folder root:
-            IFolder folder = javaProject.getProject().getFolder(properties.get(SOURCE_FOLDER));
-            IPackageFragmentRoot root = javaProject.getPackageFragmentRoot(folder);
-            // build the new package:
-            String currentPackage = unit.getParent().getElementName();
-            String newPackageName = packageUtil.append(currentPackage, properties.get(FACTORY_PACKAGE));
-            IPackageFragment factoryPackage = root.createPackageFragment(newPackageName, false, monitor);
+            IPackageFragment factoryPackage = createFactoryPackage(unit);
             try { // move factory to new package:
                 relocate(unit, factoryPackage);
             } catch (CoreException exception) {
