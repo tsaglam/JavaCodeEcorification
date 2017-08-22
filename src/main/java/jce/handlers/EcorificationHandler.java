@@ -11,6 +11,9 @@ import jce.JavaCodeEcorification;
  */
 public class EcorificationHandler extends MainHandler {
 
+    /**
+     * Basic constructor, sets the message box title.
+     */
     public EcorificationHandler() {
         super("JavaCodeEcorification");
     }

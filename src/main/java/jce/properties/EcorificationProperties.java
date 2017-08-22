@@ -7,7 +7,7 @@ import eme.properties.AbstractProperties;
  * @author Timur Saglam
  */
 public class EcorificationProperties extends AbstractProperties<TextProperty, BinaryProperty> {
-    
+
     /**
      * Basic constructor.
      */

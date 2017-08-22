@@ -146,6 +146,9 @@ public abstract class AbstractCodeManipulator {
 
     /**
      * Returns the name of the package member type of a compilation unit. E.g. "model.Main" from "Main.java"
+     * @param unit is the {@link ICompilationUnit}.
+     * @return the name as a String.
+     * @throws JavaModelException if there are problems with the Java model.
      */
     protected String getPackageMemberName(ICompilationUnit unit) throws JavaModelException {
         CompilationUnit parsedUnit = parse(unit); // TODO (MEDIUM) replace with getParent().getName()

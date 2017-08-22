@@ -27,6 +27,7 @@ public class InterfaceRetentionVisitor extends ASTVisitor {
     /**
      * Basic constructor.
      * @param imports are the import declaration from which the full interface names are resolved.
+     * @param currentPackage is the current package of the visited type.
      */
     public InterfaceRetentionVisitor(IImportDeclaration[] imports, String currentPackage) {
         super();

@@ -32,6 +32,7 @@ public class MemberRemovalVisitor extends ASTVisitor {
     /**
      * Basic constructor.
      * @param metamodel is the Ecore metamodel which was extracted from the origin code.
+     * @param properties are the {@link EcorificationProperties}.
      */
     public MemberRemovalVisitor(GeneratedEcoreMetamodel metamodel, EcorificationProperties properties) {
         this.metamodel = metamodel;
