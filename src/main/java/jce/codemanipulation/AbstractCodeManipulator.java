@@ -26,9 +26,9 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
 
-import jce.codemanipulation.ecore.TypeNameResolver;
 import jce.properties.BinaryProperty;
 import jce.properties.EcorificationProperties;
+import jce.util.PathHelper;
 import jce.util.ResourceRefresher;
 import jce.util.logging.MonitorFactory;
 
@@ -41,6 +41,7 @@ public abstract class AbstractCodeManipulator {
     protected Logger logger;
     protected final IProgressMonitor monitor;
     protected final EcorificationProperties properties;
+    protected PathHelper packageHelper;
 
     /**
      * Simple constructor that sets the properties.
@@ -50,6 +51,7 @@ public abstract class AbstractCodeManipulator {
         this.properties = properties;
         logger = LogManager.getLogger(this.getClass().getName());
         monitor = MonitorFactory.createProgressMonitor(logger, properties);
+        packageHelper = new PathHelper('.');
     }
 
     /**
@@ -151,10 +153,9 @@ public abstract class AbstractCodeManipulator {
      * @throws JavaModelException if there are problems with the Java model.
      */
     protected String getPackageMemberName(ICompilationUnit unit) throws JavaModelException {
-        CompilationUnit parsedUnit = parse(unit); // TODO (MEDIUM) replace with getParent().getName()
-        TypeNameResolver visitor = new TypeNameResolver();
-        parsedUnit.accept(visitor);
-        return visitor.getTypeName();
+        String packageName = unit.getParent().getElementName();
+        String memberName = packageHelper.cutLastSegment(unit.getElementName()); // cut the filename extension
+        return packageHelper.append(packageName, memberName);
     }
 
     /**
