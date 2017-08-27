@@ -1,5 +1,7 @@
 package jce.codemanipulation.ecore;
 
+import static jce.properties.TextProperty.FACTORY_SUFFIX;
+
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
@@ -40,7 +42,7 @@ public class FactoryRenamer extends AbstractCodeManipulator {
     /**
      * Checks whether a {@link ICompilationUnit} is an Ecore factory implementation class.
      */
-    private boolean isEcoreFactory(ICompilationUnit unit) throws JavaModelException {
+    private boolean isEcoreFactory(ICompilationUnit unit) throws JavaModelException { // TODO (HIGH) allow interfaces
         String fullName = getPackageMemberName(unit); // get name of the type
         String packageName = packageHelper.getLastSegment(packageHelper.cutLastSegments(fullName, 2));
         if (fullName.endsWith(PathHelper.capitalize(packageName) + "FactoryImpl")) { // if has factory name
@@ -59,15 +61,16 @@ public class FactoryRenamer extends AbstractCodeManipulator {
     protected void manipulate(ICompilationUnit unit) throws JavaModelException {
         if (isEcoreFactory(unit)) {
             String name = unit.getElementName();
-            name = packageHelper.cutLastSegment(name);
-            name += "2"; // TODO
-            System.err.println(name); // TODO
+            String newName = packageHelper.cutLastSegment(name) + properties.get(FACTORY_SUFFIX); // new name of class
+            newName = packageHelper.append(newName, packageHelper.getLastSegment(name)); // add file extension
             try {
                 RenameCompilationUnitProcessor processor = new RenameCompilationUnitProcessor(unit);
-                System.err.println(processor.checkNewElementName(name)); // TODO
-                processor.setNewElementName(name);
-                RenameRefactoring refactoring = new RenameRefactoring(processor);
-                RefactoringUtil.applyRefactoring(refactoring, monitor);
+                if (processor.checkNewElementName(newName).isOK()) { // if new name is okay
+                    processor.setNewElementName(newName); // set new name
+                }
+                RenameRefactoring refactoring = new RenameRefactoring(processor); // create refactoring
+                RefactoringUtil.applyRefactoring(refactoring, monitor); // apply refactoring
+                monitor.beginTask("Renamed factory: " + name, 0);
             } catch (CoreException exception) {
                 logger.fatal("Renaming " + unit.getElementName() + " failed!", exception);
             }
