@@ -9,7 +9,6 @@ import org.apache.log4j.LogManager
 import org.apache.log4j.Logger
 import org.eclipse.core.resources.IFolder
 import org.eclipse.core.resources.IProject
-import org.eclipse.core.resources.IResource
 import org.eclipse.core.runtime.IProgressMonitor
 
 import static jce.properties.TextProperty.SOURCE_FOLDER
@@ -37,9 +36,11 @@ class ClassGenerator {
 	def public void createClass(String path, String name, String content, IProject project) {
 		var folder = project.getFolder(pathUtil.append(properties.get(SOURCE_FOLDER), path))
 		var file = folder.getFile(name)
-		if (!file.exists) {
+		if (file.exists) {
+			logger.error("File " + file.name + " already exists!")
+		} else {
 			val source = new ByteArrayInputStream(content.bytes)
-			file.create(source, IResource.NONE, monitor)
+			file.create(source, true, monitor)
 		}
 	}
 
