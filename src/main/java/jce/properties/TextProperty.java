@@ -14,7 +14,8 @@ public enum TextProperty implements ITextProperty {
     FACTORY_PACKAGE("FactoryPackageName", "original"),
     PROJECT_SUFFIX("ProjectSuffix", "Ecorified"),
     SOURCE_FOLDER("SourceFolder", "src"),
-    ROOT_CONTAINER("RootContainerName", "RootContainer");
+    ROOT_CONTAINER("RootContainerName", "RootContainer"),
+    FACTORY_SUFFIX("OriginalFactorySuffix","Old");
 
     private final String defaultValue;
     private final String key;
