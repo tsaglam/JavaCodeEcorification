@@ -2,8 +2,6 @@ package jce.codemanipulation.origin;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -13,12 +11,9 @@ import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldRefactoring;
-import org.eclipse.ltk.core.refactoring.CheckConditionsOperation;
-import org.eclipse.ltk.core.refactoring.CreateChangeOperation;
-import org.eclipse.ltk.core.refactoring.PerformChangeOperation;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import jce.properties.EcorificationProperties;
+import jce.util.RefactoringUtil;
 import jce.util.logging.MonitorFactory;
 
 /**
@@ -45,13 +40,8 @@ public class FieldEncapsulationVisitor extends ASTVisitor {
     public void encapsulateField(IField field) {
         try {
             SelfEncapsulateFieldRefactoring refactoring = new SelfEncapsulateFieldRefactoring(field);
-            CheckConditionsOperation checkCondOp = new CheckConditionsOperation(refactoring, CheckConditionsOperation.ALL_CONDITIONS);
-            CreateChangeOperation createChangeOp = new CreateChangeOperation(checkCondOp, RefactoringStatus.WARNING);
-            PerformChangeOperation performChangeOp = new PerformChangeOperation(createChangeOp);
-            ResourcesPlugin.getWorkspace().run(performChangeOp, monitor);
+            RefactoringUtil.applyRefactoring(refactoring, monitor);
         } catch (JavaModelException exception) {
-            exception.printStackTrace();
-        } catch (CoreException exception) {
             exception.printStackTrace();
         }
     }
