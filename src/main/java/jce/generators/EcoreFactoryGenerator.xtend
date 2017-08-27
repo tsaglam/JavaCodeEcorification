@@ -3,6 +3,7 @@ package jce.generators
 import eme.generator.GeneratedEcoreMetamodel
 import java.io.File
 import java.util.LinkedList
+import java.util.List
 import jce.properties.EcorificationProperties
 import jce.util.PathHelper
 import jce.util.ResourceRefresher
@@ -43,16 +44,16 @@ final class EcoreFactoryGenerator {
 	}
 
 	/** 
-	 * Builds the wrapper classes.
+	 * Builds the Ecore factories.
 	 * @param metamodel is the metamodel that got extracted from the original project.
 	 * @param directories is the {@link ProjectDirectories} instance for the project.
 	 */
 	def void buildFactories(GeneratedEcoreMetamodel metamodel, IProject project) {
 		logger.info("Starting the factory generation...")
-		for (subpackage : metamodel.root.ESubpackages) {
+		for (subpackage : metamodel.root.ESubpackages) { // build factories for every supackage
 			buildFactories(subpackage, pathUtil.append(properties.get(ECORE_PACKAGE), subpackage.name), project)
 		}
-		ResourceRefresher.refresh(project, properties.get(SOURCE_FOLDER)) // makes wrappers visible in the Eclipse IDE
+		ResourceRefresher.refresh(project, properties.get(SOURCE_FOLDER)) // makes factories visible in the Eclipse IDE
 	}
 
 	/** 
@@ -61,22 +62,30 @@ final class EcoreFactoryGenerator {
 	 * @param path is the current file path of the {@link EPackage}. Should be initially an empty string.
 	 */
 	def private void buildFactories(EPackage ePackage, String path, IProject project) {
-		val types = new LinkedList<String>()
-		for (eClassifier : ePackage.EClassifiers) { // for every classifier
-			if (eClassifier instanceof EClass) { // if is EClass
-				if (!eClassifier.interface && !eClassifier.abstract) { // if is not interface
-					types.add(eClassifier.name) // store name
-				}
-			}
-		}
-		if (!types.empty) {
+		val classes = getClassNames(ePackage)
+		if (!classes.empty) {
 			if (buildInterfaces) {
-				factoryGenerator.create(path, types, project) // create factory interface and implementation
+				factoryGenerator.create(path, classes, project) // create interface if allowed
 			}
-			factoryImplementationGenerator.create(pathUtil.append(path, "impl"), types, project)
+			factoryImplementationGenerator.create(pathUtil.append(path, "impl"), classes, project) // build implementation
 		}
 		for (eSubpackage : ePackage.ESubpackages) { // for every subpackage
 			buildFactories(eSubpackage, pathUtil.append(path, eSubpackage.name), project) // do the same
 		}
+	}
+
+	/**
+	 * Returns the list of names of all EClasses in an EPackage.
+	 */
+	def private List<String> getClassNames(EPackage ePackage) {
+		val classes = new LinkedList<String>()
+		for (eClassifier : ePackage.EClassifiers) { // for every classifier
+			if (eClassifier instanceof EClass) { // if is EClass
+				if (!eClassifier.interface && !eClassifier.abstract) { // if is not interface
+					classes.add(eClassifier.name) // store name
+				}
+			}
+		}
+		return classes
 	}
 }
