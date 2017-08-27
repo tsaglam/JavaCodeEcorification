@@ -54,7 +54,7 @@ public class ImportOrganizer extends AbstractCodeManipulator {
         if (!file.exists()) {
             unit.applyTextEdit(edit, monitor);
         } else {
-            monitor.beginTask(CorextMessages.JavaModelUtil_applyedit_operation, 2);
+            monitor.subTask(CorextMessages.JavaModelUtil_applyedit_operation);
             try {
                 IStatus status = Resources.makeCommittable(file, null);
                 if (!status.isOK()) {
