@@ -23,8 +23,8 @@ class EFactoryImplementationGenerator extends ClassGenerator {
 	 */
 	def public void create(String path, List<String> packageTypes, IProject project) {
 		val currentPackage = path.replace(File.separatorChar, '.') // path to package declaration
-		val interfacePackage = packageUtil.cutLastSegment(currentPackage)
-		val packageName = packageUtil.getLastSegment(interfacePackage).toFirstUpper
+		val interfacePackage = nameUtil.cutLastSegment(currentPackage)
+		val packageName = nameUtil.getLastSegment(interfacePackage).toFirstUpper
 		val content = createFactoryContent(currentPackage, packageName, interfacePackage, packageTypes)
 		createClass(path, '''«packageName»FactoryImpl.java''', content, project)
 		monitor.beginTask(''' Created «packageName»FactoryImpl.java''', 0) // detailed logging
@@ -46,7 +46,7 @@ class EFactoryImplementationGenerator extends ClassGenerator {
 		import «interfacePackage».«packageName»Factory;
 		import «interfacePackage».«packageName»Package;
 		«FOR type : packageTypes»
-			import «packageUtil.cutFirstSegment(interfacePackage)».«type»;
+			import «nameUtil.cutFirstSegment(interfacePackage)».«type»;
 		«ENDFOR»
 		
 		/**
@@ -121,13 +121,13 @@ class EFactoryImplementationGenerator extends ClassGenerator {
 	 * Creates the content of an Ecore factory method.
 	 */
 	def private String createFactoryMethod(String className) '''
-		
-				/**
-				 * @generated
-				  */
-				public «className» create«className»() {
-					return new «className»(); // origin code instance
-				}	
+	
+			/**
+			 * @generated
+			  */
+			public «className» create«className»() {
+				return new «className»(); // origin code instance
+			}	
 	'''
 
 	/**

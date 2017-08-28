@@ -89,10 +89,10 @@ final class WrapperGenerator extends ClassGenerator {
 	 */
 	def private String createWrapperContent(String className, String wrapperName, String factoryName,
 		String currentPackage, String superClass) '''
-		package «packageUtil.append(properties.get(WRAPPER_PACKAGE), currentPackage)»
+		package «nameUtil.append(properties.get(WRAPPER_PACKAGE), currentPackage)»
 		
-		import «packageUtil.append(properties.get(ECORE_PACKAGE), currentPackage)».«className»
-		import «packageUtil.append(properties.get(ECORE_PACKAGE), currentPackage)».«factoryName»
+		import «nameUtil.append(properties.get(ECORE_PACKAGE), currentPackage)».«className»
+		import «nameUtil.append(properties.get(ECORE_PACKAGE), currentPackage)».«factoryName»
 		«IF superClass === null»
 			import org.eclipse.emf.ecore.impl.MinimalEObjectImpl
 			import org.eclipse.xtend.lib.annotations.Delegate
@@ -113,7 +113,7 @@ final class WrapperGenerator extends ClassGenerator {
 			private var «className» ecoreImplementation
 		
 			new() {
-				ecoreImplementation = «factoryName+properties.get(FACTORY_SUFFIX)».eINSTANCE.create«className»()
+				ecoreImplementation = «factoryName».eINSTANCE.create«className»()
 			}
 		}
 	'''
@@ -123,7 +123,7 @@ final class WrapperGenerator extends ClassGenerator {
 	 */
 	def private void createXtendWrapper(String path, String name, String superClass) {
 		val currentPackage = path.replace(File.separatorChar, '.') // path to package declaration
-		var factoryName = '''«PathHelper.capitalize(packageUtil.getLastSegment(currentPackage))»Factory''' // name of the ecore factory of the package
+		var factoryName = '''«PathHelper.capitalize(nameUtil.getLastSegment(currentPackage))»Factory«properties.get(FACTORY_SUFFIX)»'''
 		val className = properties.get(WRAPPER_PREFIX) + PathHelper.capitalize(name) + properties.get(WRAPPER_SUFFIX) // name of the wrapper class
 		val content = createWrapperContent(name, className, factoryName, currentPackage, superClass) // content of the class
 		val wrapperPath = pathUtil.append(properties.get(WRAPPER_PACKAGE), path)
@@ -137,7 +137,7 @@ final class WrapperGenerator extends ClassGenerator {
 		if (superClass === null) {
 			return "MinimalEObjectImpl.Container"
 		}
-		return packageUtil.getLastSegment(superClass)
+		return nameUtil.getLastSegment(superClass)
 	}
 
 	/**
@@ -146,7 +146,7 @@ final class WrapperGenerator extends ClassGenerator {
 	def private String getSuperClass(EClass eClass) {
 		for (superType : eClass.ESuperTypes) {
 			if (!superType.interface) {
-				return packageUtil.append(getPackage(superType), superType.name)
+				return nameUtil.append(getPackage(superType), superType.name)
 			}
 		}
 		return null
@@ -159,10 +159,10 @@ final class WrapperGenerator extends ClassGenerator {
 		var String package = ""
 		var EPackage current = eClass.EPackage
 		while (current !== null) {
-			package = packageUtil.append(current.name, package)
+			package = nameUtil.append(current.name, package)
 			current = current.ESuperPackage
 		}
-		return packageUtil.cutFirstSegment(package)
+		return nameUtil.cutFirstSegment(package)
 	}
 
 	/**

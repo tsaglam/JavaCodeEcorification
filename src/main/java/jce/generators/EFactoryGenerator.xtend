@@ -23,7 +23,7 @@ class EFactoryGenerator extends ClassGenerator {
 	 */
 	def public void create(String path, List<String> packageTypes, IProject project) {
 		val currentPackage = path.replace(File.separatorChar, '.') // path to package declaration
-		val packageName = packageUtil.getLastSegment(currentPackage).toFirstUpper
+		val packageName = nameUtil.getLastSegment(currentPackage).toFirstUpper
 		val content = createFactoryContent(currentPackage, packageName, packageTypes)
 		createClass(path, '''«packageName»Factory.java''', content, project)
 		monitor.beginTask(''' Created «packageName»Factory.java''', 0) // detailed logging
@@ -68,12 +68,11 @@ class EFactoryGenerator extends ClassGenerator {
 	 */
 	def private String createFactoryMethod(String className) '''
 		
-				/**
-				 * Returns a new object of class '<em>«className»</em>'.
-				 * @return a new object of class '<em>«className»</em>'.
-				 * @generated
-				 */
-				«className» create«className»();
-				    
+			/**
+			 * Returns a new object of class '<em>«className»</em>'.
+			 * @return a new object of class '<em>«className»</em>'.
+			 * @generated
+			 */
+			«className» create«className»();	    
 	'''
 }

@@ -15,7 +15,7 @@ import static jce.properties.TextProperty.SOURCE_FOLDER
 
 class ClassGenerator {
 	protected static final Logger logger = LogManager.getLogger(ClassGenerator.getName)
-	protected final PathHelper packageUtil
+	protected final PathHelper nameUtil
 	protected final PathHelper pathUtil
 	protected final IProgressMonitor monitor
 	protected final EcorificationProperties properties
@@ -26,7 +26,7 @@ class ClassGenerator {
 	new(EcorificationProperties properties) {
 		this.properties = properties
 		monitor = MonitorFactory.createProgressMonitor(logger, properties)
-		packageUtil = new PathHelper(Character.valueOf('.').charValue)
+		nameUtil = new PathHelper(Character.valueOf('.').charValue)
 		pathUtil = new PathHelper(File.separatorChar)
 	}
 
