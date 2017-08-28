@@ -41,7 +41,7 @@ public abstract class AbstractCodeManipulator {
     protected Logger logger;
     protected final IProgressMonitor monitor;
     protected final EcorificationProperties properties;
-    protected PathHelper packageHelper;
+    protected PathHelper nameUtil;
 
     /**
      * Simple constructor that sets the properties.
@@ -51,7 +51,7 @@ public abstract class AbstractCodeManipulator {
         this.properties = properties;
         logger = LogManager.getLogger(this.getClass().getName());
         monitor = MonitorFactory.createProgressMonitor(logger, properties);
-        packageHelper = new PathHelper('.');
+        nameUtil = new PathHelper('.');
     }
 
     /**
@@ -154,8 +154,8 @@ public abstract class AbstractCodeManipulator {
      */
     protected String getPackageMemberName(ICompilationUnit unit) throws JavaModelException {
         String packageName = unit.getParent().getElementName();
-        String memberName = packageHelper.cutLastSegment(unit.getElementName()); // cut the filename extension
-        return packageHelper.append(packageName, memberName);
+        String memberName = nameUtil.cutLastSegment(unit.getElementName()); // cut the filename extension
+        return nameUtil.append(packageName, memberName);
     }
 
     /**

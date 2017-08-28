@@ -37,7 +37,6 @@ import jce.util.PathHelper;
 @SuppressWarnings("restriction")  // TODO (LOW) This class uses LTK classes & methods that are not marked as API
 public class FactoryRelocator extends AbstractCodeManipulator {
     private final GeneratedEcoreMetamodel metamodel;
-    private PathHelper packageUtil;
 
     /**
      * Simple constructor, sets the metamodel and the properties.
@@ -47,7 +46,6 @@ public class FactoryRelocator extends AbstractCodeManipulator {
     public FactoryRelocator(GeneratedEcoreMetamodel metamodel, EcorificationProperties properties) {
         super(properties);
         this.metamodel = metamodel;
-        packageUtil = new PathHelper('.');
     }
 
     /**
@@ -61,7 +59,7 @@ public class FactoryRelocator extends AbstractCodeManipulator {
         IPackageFragmentRoot root = javaProject.getPackageFragmentRoot(folder);
         // build the new package:
         String currentPackage = unit.getParent().getElementName();
-        String newPackageName = packageUtil.append(currentPackage, properties.get(FACTORY_PACKAGE));
+        String newPackageName = nameUtil.append(currentPackage, properties.get(FACTORY_PACKAGE));
         return root.createPackageFragment(newPackageName, false, monitor);
     }
 
@@ -70,9 +68,9 @@ public class FactoryRelocator extends AbstractCodeManipulator {
      */
     private boolean isEcoreFactory(ICompilationUnit unit) throws JavaModelException {
         String fullName = getPackageMemberName(unit); // get name of the type
-        String packageName = packageUtil.getLastSegment(packageUtil.cutLastSegments(fullName, 2));
+        String packageName = nameUtil.getLastSegment(nameUtil.cutLastSegments(fullName, 2));
         if (fullName.endsWith(PathHelper.capitalize(packageName) + "FactoryImpl")) { // if has factory name
-            String modelName = packageUtil.cutFirstSegment(fullName); // without ecore package
+            String modelName = nameUtil.cutFirstSegment(fullName); // without ecore package
             return MetamodelSearcher.findEClass(modelName, metamodel.getRoot()) == null; // search metamodel counterpart
         }
         return false; // Does not have Ecore implementation name and package

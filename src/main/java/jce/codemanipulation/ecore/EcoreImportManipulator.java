@@ -18,7 +18,6 @@ import jce.properties.EcorificationProperties;
 import jce.properties.TextProperty;
 import jce.util.MetamodelSearcher;
 import jce.util.PackageFilter;
-import jce.util.PathHelper;
 
 /**
  * Base class for the adaption of problematic import declarations in the Ecore code. A problematic import declaration is
@@ -30,7 +29,6 @@ import jce.util.PathHelper;
  */
 public class EcoreImportManipulator extends AbstractCodeManipulator {
     private final GeneratedEcoreMetamodel metamodel;
-    private final PathHelper packageUtil;
     private IJavaProject project;
 
     /**
@@ -41,7 +39,6 @@ public class EcoreImportManipulator extends AbstractCodeManipulator {
     public EcoreImportManipulator(GeneratedEcoreMetamodel metamodel, EcorificationProperties properties) {
         super(properties);
         this.metamodel = metamodel;
-        packageUtil = new PathHelper('.'); // package helper
     }
 
     @Override
@@ -57,7 +54,7 @@ public class EcoreImportManipulator extends AbstractCodeManipulator {
     private void edit(IImportDeclaration importDeclaration, ImportRewrite implementationRewrite, ImportRewrite interfaceRewrite) {
         String name = importDeclaration.getElementName();
         if (implementationRewrite.removeImport(name)) { // remove old import
-            name = packageUtil.cutFirstSegment(name); // generate new import string
+            name = nameUtil.cutFirstSegment(name); // generate new import string
             implementationRewrite.addImport(name); // add to implementation class
             interfaceRewrite.removeImport(name);
             interfaceRewrite.addImport(name); // add to Ecore interface
@@ -80,7 +77,7 @@ public class EcoreImportManipulator extends AbstractCodeManipulator {
      * given "model.impl.MainImpl".
      */
     private String getInterfaceName(String typeName) {
-        String interfaceName = packageUtil.append(packageUtil.cutLastSegments(typeName, 2), packageUtil.getLastSegment(typeName));
+        String interfaceName = nameUtil.append(nameUtil.cutLastSegments(typeName, 2), nameUtil.getLastSegment(typeName));
         return interfaceName.substring(0, interfaceName.length() - 4); // remove "Impl" suffix
     }
 
@@ -91,7 +88,7 @@ public class EcoreImportManipulator extends AbstractCodeManipulator {
      * counterpart in the Ecore metamodel
      */
     private boolean isEcoreImplementation(ICompilationUnit unit) throws JavaModelException {
-        String typeName = packageUtil.cutFirstSegment(getPackageMemberName(unit));
+        String typeName = nameUtil.cutFirstSegment(getPackageMemberName(unit));
         if (isEcoreImplementationName(typeName)) { // if has Ecore implementation name and package
             typeName = getInterfaceName(typeName); // get name of Ecore interface and EClass
             return MetamodelSearcher.findEClass(typeName, metamodel.getRoot()) != null; // search metamodel counterpart
@@ -104,7 +101,7 @@ public class EcoreImportManipulator extends AbstractCodeManipulator {
      * package. That means the last package of the type name is called impl and the type name end with the suffix Impl.
      */
     private boolean isEcoreImplementationName(String typeName) {
-        return packageUtil.getLastSegment(packageUtil.cutLastSegment(typeName)).equals("impl") && typeName.endsWith("Impl");
+        return nameUtil.getLastSegment(nameUtil.cutLastSegment(typeName)).equals("impl") && typeName.endsWith("Impl");
     }
 
     /**
@@ -117,7 +114,7 @@ public class EcoreImportManipulator extends AbstractCodeManipulator {
         if (importDeclaration.isOnDemand()) {
             return false; // EMF imports the Ecore classes directly, not with .*
         }
-        String typeName = packageUtil.cutFirstSegment(importDeclaration.getElementName());
+        String typeName = nameUtil.cutFirstSegment(importDeclaration.getElementName());
         return MetamodelSearcher.findEClass(typeName, metamodel.getRoot()) != null;
     }
 
