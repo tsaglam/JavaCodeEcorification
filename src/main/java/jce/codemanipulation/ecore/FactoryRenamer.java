@@ -40,16 +40,42 @@ public class FactoryRenamer extends AbstractCodeManipulator {
     }
 
     /**
-     * Checks whether a {@link ICompilationUnit} is an Ecore factory implementation class.
+     * Checks whether an {@link ICompilationUnit} is a Ecore factory, which means it is either an Ecore factory
+     * interface or and Ecore factory implementation class.
      */
-    private boolean isEcoreFactory(ICompilationUnit unit) throws JavaModelException { // TODO (HIGH) allow interfaces
-        String fullName = getPackageMemberName(unit); // get name of the type
+    private boolean isEcoreFactory(ICompilationUnit unit) throws JavaModelException {
+        String fullName = getPackageMemberName(unit); // get name
+        return isEcoreFactoryImplementation(fullName) || isEcoreFactoryInterface(fullName);
+    }
+
+    /**
+     * Checks whether a Java type is an Ecore factory implementation class.
+     */
+    private boolean isEcoreFactoryImplementation(String fullName) throws JavaModelException {
         String packageName = packageHelper.getLastSegment(packageHelper.cutLastSegments(fullName, 2));
         if (fullName.endsWith(PathHelper.capitalize(packageName) + "FactoryImpl")) { // if has factory name
-            String modelName = packageHelper.cutFirstSegment(fullName); // without ecore package
-            return MetamodelSearcher.findEClass(modelName, metamodel.getRoot()) == null; // search metamodel counterpart
+            return !isInMetamodel(fullName); // check if not in metamodel
         }
         return false; // Does not have Ecore implementation name and package
+    }
+
+    /**
+     * Checks whether a Java type is an Ecore factory interface.
+     */
+    private boolean isEcoreFactoryInterface(String fullName) throws JavaModelException {
+        String packageName = packageHelper.getLastSegment(packageHelper.cutLastSegment(fullName));
+        if (fullName.endsWith(PathHelper.capitalize(packageName) + "Factory")) { // if has factory name
+            return !isInMetamodel(fullName); // check if not in metamodel
+        }
+        return false; // Does not have Ecore interface name and package
+    }
+
+    /**
+     * Checks if a type from the model code is in the metamodel.
+     */
+    private boolean isInMetamodel(String fullName) {
+        String modelName = packageHelper.cutFirstSegment(fullName); // without ecore package
+        return MetamodelSearcher.findEClass(modelName, metamodel.getRoot()) != null; // search metamodel counterpart
     }
 
     @Override
