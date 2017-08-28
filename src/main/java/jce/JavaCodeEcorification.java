@@ -22,6 +22,7 @@ import eme.properties.ExtractionProperties;
 import eme.properties.TextProperty;
 import jce.codemanipulation.ImportOrganizer;
 import jce.codemanipulation.ecore.EcoreImportManipulator;
+import jce.codemanipulation.ecore.FactoryRenamer;
 import jce.codemanipulation.origin.FieldEncapsulator;
 import jce.codemanipulation.origin.InheritanceManipulator;
 import jce.codemanipulation.origin.MemberRemover;
@@ -60,7 +61,6 @@ public class JavaCodeEcorification {
         importOrganizer = new ImportOrganizer(properties);
         inheritanceManipulator = new InheritanceManipulator(properties);
         configureExtraction(metamodelGenerator.getProperties());
-
     }
 
     /**
@@ -78,22 +78,21 @@ public class JavaCodeEcorification {
         GenModel genModel = genModelGenerator.generate(metamodel);
         IProject project = getProject(metamodel.getSavingInformation()); // Retrieve output project
         ModelCodeGenerator.generate(genModel, properties);
-        // 2. generate wrappers:
+        // 2. Build custom factories:
+        new FactoryRenamer(metamodel, properties).manipulate(project);
+        new EcoreFactoryGenerator(true, properties).buildFactories(metamodel, project);
+        // 3. generate wrappers:
         XtendLibraryHelper.addXtendLibs(project, properties);
         ResourceRefresher.refresh(project);
         wrapperGenerator.buildWrappers(metamodel, project);
-        // 3. adapt Ecore code
+        // 4. adapt Ecore code
         new EcoreImportManipulator(metamodel, properties).manipulate(project);
         importOrganizer.manipulate(project);
-        // 4. adapt origin code:
+        // 5. adapt origin code:
         fieldEncapsulator.manipulate(project);
         new MemberRemover(metamodel, properties).manipulate(project);
         importOrganizer.manipulate(project);
         inheritanceManipulator.manipulate(project);
-        // 5. Build custom factories:
-        // TODO (HIGH) rename factories instead of moving them:
-        // new FactoryRelocator(metamodel, properties).manipulate(project);
-        new EcoreFactoryGenerator(false, properties).buildFactories(metamodel, project);
         // 6. build project and make changes visible in the Eclipse IDE:
         rebuild(project, properties);
         logger.info("Ecorification complete!");
