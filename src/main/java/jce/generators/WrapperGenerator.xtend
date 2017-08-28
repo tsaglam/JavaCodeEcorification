@@ -12,6 +12,7 @@ import org.eclipse.emf.ecore.EClassifier
 import org.eclipse.emf.ecore.EPackage
 
 import static jce.properties.TextProperty.ECORE_PACKAGE
+import static jce.properties.TextProperty.FACTORY_SUFFIX
 import static jce.properties.TextProperty.SOURCE_FOLDER
 import static jce.properties.TextProperty.WRAPPER_PACKAGE
 import static jce.properties.TextProperty.WRAPPER_PREFIX
@@ -112,7 +113,7 @@ final class WrapperGenerator extends ClassGenerator {
 			private var «className» ecoreImplementation
 		
 			new() {
-				ecoreImplementation = «factoryName».eINSTANCE.create«className»()
+				ecoreImplementation = «factoryName+properties.get(FACTORY_SUFFIX)».eINSTANCE.create«className»()
 			}
 		}
 	'''
