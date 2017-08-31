@@ -69,15 +69,15 @@ class WrapperRepresentation {
 				@DelegateDeclared
 			«ENDIF»
 			protected var «eClass.name» ecoreImplementation
-		
+			
+			new() {
+				ecoreImplementation = instance
+			}
+			
 			«IF eClass.abstract»
-				new() {
-					ecoreImplementation = instance
-				}
-				
 				«getMethodKeyword()» protected abstract «eClass.name» getInstance()
 			«ELSE»
-				«getMethodKeyword()» protected getInstance() {
+				«getMethodKeyword()» protected «eClass.name» getInstance() {
 					return «factoryName».eINSTANCE.create«eClass.name»
 				}
 			«ENDIF»
