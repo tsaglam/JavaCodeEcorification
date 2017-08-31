@@ -3,6 +3,7 @@ package jce.generators
 import java.io.File
 import java.util.List
 import jce.properties.EcorificationProperties
+import jce.util.PathHelper
 import org.eclipse.core.resources.IProject
 
 /**
@@ -10,12 +11,14 @@ import org.eclipse.core.resources.IProject
  * @author Timur Saglam
  */
 class EFactoryImplementationGenerator extends ClassGenerator {
+	extension PathHelper nameUtil
 
 	/**
 	 * Basic constructor, sets the properties.
 	 */
 	new(EcorificationProperties properties) {
 		super(properties)
+		nameUtil = new PathHelper('.')
 	}
 
 	/**
@@ -23,8 +26,8 @@ class EFactoryImplementationGenerator extends ClassGenerator {
 	 */
 	def public void create(String path, List<String> packageTypes, IProject project) {
 		val currentPackage = path.replace(File.separatorChar, '.') // path to package declaration
-		val interfacePackage = nameUtil.cutLastSegment(currentPackage)
-		val packageName = nameUtil.getLastSegment(interfacePackage).toFirstUpper
+		val interfacePackage = currentPackage.cutLastSegment
+		val packageName = interfacePackage.getLastSegment.toFirstUpper
 		val content = createFactoryContent(currentPackage, packageName, interfacePackage, packageTypes)
 		createClass(path, '''«packageName»FactoryImpl.java''', content, project)
 		monitor.beginTask(''' Created «packageName»FactoryImpl.java''', 0) // detailed logging
@@ -46,7 +49,7 @@ class EFactoryImplementationGenerator extends ClassGenerator {
 		import «interfacePackage».«packageName»Factory;
 		import «interfacePackage».«packageName»Package;
 		«FOR type : packageTypes»
-			import «nameUtil.cutFirstSegment(interfacePackage)».«type»;
+			import «interfacePackage.cutFirstSegment».«type»;
 		«ENDFOR»
 		
 		/**
@@ -131,13 +134,12 @@ class EFactoryImplementationGenerator extends ClassGenerator {
 	'''
 
 	/**
-	 * Makes a type a name a constant name (MyType => MY_TYPE)
+	 * Makes a constant name out of a type name (MyType => MY_TYPE, ABCTest => ABC_TEST)
 	 */
 	def private String constantName(String typeName) {
-		val String[] words = typeName.split("(?=\\p{Upper})");
 		var constantName = "" // empty result string
 		var wasLowerCase = true // last word was lower case
-		for (String word : words) {
+		for (String word : typeName.split("(?=\\p{Upper})")) { // iterate over every word
 			if (containsLowerCase(word) || wasLowerCase) { // if has or comes after lower case letter.
 				constantName += '_' // add separator
 			}

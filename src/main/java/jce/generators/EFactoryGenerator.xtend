@@ -3,6 +3,7 @@ package jce.generators
 import java.io.File
 import java.util.List
 import jce.properties.EcorificationProperties
+import jce.util.PathHelper
 import org.eclipse.core.resources.IProject
 
 /**
@@ -10,12 +11,14 @@ import org.eclipse.core.resources.IProject
  * @author Timur Saglam
  */
 class EFactoryGenerator extends ClassGenerator {
+	extension PathHelper nameUtil
 
 	/**
 	 * Basic constructor, sets the properties.
 	 */
 	new(EcorificationProperties properties) {
 		super(properties)
+		nameUtil = new PathHelper('.')
 	}
 
 	/**
@@ -23,7 +26,7 @@ class EFactoryGenerator extends ClassGenerator {
 	 */
 	def public void create(String path, List<String> packageTypes, IProject project) {
 		val currentPackage = path.replace(File.separatorChar, '.') // path to package declaration
-		val packageName = nameUtil.getLastSegment(currentPackage).toFirstUpper
+		val packageName = currentPackage.getLastSegment.toFirstUpper
 		val content = createFactoryContent(currentPackage, packageName, packageTypes)
 		createClass(path, '''«packageName»Factory.java''', content, project)
 		monitor.beginTask(''' Created «packageName»Factory.java''', 0) // detailed logging

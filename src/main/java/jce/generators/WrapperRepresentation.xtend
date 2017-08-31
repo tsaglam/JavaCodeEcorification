@@ -105,7 +105,7 @@ class WrapperRepresentation {
 		if(superClass === null) {
 			return append(typeof(MinimalEObjectImpl).simpleName, typeof(MinimalEObjectImpl.Container).simpleName)
 		}
-		return getLastSegment(superClass)
+		return superClass.getLastSegment
 	}
 
 	/**

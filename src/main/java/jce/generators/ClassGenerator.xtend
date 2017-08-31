@@ -14,11 +14,11 @@ import org.eclipse.core.runtime.IProgressMonitor
 import static jce.properties.TextProperty.SOURCE_FOLDER
 
 class ClassGenerator {
+	extension protected final PathHelper pathUtil
+	extension protected final EcorificationProperties properties
+	
 	protected static final Logger logger = LogManager.getLogger(ClassGenerator.getName)
-	protected final PathHelper nameUtil
-	protected final PathHelper pathUtil
 	protected final IProgressMonitor monitor
-	protected final EcorificationProperties properties
 
 	/**
 	 * Basic constructor, sets the properties.
@@ -26,7 +26,6 @@ class ClassGenerator {
 	new(EcorificationProperties properties) {
 		this.properties = properties
 		monitor = MonitorFactory.createProgressMonitor(logger, properties)
-		nameUtil = new PathHelper(Character.valueOf('.').charValue)
 		pathUtil = new PathHelper(File.separatorChar)
 	}
 
@@ -34,7 +33,7 @@ class ClassGenerator {
 	 * Creates an IFile from a project relative path, a file name and creates the file content.
 	 */
 	def public void createClass(String path, String name, String content, IProject project) {
-		var folder = project.getFolder(pathUtil.append(properties.get(SOURCE_FOLDER), path))
+		var folder = project.getFolder(append(SOURCE_FOLDER.get, path))
 		var file = folder.getFile(name)
 		if (file.exists) {
 			logger.error("File " + file.name + " already exists!")

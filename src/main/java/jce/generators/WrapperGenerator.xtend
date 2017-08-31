@@ -2,13 +2,13 @@ package jce.generators
 
 import eme.generator.GeneratedEcoreMetamodel
 import jce.properties.EcorificationProperties
-import jce.properties.TextProperty
 import jce.util.ResourceRefresher
 import org.eclipse.core.resources.IProject
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EClassifier
 import org.eclipse.emf.ecore.EPackage
 
+import static jce.properties.TextProperty.ROOT_CONTAINER
 import static jce.properties.TextProperty.SOURCE_FOLDER
 import static jce.properties.TextProperty.WRAPPER_PACKAGE
 
@@ -16,7 +16,7 @@ import static jce.properties.TextProperty.WRAPPER_PACKAGE
  * Creates and manages wrappers for the classes of the original Java project with is ecorified.
  * @author Timur Saglam
  */
-final class WrapperGenerator extends ClassGenerator { // TODO (HIGH) use extensions
+final class WrapperGenerator extends ClassGenerator {
 	final String sourceFolder
 	final String wrapperFolder
 	IProject project
@@ -26,8 +26,8 @@ final class WrapperGenerator extends ClassGenerator { // TODO (HIGH) use extensi
 	 */
 	new(EcorificationProperties properties) {
 		super(properties)
-		sourceFolder = properties.get(SOURCE_FOLDER)
-		wrapperFolder = pathUtil.append(sourceFolder, properties.get(WRAPPER_PACKAGE))
+		sourceFolder = SOURCE_FOLDER.get
+		wrapperFolder = append(sourceFolder, WRAPPER_PACKAGE.get)
 	}
 
 	/** 
@@ -50,7 +50,7 @@ final class WrapperGenerator extends ClassGenerator { // TODO (HIGH) use extensi
 	 */
 	def private void buildWrappers(EPackage ePackage, String path) {
 		if(containsEClass(ePackage)) { // avoids empty folders
-			createFolder(pathUtil.append(wrapperFolder, path), project)
+			createFolder(append(wrapperFolder, path), project)
 		}
 		for (eClassifier : ePackage.EClassifiers) { // for every classifier
 			if(eClassifier instanceof EClass) { // if is EClass
@@ -60,7 +60,7 @@ final class WrapperGenerator extends ClassGenerator { // TODO (HIGH) use extensi
 			}
 		}
 		for (eSubpackage : ePackage.ESubpackages) { // for every subpackage
-			buildWrappers(eSubpackage, pathUtil.append(path, eSubpackage.name)) // do the same
+			buildWrappers(eSubpackage, append(path, eSubpackage.name)) // do the same
 		}
 	}
 
@@ -83,7 +83,7 @@ final class WrapperGenerator extends ClassGenerator { // TODO (HIGH) use extensi
 	 */
 	def private void createXtendWrapper(EClass eClass, String path) {
 		val wrapper = new WrapperRepresentation(eClass, properties) // build wrapper representation
-		val wrapperPath = pathUtil.append(properties.get(WRAPPER_PACKAGE), path) // add wrapper prefix
+		val wrapperPath = append(WRAPPER_PACKAGE.get, path) // add wrapper prefix
 		createClass(wrapperPath, '''«wrapper.name».xtend''', wrapper.content, project) // create wrapper
 	}
 
@@ -91,6 +91,6 @@ final class WrapperGenerator extends ClassGenerator { // TODO (HIGH) use extensi
 	 * Checks whether a EClass at a given path is the root container element.
 	 */
 	def private boolean isRootContainer(EClass eClass, String path) {
-		return "" === path && eClass.name === properties.get(TextProperty.ROOT_CONTAINER);
+		return "" === path && eClass.name === ROOT_CONTAINER.get;
 	}
 }

@@ -23,10 +23,11 @@ import static jce.properties.TextProperty.SOURCE_FOLDER
  * @author Timur Saglam
  */
 final class EcoreFactoryGenerator {
+	extension final PathHelper pathUtil
+	extension final EcorificationProperties properties
+	
 	static final Logger logger = LogManager.getLogger(EcoreFactoryGenerator.getName)
 	final IProgressMonitor monitor
-	final PathHelper pathUtil
-	final EcorificationProperties properties
 	final EFactoryGenerator factoryGenerator
 	final EFactoryImplementationGenerator factoryImplementationGenerator
 	final boolean buildInterfaces;
@@ -51,9 +52,9 @@ final class EcoreFactoryGenerator {
 	def void buildFactories(GeneratedEcoreMetamodel metamodel, IProject project) {
 		logger.info("Starting the factory generation...")
 		for (subpackage : metamodel.root.ESubpackages) { // build factories for every supackage
-			buildFactories(subpackage, pathUtil.append(properties.get(ECORE_PACKAGE), subpackage.name), project)
+			buildFactories(subpackage, append(ECORE_PACKAGE.get, subpackage.name), project)
 		}
-		ResourceRefresher.refresh(project, properties.get(SOURCE_FOLDER)) // makes factories visible in the Eclipse IDE
+		ResourceRefresher.refresh(project, SOURCE_FOLDER.get) // makes factories visible in the Eclipse IDE
 	}
 
 	/** 
@@ -67,10 +68,10 @@ final class EcoreFactoryGenerator {
 			if (buildInterfaces) {
 				factoryGenerator.create(path, classes, project) // create interface if allowed
 			}
-			factoryImplementationGenerator.create(pathUtil.append(path, "impl"), classes, project) // build implementation
+			factoryImplementationGenerator.create(append(path, "impl"), classes, project) // build implementation
 		}
 		for (eSubpackage : ePackage.ESubpackages) { // for every subpackage
-			buildFactories(eSubpackage, pathUtil.append(path, eSubpackage.name), project) // do the same
+			buildFactories(eSubpackage, append(path, eSubpackage.name), project) // do the same
 		}
 	}
 
