@@ -90,7 +90,7 @@ class WrapperRepresentation {
 	def String getName() {
 		return wrapperName
 	}
-	
+
 	/**
 	 * Returns the name of the package of the wrapper.
 	 */
@@ -111,9 +111,7 @@ class WrapperRepresentation {
 	/**
 	 * 	Starts a method declaration. Returns either "def" or "override" depending on whether the EClass has a superclass.
 	 */
-	def private String getMethodKeyword() '''
-		«IF superClass === null»def«ELSE»override«ENDIF»
-	'''
+	def private String getMethodKeyword() '''«IF superClass === null»def«ELSE»override«ENDIF»'''
 
 	/**
 	 * Returns the fully qualified name of the super class of an EClass.
