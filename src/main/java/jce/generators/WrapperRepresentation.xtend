@@ -4,6 +4,7 @@ import jce.properties.EcorificationProperties
 import jce.util.PathHelper
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EPackage
+import org.eclipse.emf.ecore.impl.MinimalEObjectImpl
 
 import static jce.properties.TextProperty.ECORE_PACKAGE
 import static jce.properties.TextProperty.FACTORY_SUFFIX
@@ -37,17 +38,19 @@ class WrapperRepresentation {
 		packageName = getPackage(eClass)
 		wrapperName = WRAPPER_PREFIX.get + PathHelper.capitalize(eClass.name) + WRAPPER_SUFFIX.get // name of the wrapper class
 		factoryName = '''«PathHelper.capitalize(packageName.getLastSegment)»Factory«FACTORY_SUFFIX.get»'''
-		superClass = getSuperClass(eClass)
+		superClass = getSuperClassName(eClass)
 	}
 
 	/**
 	 * Builds the content of a wrapper class.
 	 */
 	def String getContent() '''
-		package «nameUtil.append(WRAPPER_PACKAGE.get, packageName)»
+		package «append(WRAPPER_PACKAGE.get, packageName)»
 		
-		import «nameUtil.append(ECORE_PACKAGE.get, packageName)».«eClass.name»
-		import «nameUtil.append(ECORE_PACKAGE.get, packageName)».«factoryName»
+		import «append(ECORE_PACKAGE.get, packageName)».«eClass.name»
+		«IF !eClass.abstract»
+			import «append(ECORE_PACKAGE.get, packageName)».«factoryName»
+		«ENDIF»
 		«IF superClass === null»
 			import org.eclipse.emf.ecore.impl.MinimalEObjectImpl
 			import org.eclipse.xtend.lib.annotations.Delegate
@@ -72,9 +75,9 @@ class WrapperRepresentation {
 					ecoreImplementation = instance
 				}
 				
-				def protected abstract «eClass.name» getInstance()
+				«getMethodKeyword()» protected abstract «eClass.name» getInstance()
 			«ELSE»
-				override protected getInstance() {
+				«getMethodKeyword()» protected getInstance() {
 					return «factoryName».eINSTANCE.create«eClass.name»
 				}
 			«ENDIF»
@@ -87,24 +90,49 @@ class WrapperRepresentation {
 	def String getName() {
 		return wrapperName
 	}
+	
+	/**
+	 * Returns the name of the package of the wrapper.
+	 */
+	def String getPackage() {
+		return packageName
+	}
 
 	/**
 	 * Builds the super type declaration of a wrapper from a String that is either the super type or null.
 	 */
 	def private String createSuperType(String superClass) {
 		if(superClass === null) {
-			return "MinimalEObjectImpl.Container"
+			return append(typeof(MinimalEObjectImpl).simpleName, typeof(MinimalEObjectImpl.Container).simpleName)
 		}
-		return nameUtil.getLastSegment(superClass)
+		return getLastSegment(superClass)
 	}
+
+	/**
+	 * 	Starts a method declaration. Returns either "def" or "override" depending on whether the EClass has a superclass.
+	 */
+	def private String getMethodKeyword() '''
+		«IF superClass === null»def«ELSE»override«ENDIF»
+	'''
 
 	/**
 	 * Returns the fully qualified name of the super class of an EClass.
 	 */
-	def private String getSuperClass(EClass eClass) {
+	def private String getSuperClassName(EClass eClass) {
+		val EClass superType = getSuperClass(eClass)
+		if(superType !== null) {
+			return append(getPackage(superType), superType.name)
+		}
+		return null
+	}
+
+	/**
+	 * Returns super class of an EClass or null if it has none.
+	 */
+	def private EClass getSuperClass(EClass eClass) {
 		for (superType : eClass.ESuperTypes) {
 			if(!superType.interface) {
-				return append(getPackage(superType), superType.name)
+				return superType
 			}
 		}
 		return null
@@ -116,10 +144,10 @@ class WrapperRepresentation {
 	def private String getPackage(EClass eClass) {
 		var String package = ""
 		var EPackage current = eClass.EPackage
-		while(current !== null) {
-			package = append(current.name, package)
+		while(current !== null) { // iterate through package hierarchy
+			package = append(current.name, package) // concatenate package with super package name
 			current = current.ESuperPackage
 		}
-		return package.cutFirstSegment
+		return package.cutFirstSegment // cut Ecore package name
 	}
 }
