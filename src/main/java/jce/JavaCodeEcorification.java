@@ -80,7 +80,7 @@ public class JavaCodeEcorification {
         ModelCodeGenerator.generate(genModel, properties);
         // 2. Build custom factories:
         new FactoryRenamer(metamodel, properties).manipulate(project);
-        new EcoreFactoryGenerator(true, properties).buildFactories(metamodel, project);
+        new EcoreFactoryGenerator(properties).buildFactories(metamodel, project);
         // 3. generate wrappers:
         XtendLibraryHelper.addXtendLibs(project, properties);
         ResourceRefresher.refresh(project);

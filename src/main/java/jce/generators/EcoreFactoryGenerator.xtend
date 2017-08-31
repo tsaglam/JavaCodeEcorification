@@ -30,13 +30,11 @@ final class EcoreFactoryGenerator {
 	final IProgressMonitor monitor
 	final EFactoryGenerator factoryGenerator
 	final EFactoryImplementationGenerator factoryImplementationGenerator
-	final boolean buildInterfaces;
 
 	/**
 	 * Basic constructor, sets the properties.
 	 */
-	new(boolean buildInterfaces, EcorificationProperties properties) {
-		this.buildInterfaces = buildInterfaces;
+	new(EcorificationProperties properties) {
 		this.properties = properties
 		factoryGenerator = new EFactoryGenerator(properties)
 		factoryImplementationGenerator = new EFactoryImplementationGenerator(properties)
@@ -65,10 +63,8 @@ final class EcoreFactoryGenerator {
 	def private void buildFactories(EPackage ePackage, String path, IProject project) {
 		val classes = getClassNames(ePackage)
 		if (!classes.empty) {
-			if (buildInterfaces) {
-				factoryGenerator.create(path, classes, project) // create interface if allowed
-			}
-			factoryImplementationGenerator.create(append(path, "impl"), classes, project) // build implementation
+			factoryGenerator.create(path, classes, project) // create interface
+			factoryImplementationGenerator.create(append(path, "impl"), classes, project) // create implementation
 		}
 		for (eSubpackage : ePackage.ESubpackages) { // for every subpackage
 			buildFactories(eSubpackage, append(path, eSubpackage.name), project) // do the same
