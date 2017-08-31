@@ -1,28 +1,22 @@
 package jce.generators
 
 import eme.generator.GeneratedEcoreMetamodel
-import java.io.File
 import jce.properties.EcorificationProperties
 import jce.properties.TextProperty
-import jce.util.PathHelper
 import jce.util.ResourceRefresher
 import org.eclipse.core.resources.IProject
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EClassifier
 import org.eclipse.emf.ecore.EPackage
 
-import static jce.properties.TextProperty.ECORE_PACKAGE
-import static jce.properties.TextProperty.FACTORY_SUFFIX
 import static jce.properties.TextProperty.SOURCE_FOLDER
 import static jce.properties.TextProperty.WRAPPER_PACKAGE
-import static jce.properties.TextProperty.WRAPPER_PREFIX
-import static jce.properties.TextProperty.WRAPPER_SUFFIX
 
 /** 
  * Creates and manages wrappers for the classes of the original Java project with is ecorified.
  * @author Timur Saglam
  */
-final class WrapperGenerator extends ClassGenerator {
+final class WrapperGenerator extends ClassGenerator { // TODO (HIGH) use extensions
 	final String sourceFolder
 	final String wrapperFolder
 	IProject project
@@ -55,13 +49,13 @@ final class WrapperGenerator extends ClassGenerator {
 	 * @param path is the current file path of the {@link EPackage}. Should be initially an empty string.
 	 */
 	def private void buildWrappers(EPackage ePackage, String path) {
-		if (containsEClass(ePackage)) { // avoids empty folders
+		if(containsEClass(ePackage)) { // avoids empty folders
 			createFolder(pathUtil.append(wrapperFolder, path), project)
 		}
 		for (eClassifier : ePackage.EClassifiers) { // for every classifier
-			if (eClassifier instanceof EClass) { // if is EClass
-				if (!eClassifier.interface && !isRootContainer(eClassifier, path)) { // if is not interface or root
-					createXtendWrapper(path, eClassifier.name, getSuperClass(eClassifier)) // create wrapper class
+			if(eClassifier instanceof EClass) { // if is EClass
+				if(!eClassifier.interface && !isRootContainer(eClassifier, path)) { // if is not interface or root
+					createXtendWrapper(eClassifier, path) // create wrapper class
 				}
 			}
 		}
@@ -85,84 +79,12 @@ final class WrapperGenerator extends ClassGenerator {
 	}
 
 	/**
-	 * Builds the content of a wrapper class.
-	 */
-	def private String createWrapperContent(String className, String wrapperName, String factoryName,
-		String currentPackage, String superClass) '''
-		package «nameUtil.append(properties.get(WRAPPER_PACKAGE), currentPackage)»
-		
-		import «nameUtil.append(properties.get(ECORE_PACKAGE), currentPackage)».«className»
-		import «nameUtil.append(properties.get(ECORE_PACKAGE), currentPackage)».«factoryName»
-		«IF superClass === null»
-			import org.eclipse.emf.ecore.impl.MinimalEObjectImpl
-			import org.eclipse.xtend.lib.annotations.Delegate
-		«ELSE»
-			import edu.kit.ipd.sdq.activextendannotations.DelegateDeclared
-			import «superClass»
-		«ENDIF»
-		
-		/**
-		 * Unification class for the class «className»
-		 */
-		class «wrapperName» extends «createSuperType(superClass)» implements «className» {
-			«IF superClass === null»
-				@Delegate
-			«ELSE»
-				@DelegateDeclared
-			«ENDIF»
-			private var «className» ecoreImplementation
-		
-			new() {
-				ecoreImplementation = «factoryName».eINSTANCE.create«className»()
-			}
-		}
-	'''
-
-	/**
 	 * Creates a Xtend Wrapper in a package path with a specific name. 
 	 */
-	def private void createXtendWrapper(String path, String name, String superClass) {
-		val currentPackage = path.replace(File.separatorChar, '.') // path to package declaration
-		var factoryName = '''«PathHelper.capitalize(nameUtil.getLastSegment(currentPackage))»Factory«properties.get(FACTORY_SUFFIX)»'''
-		val className = properties.get(WRAPPER_PREFIX) + PathHelper.capitalize(name) + properties.get(WRAPPER_SUFFIX) // name of the wrapper class
-		val content = createWrapperContent(name, className, factoryName, currentPackage, superClass) // content of the class
-		val wrapperPath = pathUtil.append(properties.get(WRAPPER_PACKAGE), path)
-		createClass(wrapperPath, '''«className».xtend''', content, project) // add wrapper folder.
-	}
-
-	/**
-	 * Builds the super type declaration of a wrapper from a String that is either the super type or null.
-	 */
-	def private String createSuperType(String superClass) {
-		if (superClass === null) {
-			return "MinimalEObjectImpl.Container"
-		}
-		return nameUtil.getLastSegment(superClass)
-	}
-
-	/**
-	 * Returns the fully qualified name of the super class of an EClass.
-	 */
-	def private String getSuperClass(EClass eClass) {
-		for (superType : eClass.ESuperTypes) {
-			if (!superType.interface) {
-				return nameUtil.append(getPackage(superType), superType.name)
-			}
-		}
-		return null
-	}
-
-	/**
-	 * Returns the full package path of an EClass. 
-	 */
-	def private String getPackage(EClass eClass) {
-		var String package = ""
-		var EPackage current = eClass.EPackage
-		while (current !== null) {
-			package = nameUtil.append(current.name, package)
-			current = current.ESuperPackage
-		}
-		return nameUtil.cutFirstSegment(package)
+	def private void createXtendWrapper(EClass eClass, String path) {
+		val wrapper = new WrapperRepresentation(eClass, properties) // build wrapper representation
+		val wrapperPath = pathUtil.append(properties.get(WRAPPER_PACKAGE), path) // add wrapper prefix
+		createClass(wrapperPath, '''«wrapper.name».xtend''', wrapper.content, project) // create wrapper
 	}
 
 	/**
@@ -171,5 +93,4 @@ final class WrapperGenerator extends ClassGenerator {
 	def private boolean isRootContainer(EClass eClass, String path) {
 		return "" === path && eClass.name === properties.get(TextProperty.ROOT_CONTAINER);
 	}
-
 }
