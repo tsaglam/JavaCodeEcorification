@@ -15,7 +15,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
  * Utility class for applying LTK refactorings.
  * @author Timur Saglam
  */
-public class RefactoringUtil {
+public final class RefactoringUtil {
     private static final Logger logger = LogManager.getLogger(RefactoringUtil.class.getName());
 
     private RefactoringUtil() {
