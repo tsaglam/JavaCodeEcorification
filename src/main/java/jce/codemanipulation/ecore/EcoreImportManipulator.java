@@ -52,14 +52,14 @@ public class EcoreImportManipulator extends AbstractCodeManipulator {
      * code instead to the Ecore code.
      */
     private void edit(IImportDeclaration importDeclaration, ImportRewrite implementationRewrite, ImportRewrite interfaceRewrite) {
-        String name = importDeclaration.getElementName();
-        if (implementationRewrite.removeImport(name)) { // remove old import
-            name = nameUtil.cutFirstSegment(name); // generate new import string
-            implementationRewrite.addImport(name); // add to implementation class
-            interfaceRewrite.removeImport(name);
-            interfaceRewrite.addImport(name); // add to Ecore interface
+        String oldName = importDeclaration.getElementName();
+        String newName = nameUtil.cutFirstSegment(oldName); // generate new import string
+        if (implementationRewrite.removeImport(oldName)) { // remove old import
+            implementationRewrite.addImport(newName); // add to implementation class
+            interfaceRewrite.removeImport(oldName); // remove old import as well
+            interfaceRewrite.addImport(newName); // add to Ecore interface
         } else {
-            logger.fatal("Could not remove Ecore import " + name);
+            logger.fatal("Could not remove Ecore import " + oldName);
         }
     }
 
