@@ -8,6 +8,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldRefactoring;
@@ -51,11 +52,16 @@ public class FieldEncapsulationVisitor extends ASTVisitor {
         if (!node.isInterface()) { // if is class, manipulate inheritance:
             for (FieldDeclaration field : node.getFields()) { // for every field:
                 VariableDeclarationFragment fragment = (VariableDeclarationFragment) field.fragments().get(0);
-                IJavaElement element = fragment.resolveBinding().getJavaElement(); // parse FieldDeclaration to IField
-                if (element instanceof IField) {
-                    encapsulateField((IField) element); // Encapsulate if casted succesful.
+                IVariableBinding binding = fragment.resolveBinding(); // resolve binding of fragment
+                if (binding == null) {
+                    logger.error("Could not resolve binding: " + fragment + " of " + field);
                 } else {
-                    throw new ClassCastException("IJavaElement is not IField: " + element + " is " + element.getClass().getName());
+                    IJavaElement element = binding.getJavaElement(); // parse FieldDeclaration to IField
+                    if (element instanceof IField) {
+                        encapsulateField((IField) element); // Encapsulate if casted succesful.
+                    } else {
+                        throw new ClassCastException("IJavaElement is not IField: " + element + " is " + element.getClass().getName());
+                    }
                 }
             }
         }
