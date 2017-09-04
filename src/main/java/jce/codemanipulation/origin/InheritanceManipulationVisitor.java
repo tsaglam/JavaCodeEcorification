@@ -42,10 +42,12 @@ public class InheritanceManipulationVisitor extends ASTVisitor {
 
     @Override
     public boolean visit(TypeDeclaration node) {
-        if (node.isInterface()) {
-            addEcoreInterface(node); // add correlating Ecore interface as super interface
-        } else {
-            overrideSuperclass(node); // set correlating wrapper as super class
+        if (node.isPackageMemberTypeDeclaration()) { // is no nested type
+            if (node.isInterface()) {
+                addEcoreInterface(node); // add correlating Ecore interface as super interface
+            } else {
+                overrideSuperclass(node); // set correlating wrapper as super class
+            }
         }
         return false;
     }

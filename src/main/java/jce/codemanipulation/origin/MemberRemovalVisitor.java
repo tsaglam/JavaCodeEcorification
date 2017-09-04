@@ -42,7 +42,7 @@ public class MemberRemovalVisitor extends ASTVisitor {
 
     @Override
     public boolean visit(TypeDeclaration node) {
-        if (!node.isInterface()) { // if is class, manipulate inheritance:
+        if (!node.isInterface() && node.isPackageMemberTypeDeclaration()) { // if is class, manipulate inheritance:
             removeFields(node);
             removeAccessMethods(node);
             monitor.beginTask("Removed fields with their access methods from " + node.getName().getIdentifier() + ": " + removedFields, 0);

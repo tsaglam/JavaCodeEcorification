@@ -49,7 +49,7 @@ public class FieldEncapsulationVisitor extends ASTVisitor {
 
     @Override
     public boolean visit(TypeDeclaration node) {
-        if (!node.isInterface()) { // if is class, manipulate inheritance:
+        if (!node.isInterface() && node.isPackageMemberTypeDeclaration()) { // if is class, manipulate inheritance:
             for (FieldDeclaration field : node.getFields()) { // for every field:
                 VariableDeclarationFragment fragment = (VariableDeclarationFragment) field.fragments().get(0);
                 IVariableBinding binding = fragment.resolveBinding(); // resolve binding of fragment
