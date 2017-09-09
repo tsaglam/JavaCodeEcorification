@@ -7,8 +7,8 @@ import eme.properties.IBinaryProperty;
  * @author Timur Saglam
  */
 public enum BinaryProperty implements IBinaryProperty {
-    FULL_LOGGING("FullLogging", false);
-
+    FULL_LOGGING("FullLogging", false),
+    EXPOSE_INNER_CLASSES("ExposeInnerClasses", true);
     private final boolean defaultValue;
     private final String key;
 
