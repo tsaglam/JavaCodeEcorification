@@ -34,37 +34,50 @@ public class FieldEncapsulationVisitor extends ASTVisitor {
         monitor = MonitorFactory.createProgressMonitor(logger, properties);
     }
 
-    /**
-     * Encapsulates a specific {@link IField}.
-     * @param field is the specific {@link IField}.
-     */
-    public void encapsulateField(IField field) {
-        try {
-            SelfEncapsulateFieldRefactoring refactoring = new SelfEncapsulateFieldRefactoring(field);
-            RefactoringUtil.applyRefactoring(refactoring, monitor);
-        } catch (JavaModelException exception) {
-            exception.printStackTrace();
-        }
-    }
-
     @Override
     public boolean visit(TypeDeclaration node) {
         if (!node.isInterface() && node.isPackageMemberTypeDeclaration()) { // if is class, manipulate inheritance:
             for (FieldDeclaration field : node.getFields()) { // for every field:
-                VariableDeclarationFragment fragment = (VariableDeclarationFragment) field.fragments().get(0);
-                IVariableBinding binding = fragment.resolveBinding(); // resolve binding of fragment
-                if (binding == null) {
-                    logger.error("Could not resolve binding: " + fragment + " of " + field);
-                } else {
-                    IJavaElement element = binding.getJavaElement(); // parse FieldDeclaration to IField
-                    if (element instanceof IField) {
-                        encapsulateField((IField) element); // Encapsulate if casted succesful.
-                    } else {
-                        throw new ClassCastException("IJavaElement is not IField: " + element + " is " + element.getClass().getName());
-                    }
-                }
+                encapsulate(field); // resolve and encapsulate
             }
         }
         return super.visit(node);
+    }
+
+    /**
+     * Resolves the {@link IVariableBinding} of an {@link FieldDeclaration} and tries to encapsulate it.
+     */
+    private void encapsulate(FieldDeclaration field) {
+        VariableDeclarationFragment fragment = (VariableDeclarationFragment) field.fragments().get(0);
+        IVariableBinding binding = fragment.resolveBinding(); // resolve binding of fragment
+        if (binding == null) {
+            logger.error("Could not resolve binding: " + fragment + " of " + field);
+        } else {
+            encapsulateCorrespondingField(binding); // encapsulates the corresponding IField
+        }
+    }
+
+    /**
+     * Encapsulates the corresponding {@link IJavaElement} of an {@link IVariableBinding} if it is an {@link IField}.
+     */
+    private void encapsulateCorrespondingField(IVariableBinding binding) {
+        IJavaElement element = binding.getJavaElement(); // parse FieldDeclaration to IField
+        if (element instanceof IField) {
+            encapsulateField((IField) element); // Encapsulate if casted succesful.
+        } else { // Should never happen:
+            throw new ClassCastException("IJavaElement is not IField: " + element + " is " + element.getClass().getName());
+        }
+    }
+
+    /**
+     * Encapsulates a specific {@link IField}.
+     */
+    private void encapsulateField(IField field) {
+        try {
+            SelfEncapsulateFieldRefactoring refactoring = new SelfEncapsulateFieldRefactoring(field);
+            RefactoringUtil.applyRefactoring(refactoring, monitor);
+        } catch (JavaModelException exception) {
+            logger.fatal("Encapsulateing field " + field.getElementName() + " failed!", exception);
+        }
     }
 }
