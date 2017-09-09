@@ -3,6 +3,7 @@ package jce.codemanipulation.origin;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 
+import jce.properties.BinaryProperty;
 import jce.properties.EcorificationProperties;
 
 /**
@@ -21,6 +22,8 @@ public class InnerClassExposer extends OriginCodeManipulator {
 
     @Override
     protected void manipulate(ICompilationUnit unit) throws JavaModelException {
-        applyVisitorModifications(unit, new ClassExpositionVisitor(properties));
+        if (properties.get(BinaryProperty.EXPOSE_INNER_CLASSES)) {
+            applyVisitorModifications(unit, new ClassExpositionVisitor(properties));
+        }
     }
 }
