@@ -25,6 +25,7 @@ import jce.codemanipulation.ecore.EcoreImportManipulator;
 import jce.codemanipulation.ecore.FactoryRenamer;
 import jce.codemanipulation.origin.FieldEncapsulator;
 import jce.codemanipulation.origin.InheritanceManipulator;
+import jce.codemanipulation.origin.InnerClassExposer;
 import jce.codemanipulation.origin.MemberRemover;
 import jce.generators.EcoreFactoryGenerator;
 import jce.generators.GenModelGenerator;
@@ -81,13 +82,13 @@ public class JavaCodeEcorification {
         // 2. Build custom factories:
         new FactoryRenamer(metamodel, properties).manipulate(project);
         new EcoreFactoryGenerator(properties).buildFactories(metamodel, project);
+        new InnerClassExposer(properties).manipulate(project);
         // 3. generate wrappers:
         XtendLibraryHelper.addXtendLibs(project, properties);
         ResourceRefresher.refresh(project);
         wrapperGenerator.buildWrappers(metamodel, project);
         // 4. adapt Ecore code
         new EcoreImportManipulator(metamodel, properties).manipulate(project);
-        importOrganizer.manipulate(project);
         // 5. adapt origin code:
         fieldEncapsulator.manipulate(project);
         new MemberRemover(metamodel, properties).manipulate(project);
@@ -122,6 +123,7 @@ public class JavaCodeEcorification {
         properties.set(TextProperty.DATATYPE_PACKAGE, "datatypes");
         properties.set(BinaryProperty.DUMMY_CLASS, false);
         properties.set(BinaryProperty.ROOT_CONTAINER, true);
+        properties.set(BinaryProperty.FINAL_AS_UNCHANGEABLE, false);
     }
 
     /**
