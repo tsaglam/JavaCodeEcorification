@@ -10,6 +10,7 @@ import org.eclipse.ltk.core.refactoring.CreateChangeOperation;
 import org.eclipse.ltk.core.refactoring.PerformChangeOperation;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 
 /**
  * Utility class for applying LTK refactorings.
@@ -26,15 +27,35 @@ public final class RefactoringUtil {
      * Applies a {@link Refactoring} to the Workspace.
      * @param refactoring is the {@link Refactoring}.
      * @param monitor is the {@link IProgressMonitor} for this process.
+     * @return the {@link RefactoringStatus} of the {@link CheckConditionsOperation}.
      */
-    public static void applyRefactoring(Refactoring refactoring, IProgressMonitor monitor) {
+    public static RefactoringStatus applyRefactoring(Refactoring refactoring, IProgressMonitor monitor) {
         CheckConditionsOperation conditionCheck = new CheckConditionsOperation(refactoring, CheckConditionsOperation.ALL_CONDITIONS);
-        CreateChangeOperation changeCreator = new CreateChangeOperation(conditionCheck, RefactoringStatus.WARNING);
+        CreateChangeOperation changeCreator = new CreateChangeOperation(conditionCheck, RefactoringStatus.ERROR);
         PerformChangeOperation changePerformer = new PerformChangeOperation(changeCreator);
         try {
             ResourcesPlugin.getWorkspace().run(changePerformer, monitor);
         } catch (CoreException exception) {
             logger.fatal("Refactoring failed: " + refactoring.getName(), exception);
+        }
+        return conditionCheck.getStatus();
+    }
+
+    /**
+     * Logs the messages of every {@link RefactoringStatusEntry} of an {@link RefactoringStatus} according their
+     * severity.
+     * @param status is the {@link RefactoringStatus}.
+     * @param logger is the {@link Logger} which is used to log the messages.
+     */
+    public static void logStatus(RefactoringStatus status, Logger logger) {
+        for (RefactoringStatusEntry entry : status.getEntries()) {
+            if (entry.isFatalError()) {
+                logger.fatal(entry.getMessage());
+            } else if (entry.isError()) {
+                logger.error(entry.getMessage());
+            } else if (entry.isWarning()) {
+                logger.warn(entry.getMessage());
+            }
         }
     }
 }
