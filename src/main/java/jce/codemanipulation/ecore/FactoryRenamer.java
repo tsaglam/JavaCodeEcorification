@@ -11,7 +11,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameCompilationUnitProcessor;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
 import eme.generator.GeneratedEcoreMetamodel;
@@ -110,8 +109,7 @@ public class FactoryRenamer extends AbstractCodeManipulator {
                     processor.setNewElementName(newName); // set new name
                 }
                 RenameRefactoring refactoring = new RenameRefactoring(processor); // create refactoring
-                RefactoringStatus status = RefactoringUtil.applyRefactoring(refactoring, monitor); // apply refactoring
-                RefactoringUtil.logStatus(status, logger);
+                RefactoringUtil.applyRefactoring(refactoring, monitor, logger);
                 monitor.beginTask("Renamed factory: " + getPackageMemberName(unit), 0);
             } catch (CoreException exception) {
                 logger.fatal("Renaming " + getPackageMemberName(unit) + " failed!", exception);
