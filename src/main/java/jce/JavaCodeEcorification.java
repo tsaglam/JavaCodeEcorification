@@ -124,6 +124,7 @@ public class JavaCodeEcorification {
         properties.set(BinaryProperty.DUMMY_CLASS, false);
         properties.set(BinaryProperty.ROOT_CONTAINER, true);
         properties.set(BinaryProperty.FINAL_AS_UNCHANGEABLE, false);
+        properties.set(BinaryProperty.NESTED_TYPES, false);
     }
 
     /**
