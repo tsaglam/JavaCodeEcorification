@@ -53,17 +53,17 @@ public class FieldEncapsulationVisitor extends ASTVisitor {
         if (binding == null) {
             logger.error("Could not resolve binding: " + fragment + " of " + field);
         } else {
-            encapsulateCorrespondingField(binding); // encapsulates the corresponding IField
+            encapsulateBinding(binding); // encapsulates the corresponding IField
         }
     }
 
     /**
      * Encapsulates the corresponding {@link IJavaElement} of an {@link IVariableBinding} if it is an {@link IField}.
      */
-    private void encapsulateCorrespondingField(IVariableBinding binding) {
+    private void encapsulateBinding(IVariableBinding binding) {
         IJavaElement element = binding.getJavaElement(); // parse FieldDeclaration to IField
         if (element instanceof IField) {
-            encapsulateField((IField) element); // Encapsulate if casted succesful.
+            encapsulateElement((IField) element); // Encapsulate if casted successful.
         } else { // Should never happen:
             throw new ClassCastException("IJavaElement is not IField: " + element + " is " + element.getClass().getName());
         }
@@ -72,10 +72,10 @@ public class FieldEncapsulationVisitor extends ASTVisitor {
     /**
      * Encapsulates a specific {@link IField}.
      */
-    private void encapsulateField(IField field) {
+    private void encapsulateElement(IField field) {
         try {
             SelfEncapsulateFieldRefactoring refactoring = new SelfEncapsulateFieldRefactoring(field);
-            RefactoringUtil.applyRefactoring(refactoring, monitor);
+            RefactoringUtil.applyRefactoring(refactoring, monitor, logger);
         } catch (JavaModelException exception) {
             logger.fatal("Encapsulateing field " + field.getElementName() + " failed!", exception);
         }
