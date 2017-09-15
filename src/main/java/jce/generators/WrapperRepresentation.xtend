@@ -11,6 +11,8 @@ import static jce.properties.TextProperty.FACTORY_SUFFIX
 import static jce.properties.TextProperty.WRAPPER_PACKAGE
 import static jce.properties.TextProperty.WRAPPER_PREFIX
 import static jce.properties.TextProperty.WRAPPER_SUFFIX
+import eme.model.IntermediateModel
+import eme.model.ExtractedType
 
 /**
  * This class models a wrapper class which unifies an origin code type with its Ecore counterparts in the Ecore model
@@ -26,19 +28,24 @@ class WrapperRepresentation {
 	final EClass eClass
 	final String wrapperName
 	final String factoryName
+	final ExtractedType intermediateModelType;
 
 	/**
 	 * Creates a new wrapper representation from an EClass and the EcorificationProperties. The EClass specifies which
 	 * types are unified. The properties specify the employed naming scheme.
 	 */
-	new(EClass eClass, EcorificationProperties properties) {
+	new(EClass eClass, IntermediateModel model, EcorificationProperties properties) { // TODO (HIGH) clean code.
 		this.eClass = eClass
 		this.properties = properties
 		nameUtil = new PathHelper('.')
 		packageName = getPackage(eClass)
-		wrapperName = WRAPPER_PREFIX.get + PathHelper.capitalize(eClass.name) + WRAPPER_SUFFIX.get // name of the wrapper class
+		wrapperName = WRAPPER_PREFIX.get + eClass.name + WRAPPER_SUFFIX.get // name of the wrapper class
 		factoryName = '''«PathHelper.capitalize(packageName.getLastSegment)»Factory«FACTORY_SUFFIX.get»'''
 		superClass = getSuperClassName(eClass)
+		intermediateModelType = model.getType(append(packageName, eClass.name));
+		if(intermediateModelType === null) {
+			throw new IllegalArgumentException("Could not find EClass counterpart in intermediate model.")
+		}
 	}
 
 	/**

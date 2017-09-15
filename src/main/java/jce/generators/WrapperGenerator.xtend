@@ -11,6 +11,7 @@ import org.eclipse.emf.ecore.EPackage
 import static jce.properties.TextProperty.ROOT_CONTAINER
 import static jce.properties.TextProperty.SOURCE_FOLDER
 import static jce.properties.TextProperty.WRAPPER_PACKAGE
+import eme.model.IntermediateModel
 
 /** 
  * Creates and manages wrappers for the classes of the original Java project with is ecorified.
@@ -39,7 +40,7 @@ final class WrapperGenerator extends ClassGenerator {
 		logger.info("Starting the wrapper generation...")
 		this.project = project
 		createFolder(wrapperFolder, project) // build wrapper base folder
-		buildWrappers(metamodel.root, "")
+		buildWrappers(metamodel.root, "", metamodel.intermediateModel)
 		ResourceRefresher.refresh(project, sourceFolder) // makes wrappers visible in the Eclipse IDE
 	}
 
@@ -48,19 +49,19 @@ final class WrapperGenerator extends ClassGenerator {
 	 * @param ePackage is the current {@link EPackage} to create wrappers for.
 	 * @param path is the current file path of the {@link EPackage}. Should be initially an empty string.
 	 */
-	def private void buildWrappers(EPackage ePackage, String path) {
+	def private void buildWrappers(EPackage ePackage, String path, IntermediateModel model) {
 		if(containsEClass(ePackage)) { // avoids empty folders
 			createFolder(append(wrapperFolder, path), project)
 		}
 		for (eClassifier : ePackage.EClassifiers) { // for every classifier
 			if(eClassifier instanceof EClass) { // if is EClass
 				if(!eClassifier.interface && !isRootContainer(eClassifier, path)) { // if is not interface or root
-					createXtendWrapper(eClassifier, path) // create wrapper class
+					createXtendWrapper(eClassifier, path, model) // create wrapper class
 				}
 			}
 		}
 		for (eSubpackage : ePackage.ESubpackages) { // for every subpackage
-			buildWrappers(eSubpackage, append(path, eSubpackage.name)) // do the same
+			buildWrappers(eSubpackage, append(path, eSubpackage.name), model) // do the same
 		}
 	}
 
@@ -81,8 +82,8 @@ final class WrapperGenerator extends ClassGenerator {
 	/**
 	 * Creates a Xtend Wrapper in a package path with a specific name. 
 	 */
-	def private void createXtendWrapper(EClass eClass, String path) {
-		val wrapper = new WrapperRepresentation(eClass, properties) // build wrapper representation
+	def private void createXtendWrapper(EClass eClass, String path, IntermediateModel model) {
+		val wrapper = new WrapperRepresentation(eClass, model, properties) // build wrapper representation
 		val wrapperPath = append(WRAPPER_PACKAGE.get, path) // add wrapper prefix
 		createClass(wrapperPath, '''«wrapper.name».xtend''', wrapper.content, project) // create wrapper
 	}
