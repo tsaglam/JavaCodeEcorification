@@ -18,6 +18,7 @@ import org.eclipse.text.edits.TextEdit;
 
 import jce.properties.EcorificationProperties;
 import jce.properties.TextProperty;
+import jce.util.ASTUtil;
 import jce.util.PackageFilter;
 import jce.util.logging.MonitorFactory;
 
@@ -51,7 +52,7 @@ public class ImportOrganizer extends AbstractCodeManipulator {
         try {
             OrganizeImportsOperation operation = new OrganizeImportsOperation(unit, reconciledUnit, true, true, true, null);
             TextEdit edit = operation.createTextEdit(monitor);
-            applyTextEdit(edit, unit);
+            ASTUtil.applyTextEdit(edit, unit, monitor);
         } catch (OperationCanceledException exception) {
             logger.error(exception);
         } catch (CoreException exception) {

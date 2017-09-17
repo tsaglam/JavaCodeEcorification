@@ -16,6 +16,7 @@ import eme.generator.GeneratedEcoreMetamodel;
 import jce.codemanipulation.AbstractCodeManipulator;
 import jce.properties.EcorificationProperties;
 import jce.properties.TextProperty;
+import jce.util.ASTUtil;
 import jce.util.MetamodelSearcher;
 import jce.util.PackageFilter;
 
@@ -122,7 +123,7 @@ public class EcoreImportManipulator extends AbstractCodeManipulator {
      * Retains the super interface declarations of an compilation unit. .
      */
     private void retainInterface(ICompilationUnit unit) throws JavaModelException {
-        applyVisitorModifications(unit, new InterfaceRetentionVisitor(unit.getImports(), unit.getParent().getElementName()));
+        ASTUtil.applyVisitorModifications(unit, new InterfaceRetentionVisitor(unit.getImports(), unit.getParent().getElementName()), monitor);
     }
 
     @Override
@@ -150,8 +151,8 @@ public class EcoreImportManipulator extends AbstractCodeManipulator {
                     edit(importDeclaration, implementationRewrite, interfaceRewrite);
                 }
             }
-            applyImportRewrite(unit, implementationRewrite);
-            applyImportRewrite(ecoreInterface, interfaceRewrite);
+            ASTUtil.applyImportRewrite(unit, implementationRewrite, monitor);
+            ASTUtil.applyImportRewrite(ecoreInterface, interfaceRewrite, monitor);
         }
     }
 }

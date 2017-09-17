@@ -5,6 +5,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import jce.properties.BinaryProperty;
 import jce.properties.EcorificationProperties;
+import jce.util.ASTUtil;
 
 /**
  * Changes the visibility of default inner classes of the origin code to public to make them visible.
@@ -23,7 +24,7 @@ public class InnerClassExposer extends OriginCodeManipulator {
     @Override
     protected void manipulate(ICompilationUnit unit) throws JavaModelException {
         if (properties.get(BinaryProperty.EXPOSE_INNER_CLASSES)) {
-            applyVisitorModifications(unit, new ClassExpositionVisitor(properties));
+            ASTUtil.applyVisitorModifications(unit, new ClassExpositionVisitor(properties), monitor);
         }
     }
 }

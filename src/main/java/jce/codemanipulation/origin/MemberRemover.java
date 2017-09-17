@@ -5,6 +5,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import eme.generator.GeneratedEcoreMetamodel;
 import jce.properties.EcorificationProperties;
+import jce.util.ASTUtil;
 
 /**
  * Removes all private non-static fields and their access methods from the origin code that have a counterpart in the
@@ -29,6 +30,6 @@ public class MemberRemover extends OriginCodeManipulator {
         if (metamodel == null) {
             throw new IllegalStateException("Please set the generated Ecore metamodel before calling manipulate().");
         }
-        applyVisitorModifications(unit, new MemberRemovalVisitor(metamodel, properties));
+        ASTUtil.applyVisitorModifications(unit, new MemberRemovalVisitor(metamodel, properties), monitor);
     }
 }

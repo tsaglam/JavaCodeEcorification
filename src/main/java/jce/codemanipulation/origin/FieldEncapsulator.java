@@ -11,6 +11,7 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import jce.properties.EcorificationProperties;
+import jce.util.ASTUtil;
 
 /**
  * Encapsulates the fields of the origin code. This is necessary for the removal of the fields.
@@ -28,8 +29,8 @@ public class FieldEncapsulator extends OriginCodeManipulator {
 
     @Override
     protected void manipulate(ICompilationUnit unit) throws JavaModelException {
-        applyVisitorModifications(unit, new FieldUnfinalizationVisitor()); // make final fields not final
-        CompilationUnit parsedUnit = parse(unit);
+        ASTUtil.applyVisitorModifications(unit, new FieldUnfinalizationVisitor(), monitor); // make final fields not final
+        CompilationUnit parsedUnit = ASTUtil.parse(unit, monitor);
         parsedUnit.accept(new FieldEncapsulationVisitor(properties));
     }
 

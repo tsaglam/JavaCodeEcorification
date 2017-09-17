@@ -4,6 +4,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 
 import jce.properties.EcorificationProperties;
+import jce.util.ASTUtil;
 
 /**
  * Changes the inheritance of the origin code to let the original classes inherit from the generated unification
@@ -22,6 +23,6 @@ public class InheritanceManipulator extends OriginCodeManipulator {
 
     @Override
     protected void manipulate(ICompilationUnit unit) throws JavaModelException {
-        applyVisitorModifications(unit, new InheritanceManipulationVisitor(unit.getParent().getElementName(), properties));
+        ASTUtil.applyVisitorModifications(unit, new InheritanceManipulationVisitor(unit.getParent().getElementName(), properties), monitor);
     }
 }
