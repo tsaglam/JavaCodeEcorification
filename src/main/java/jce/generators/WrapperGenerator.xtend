@@ -7,12 +7,12 @@ import org.eclipse.core.resources.IProject
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EClassifier
 import org.eclipse.emf.ecore.EPackage
+import org.eclipse.jdt.core.IJavaProject
+import org.eclipse.jdt.core.JavaCore
 
 import static jce.properties.TextProperty.ROOT_CONTAINER
 import static jce.properties.TextProperty.SOURCE_FOLDER
 import static jce.properties.TextProperty.WRAPPER_PACKAGE
-import org.eclipse.jdt.core.IJavaProject
-import org.eclipse.jdt.core.JavaCore
 
 /** 
  * Creates and manages wrappers for the classes of the original Java project with is ecorified.

@@ -1,18 +1,25 @@
 package jce.generators
 
+import java.util.List
 import jce.properties.EcorificationProperties
+import jce.util.ASTUtil
 import jce.util.PathHelper
+import jce.util.logging.MonitorFactory
+import org.apache.log4j.LogManager
+import org.apache.log4j.Logger
+import org.eclipse.core.runtime.IProgressMonitor
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.impl.MinimalEObjectImpl
+import org.eclipse.jdt.core.IJavaProject
+import org.eclipse.jdt.core.IType
+import org.eclipse.jdt.core.dom.CompilationUnit
 
 import static jce.properties.TextProperty.ECORE_PACKAGE
 import static jce.properties.TextProperty.FACTORY_SUFFIX
 import static jce.properties.TextProperty.WRAPPER_PACKAGE
 import static jce.properties.TextProperty.WRAPPER_PREFIX
 import static jce.properties.TextProperty.WRAPPER_SUFFIX
-import org.eclipse.jdt.core.IJavaProject
-import org.eclipse.jdt.core.IType
 
 /**
  * This class models a wrapper class which unifies an origin code type with its Ecore counterparts in the Ecore model
@@ -23,12 +30,13 @@ class WrapperRepresentation {
 	extension PathHelper nameUtil
 	extension EcorificationProperties properties
 
+	static final Logger logger = LogManager.getLogger(WrapperRepresentation.name)
 	final String packageName
 	final String superClass
 	final EClass eClass
 	final String wrapperName
 	final String factoryName
-	final IType type;
+	List<WrapperConstructor> constructors
 
 	/**
 	 * Creates a new wrapper representation from an EClass and the EcorificationProperties. The EClass specifies which
@@ -41,8 +49,8 @@ class WrapperRepresentation {
 		packageName = getPackage(eClass)
 		wrapperName = WRAPPER_PREFIX.get + eClass.name + WRAPPER_SUFFIX.get // name of the wrapper class
 		factoryName = '''«PathHelper.capitalize(packageName.getLastSegment)»Factory«FACTORY_SUFFIX.get»'''
-		superClass = getSuperClassName(eClass);
-		type = project.findType(append(packageName, eClass.name))
+		superClass = getSuperClassName(eClass)
+		buildConstructors(project, properties)
 	}
 
 	/**
@@ -73,10 +81,16 @@ class WrapperRepresentation {
 				@DelegateDeclared
 			«ENDIF»
 			protected var «eClass.name» ecoreImplementation
-			
-			new() {
-				ecoreImplementation = instance
-			}
+			«IF superClass === null»
+				
+				new() {
+					ecoreImplementation = instance
+				}
+			«ELSE»
+				«FOR constructor : constructors»
+					«constructor.content»
+				«ENDFOR»
+			«ENDIF»
 			
 			«IF eClass.abstract»
 				«getMethodKeyword()» protected abstract «eClass.name» getInstance()
@@ -100,6 +114,18 @@ class WrapperRepresentation {
 	 */
 	def String getPackage() {
 		return packageName
+	}
+
+	/**
+	 * Builds the constructor representations from the correlating IType of the wrapper.
+	 */
+	def private void buildConstructors(IJavaProject project, EcorificationProperties properties) {
+		val ConstructorVisitor visitor = new ConstructorVisitor
+		val IType type = project.findType(append(packageName, eClass.name))
+		val IProgressMonitor monitor = MonitorFactory.createProgressMonitor(logger, properties)
+		val CompilationUnit parsedUnit = ASTUtil.parse(type.compilationUnit, monitor)
+		parsedUnit.accept(visitor)
+		constructors = visitor.constructors
 	}
 
 	/**

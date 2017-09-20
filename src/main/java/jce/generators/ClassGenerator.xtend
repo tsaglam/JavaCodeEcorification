@@ -17,7 +17,7 @@ class ClassGenerator {
 	extension protected final PathHelper pathUtil
 	extension protected final EcorificationProperties properties
 	
-	protected static final Logger logger = LogManager.getLogger(ClassGenerator.getName)
+	protected static final Logger logger = LogManager.getLogger(ClassGenerator.name)
 	protected final IProgressMonitor monitor
 
 	/**
