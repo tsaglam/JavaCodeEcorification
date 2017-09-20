@@ -2,18 +2,11 @@ package jce.generators
 
 import java.util.List
 import jce.properties.EcorificationProperties
-import jce.util.ASTUtil
 import jce.util.PathHelper
-import jce.util.logging.MonitorFactory
-import org.apache.log4j.LogManager
-import org.apache.log4j.Logger
-import org.eclipse.core.runtime.IProgressMonitor
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.impl.MinimalEObjectImpl
 import org.eclipse.jdt.core.IJavaProject
-import org.eclipse.jdt.core.IType
-import org.eclipse.jdt.core.dom.CompilationUnit
 
 import static jce.properties.TextProperty.ECORE_PACKAGE
 import static jce.properties.TextProperty.FACTORY_SUFFIX
@@ -30,7 +23,6 @@ class WrapperRepresentation {
 	extension PathHelper nameUtil
 	extension EcorificationProperties properties
 
-	static final Logger logger = LogManager.getLogger(WrapperRepresentation.name)
 	final String packageName
 	final String superClass
 	final EClass eClass
@@ -50,7 +42,7 @@ class WrapperRepresentation {
 		wrapperName = WRAPPER_PREFIX.get + eClass.name + WRAPPER_SUFFIX.get // name of the wrapper class
 		factoryName = '''«PathHelper.capitalize(packageName.getLastSegment)»Factory«FACTORY_SUFFIX.get»'''
 		superClass = getSuperClassName(eClass)
-		buildConstructors(project, properties)
+		ConstructorGenerator.generate(append(packageName, eClass.name), project, properties)
 	}
 
 	/**
@@ -114,18 +106,6 @@ class WrapperRepresentation {
 	 */
 	def String getPackage() {
 		return packageName
-	}
-
-	/**
-	 * Builds the constructor representations from the correlating IType of the wrapper.
-	 */
-	def private void buildConstructors(IJavaProject project, EcorificationProperties properties) {
-		val ConstructorVisitor visitor = new ConstructorVisitor
-		val IType type = project.findType(append(packageName, eClass.name))
-		val IProgressMonitor monitor = MonitorFactory.createProgressMonitor(logger, properties)
-		val CompilationUnit parsedUnit = ASTUtil.parse(type.compilationUnit, monitor)
-		parsedUnit.accept(visitor)
-		constructors = visitor.constructors
 	}
 
 	/**
