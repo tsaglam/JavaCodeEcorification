@@ -55,7 +55,7 @@ class WrapperRepresentation {
 
 	/**
 	 * Builds the content of a wrapper class.
-	 */
+	 */ // TODO (HIGH) Imports for wrapper constructors.
 	def String getContent() '''
 		package «append(WRAPPER_PACKAGE.get, packageName)»
 		
