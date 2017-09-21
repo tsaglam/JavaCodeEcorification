@@ -18,7 +18,7 @@ import jce.properties.EcorificationProperties;
 import jce.properties.TextProperty;
 import jce.util.ASTUtil;
 import jce.util.MetamodelSearcher;
-import jce.util.PackageFilter;
+import jce.util.jdt.PackageFilter;
 
 /**
  * Base class for the adaption of problematic import declarations in the Ecore code. A problematic import declaration is

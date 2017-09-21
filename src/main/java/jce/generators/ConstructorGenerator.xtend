@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit
 import org.eclipse.jdt.core.dom.MethodDeclaration
 import org.eclipse.xtend.lib.annotations.Accessors
 import java.lang.reflect.Modifier
+import org.eclipse.jdt.core.ICompilationUnit
 
 final class ConstructorGenerator {
 	static final Logger logger = LogManager.getLogger(ConstructorGenerator.name)
@@ -29,8 +30,8 @@ final class ConstructorGenerator {
 	 */
 	def static List<WrapperConstructor> generate(String typeName, IJavaProject project,
 		EcorificationProperties properties) {
-		val ConstructorVisitor visitor = new ConstructorVisitor
 		val IType type = project.findType(typeName)
+		val ConstructorVisitor visitor = new ConstructorVisitor(type)
 		val IProgressMonitor monitor = MonitorFactory.createProgressMonitor(logger, properties)
 		val CompilationUnit parsedUnit = ASTUtil.parse(type.compilationUnit, monitor)
 		parsedUnit.accept(visitor)
@@ -43,17 +44,19 @@ final class ConstructorGenerator {
 	@Accessors(PUBLIC_GETTER)
 	static class ConstructorVisitor extends ASTVisitor {
 		List<WrapperConstructor> constructors
+		ICompilationUnit unit
 
 		/**
 		 * Basic constructor, creates WrapperConstructor list.
 		 */
-		new() {
+		new(IType type) {
+			unit = type.compilationUnit
 			constructors = new LinkedList
 		}
 
 		override visit(MethodDeclaration node) {
 			if(node.isConstructor && Modifier.isPublic(node.getModifiers)) {
-				constructors.add(new WrapperConstructor(node))
+				constructors.add(new WrapperConstructor(node, unit))
 			}
 			return false
 		}

@@ -7,6 +7,8 @@ import org.apache.log4j.Logger
 import org.eclipse.jdt.core.dom.MethodDeclaration
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration
 import org.eclipse.xtend.lib.annotations.Accessors
+import org.eclipse.jdt.core.ICompilationUnit
+import jce.util.jdt.TypeUtil
 
 /**
  * This class models a constructor of a wrapper class.
@@ -21,9 +23,10 @@ class WrapperConstructor {
 	String content
 
 	/**
-	 * Basic constructor, creates a wrapper constructor from a MethodDeclaration of a origin code constructor. 
+	 * Basic constructor, creates a wrapper constructor from a MethodDeclaration of a origin code constructor and the
+	 * correlating compilation unit. 
 	 */
-	new(MethodDeclaration declaration) {
+	new(MethodDeclaration declaration, ICompilationUnit unit) {
 		this.declaration = declaration
 		parameters = new LinkedList
 		for (parameter : declaration.parameters) {
@@ -31,6 +34,8 @@ class WrapperConstructor {
 		}
 		content = buildContent
 	}
+
+	
 
 	override toString() {
 		return class.name + parameters
