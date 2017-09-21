@@ -6,13 +6,13 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import jce.util.PathHelper;
 import jce.util.RawTypeUtil;
+import jce.util.jdt.TypeUtil;
 
 /**
  * {@link ASTVisitor} class that retains the super interface declarations of the Ecore implementation classes. The
@@ -54,7 +54,7 @@ public class InterfaceRetentionVisitor extends ASTVisitor {
      */
     @SuppressWarnings("unchecked")
     private void changeSuperInterface(Type superInterface, TypeDeclaration node, AST ast) {
-        SimpleType interfaceType = getSimpleType(superInterface);
+        SimpleType interfaceType = TypeUtil.getSimpleType(superInterface);
         if (isNotEObject(interfaceType)) {
             String newName = getName(interfaceType);
             Type newSuperType = ast.newSimpleType(ast.newName(newName));
@@ -74,19 +74,6 @@ public class InterfaceRetentionVisitor extends ASTVisitor {
             }
         }
         return pathHelper.append(currentPackage, typeName);
-    }
-
-    /**
-     * Returns the {@link SimpleType} of a {@link Type}. If the {@link Type} is a {@link SimpleType} it is simply
-     * casted. If it is a {@link ParameterizedType}, its type gets resolved recusivley with this method.
-     */
-    private SimpleType getSimpleType(Type type) {
-        if (type.isSimpleType()) { // cast simple types
-            return (SimpleType) type;
-        } else if (type.isParameterizedType()) { // get simple types from parameterized types.
-            return getSimpleType(((ParameterizedType) type).getType());
-        } // not supported: primitive types, array types
-        throw new IllegalArgumentException("Cannot get simple type from  " + type);
     }
 
     /**
