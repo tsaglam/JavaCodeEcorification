@@ -5,7 +5,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import jce.properties.BinaryProperty;
 import jce.properties.EcorificationProperties;
-import jce.util.ASTUtil;
+import jce.util.jdt.ASTUtil;
 
 /**
  * Changes the visibility of default inner classes of the origin code to public to make them visible.

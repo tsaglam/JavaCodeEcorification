@@ -1,21 +1,21 @@
 package jce.generators
 
+import java.lang.reflect.Modifier
 import java.util.LinkedList
 import java.util.List
 import jce.properties.EcorificationProperties
-import jce.util.ASTUtil
+import jce.util.jdt.ASTUtil
 import jce.util.logging.MonitorFactory
 import org.apache.log4j.LogManager
 import org.apache.log4j.Logger
 import org.eclipse.core.runtime.IProgressMonitor
+import org.eclipse.jdt.core.ICompilationUnit
 import org.eclipse.jdt.core.IJavaProject
 import org.eclipse.jdt.core.IType
 import org.eclipse.jdt.core.dom.ASTVisitor
 import org.eclipse.jdt.core.dom.CompilationUnit
 import org.eclipse.jdt.core.dom.MethodDeclaration
 import org.eclipse.xtend.lib.annotations.Accessors
-import java.lang.reflect.Modifier
-import org.eclipse.jdt.core.ICompilationUnit
 
 final class ConstructorGenerator {
 	static final Logger logger = LogManager.getLogger(ConstructorGenerator.name)

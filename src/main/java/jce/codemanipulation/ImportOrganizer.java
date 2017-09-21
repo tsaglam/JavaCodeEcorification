@@ -18,7 +18,7 @@ import org.eclipse.text.edits.TextEdit;
 
 import jce.properties.EcorificationProperties;
 import jce.properties.TextProperty;
-import jce.util.ASTUtil;
+import jce.util.jdt.ASTUtil;
 import jce.util.jdt.PackageFilter;
 import jce.util.logging.MonitorFactory;
 

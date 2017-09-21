@@ -4,7 +4,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 
 import jce.properties.EcorificationProperties;
-import jce.util.ASTUtil;
+import jce.util.jdt.ASTUtil;
 
 /**
  * Changes the inheritance of the origin code to let the original classes inherit from the generated unification

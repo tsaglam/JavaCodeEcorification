@@ -5,7 +5,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import eme.generator.GeneratedEcoreMetamodel;
 import jce.properties.EcorificationProperties;
-import jce.util.ASTUtil;
+import jce.util.jdt.ASTUtil;
 
 /**
  * Removes all private non-static fields and their access methods from the origin code that have a counterpart in the

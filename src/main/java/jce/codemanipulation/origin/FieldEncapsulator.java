@@ -11,7 +11,7 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import jce.properties.EcorificationProperties;
-import jce.util.ASTUtil;
+import jce.util.jdt.ASTUtil;
 
 /**
  * Encapsulates the fields of the origin code. This is necessary for the removal of the fields.

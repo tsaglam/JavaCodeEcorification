@@ -16,8 +16,8 @@ import eme.generator.GeneratedEcoreMetamodel;
 import jce.codemanipulation.AbstractCodeManipulator;
 import jce.properties.EcorificationProperties;
 import jce.properties.TextProperty;
-import jce.util.ASTUtil;
 import jce.util.MetamodelSearcher;
+import jce.util.jdt.ASTUtil;
 import jce.util.jdt.PackageFilter;
 
 /**
