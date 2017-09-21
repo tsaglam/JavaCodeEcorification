@@ -14,7 +14,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldRefactoring;
 
 import jce.properties.EcorificationProperties;
-import jce.util.RefactoringUtil;
+import jce.util.jdt.RefactoringUtil;
 import jce.util.logging.MonitorFactory;
 
 /**

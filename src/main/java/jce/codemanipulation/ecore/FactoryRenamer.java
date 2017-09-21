@@ -19,8 +19,8 @@ import jce.properties.EcorificationProperties;
 import jce.properties.TextProperty;
 import jce.util.MetamodelSearcher;
 import jce.util.PathHelper;
-import jce.util.RefactoringUtil;
 import jce.util.jdt.PackageFilter;
+import jce.util.jdt.RefactoringUtil;
 
 /**
  * Code manipulator that moves the original Ecore factory implementation class into a new subpackage.

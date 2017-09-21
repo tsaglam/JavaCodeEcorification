@@ -1,4 +1,4 @@
-package jce.util;
+package jce.util.jdt;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -86,8 +86,8 @@ public final class RefactoringUtil {
                 logger.fatal(entry.getMessage());
             } else if (entry.isError()) { // log fatal status as error level:
                 logger.error(entry.getMessage());
-            } else if (entry.isWarning()) { // warnings can generally be ignored
-                logger.debug(entry.getMessage()); // log as debug level
+            } else if (entry.isWarning()) { // log warning status as info level:
+                logger.info(entry.getMessage());
             }
         }
     }
