@@ -2,6 +2,7 @@ package jce.util.jdt
 
 import java.util.Arrays
 import java.util.Map
+import jce.properties.EcorificationProperties
 import org.apache.log4j.LogManager
 import org.apache.log4j.Logger
 import org.eclipse.core.runtime.CoreException
@@ -21,7 +22,6 @@ import org.eclipse.jface.text.Document
 import org.eclipse.jface.text.IDocument
 import org.eclipse.text.edits.MalformedTreeException
 import org.eclipse.text.edits.TextEdit
-import jce.properties.EcorificationProperties
 
 /**
  * Utility class for AST functionality such ass applying import rewrites, visitor modifications and text edits.
