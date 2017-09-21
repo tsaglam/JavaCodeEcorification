@@ -2,13 +2,13 @@ package jce.generators
 
 import java.util.LinkedList
 import java.util.List
+import jce.util.jdt.TypeUtil
 import org.apache.log4j.LogManager
 import org.apache.log4j.Logger
+import org.eclipse.jdt.core.ICompilationUnit
 import org.eclipse.jdt.core.dom.MethodDeclaration
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration
 import org.eclipse.xtend.lib.annotations.Accessors
-import org.eclipse.jdt.core.ICompilationUnit
-import jce.util.jdt.TypeUtil
 
 /**
  * This class models a constructor of a wrapper class.
@@ -33,9 +33,8 @@ class WrapperConstructor {
 			addParameter(parameter)
 		}
 		content = buildContent
+		buildImports(unit)
 	}
-
-	
 
 	override toString() {
 		return class.name + parameters
@@ -59,12 +58,26 @@ class WrapperConstructor {
 	 * Builds the Xtend code fragment of this constructor.
 	 */
 	def private String buildContent() '''
-		
 		new(«buildParameters») {
 			super(«buildNames»)
 			ecoreImplementation = instance
 		}
+		
 	'''
+
+	/** 
+	 * Builds the list of types that need to be imported to use the constructors.
+	 */
+	def private void buildImports(ICompilationUnit unit) {
+		imports = new LinkedList
+		for (import : unit.imports) { // for every import
+			for (parameter : parameters) { // if is needed for parameter
+				if(import.elementName.endsWith(TypeUtil.getTypeName(parameter.type))) {
+					imports.add(import.elementName) // add to import string list.
+				}
+			}
+		}
+	}
 
 	/**
 	 * Builds the list of parameters.

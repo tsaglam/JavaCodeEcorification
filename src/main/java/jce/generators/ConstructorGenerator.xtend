@@ -25,11 +25,13 @@ final class ConstructorGenerator {
 	}
 
 	/**
-	 * Builds the constructor representations from all constructors of an IType. The IType is the correlating type to
-	 * the wrapper which should use the generated constructors.
+	 * Builds the constructor representations from all constructors of an IType. The IType is the correlating super type
+	 * of the wrapper which should use the generated constructors.
 	 */
-	def static List<WrapperConstructor> generate(String typeName, IJavaProject project,
-		EcorificationProperties properties) {
+	def static List<WrapperConstructor> generate(String typeName, IJavaProject project, EcorificationProperties properties) {
+		if(typeName === null) {
+			return new LinkedList<WrapperConstructor>()
+		}
 		val IType type = project.findType(typeName)
 		val ConstructorVisitor visitor = new ConstructorVisitor(type)
 		val IProgressMonitor monitor = MonitorFactory.createProgressMonitor(logger, properties)

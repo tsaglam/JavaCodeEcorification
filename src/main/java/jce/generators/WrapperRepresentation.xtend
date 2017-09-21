@@ -13,6 +13,8 @@ import static jce.properties.TextProperty.FACTORY_SUFFIX
 import static jce.properties.TextProperty.WRAPPER_PACKAGE
 import static jce.properties.TextProperty.WRAPPER_PREFIX
 import static jce.properties.TextProperty.WRAPPER_SUFFIX
+import java.util.Set
+import java.util.HashSet
 
 /**
  * This class models a wrapper class which unifies an origin code type with its Ecore counterparts in the Ecore model
@@ -28,7 +30,8 @@ class WrapperRepresentation {
 	final EClass eClass
 	final String wrapperName
 	final String factoryName
-	List<WrapperConstructor> constructors
+	final List<WrapperConstructor> wrapperConstructors
+	final Set<String> constructorImports
 
 	/**
 	 * Creates a new wrapper representation from an EClass and the EcorificationProperties. The EClass specifies which
@@ -42,55 +45,30 @@ class WrapperRepresentation {
 		wrapperName = WRAPPER_PREFIX.get + eClass.name + WRAPPER_SUFFIX.get // name of the wrapper class
 		factoryName = '''«PathHelper.capitalize(packageName.getLastSegment)»Factory«FACTORY_SUFFIX.get»'''
 		superClass = getSuperClassName(eClass)
-		constructors = ConstructorGenerator.generate(append(packageName, eClass.name), project, properties)
+		wrapperConstructors = ConstructorGenerator.generate(superClass, project, properties)
+		constructorImports = new HashSet
+		for (constructor : wrapperConstructors) {
+			constructorImports.addAll(constructor.imports)
+		}
 	}
 
 	/**
 	 * Builds the content of a wrapper class.
-	 */ // TODO (HIGH) Imports for wrapper constructors.
+	 */
 	def String getContent() '''
 		package «append(WRAPPER_PACKAGE.get, packageName)»
 		
-		import «append(ECORE_PACKAGE.get, packageName)».«eClass.name»
-		«IF !eClass.abstract»
-			import «append(ECORE_PACKAGE.get, packageName)».«factoryName»
-		«ENDIF»
-		«IF superClass === null»
-			import org.eclipse.emf.ecore.impl.MinimalEObjectImpl
-			import org.eclipse.xtend.lib.annotations.Delegate
-		«ELSE»
-			import edu.kit.ipd.sdq.activextendannotations.DelegateDeclared
-			import «superClass»
-		«ENDIF»
+		«imports»
 		
 		/**
 		 * Unification class for the class «eClass.name»
 		 */
 		«IF eClass.abstract»abstract «ENDIF»class «wrapperName» extends «createSuperType(superClass)» implements «eClass.name» {
-			«IF superClass === null»
-				@Delegate
-			«ELSE»
-				@DelegateDeclared
-			«ENDIF»
+			«delegateAnnotation»
 			protected var «eClass.name» ecoreImplementation
-			«IF superClass === null»
-				
-				new() {
-					ecoreImplementation = instance
-				}
-			«ELSE»
-				«FOR constructor : constructors»
-					«constructor.content»
-				«ENDFOR»
-			«ENDIF»
 			
-			«IF eClass.abstract»
-				«getMethodKeyword()» protected abstract «eClass.name» getInstance()
-			«ELSE»
-				«getMethodKeyword()» protected «eClass.name» getInstance() {
-					return «factoryName».eINSTANCE.create«eClass.name»
-				}
-			«ENDIF»
+			«constructors»
+			«instanceMethod»
 		}
 	'''
 
@@ -117,6 +95,66 @@ class WrapperRepresentation {
 		}
 		return superClass.getLastSegment
 	}
+
+	/**
+	 * Creates the constructors depending on the super class.
+	 */
+	def private String getConstructors() '''
+		«IF superClass === null»
+			new() {
+				ecoreImplementation = instance
+			}
+			
+		«ELSE»
+			«FOR constructor : wrapperConstructors»
+				«constructor.content»
+			«ENDFOR»
+		«ENDIF»
+	'''
+
+	/**
+	 * Creates the delegate annotation.
+	 */
+	def private String getDelegateAnnotation() '''
+		«IF superClass === null»
+			@Delegate
+		«ELSE»
+			@DelegateDeclared
+		«ENDIF»
+	'''
+
+	/**
+	 * Creates the import declarations depending on the super class.
+	 */
+	def private String getImports() '''
+		import «append(ECORE_PACKAGE.get, packageName)».«eClass.name»
+		«IF !eClass.abstract»
+			import «append(ECORE_PACKAGE.get, packageName)».«factoryName»
+		«ENDIF»
+		«IF superClass === null»
+			import org.eclipse.emf.ecore.impl.MinimalEObjectImpl
+			import org.eclipse.xtend.lib.annotations.Delegate
+		«ELSE»
+			import edu.kit.ipd.sdq.activextendannotations.DelegateDeclared
+			import «superClass»
+			«FOR importDeclaration : constructorImports»
+				import «importDeclaration»
+			«ENDFOR»
+		«ENDIF»
+	'''
+
+	/**
+	 * Creates the instance template method.
+	 */
+	def private String getInstanceMethod() '''
+		«IF eClass.abstract»
+			«methodKeyword» protected abstract «eClass.name» getInstance()
+		«ELSE»
+			«methodKeyword» protected «eClass.name» getInstance() {
+				return «factoryName».eINSTANCE.create«eClass.name»
+			}
+		«ENDIF»
+	'''
 
 	/**
 	 * 	Starts a method declaration. Returns either "def" or "override" depending on whether the EClass has a superclass.
