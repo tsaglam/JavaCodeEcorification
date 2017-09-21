@@ -42,7 +42,7 @@ class WrapperRepresentation {
 		wrapperName = WRAPPER_PREFIX.get + eClass.name + WRAPPER_SUFFIX.get // name of the wrapper class
 		factoryName = '''«PathHelper.capitalize(packageName.getLastSegment)»Factory«FACTORY_SUFFIX.get»'''
 		superClass = getSuperClassName(eClass)
-		ConstructorGenerator.generate(append(packageName, eClass.name), project, properties)
+		constructors = ConstructorGenerator.generate(append(packageName, eClass.name), project, properties)
 	}
 
 	/**
