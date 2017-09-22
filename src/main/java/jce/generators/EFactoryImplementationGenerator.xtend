@@ -97,7 +97,8 @@ class EFactoryImplementationGenerator extends ClassGenerator {
 		                throw new IllegalArgumentException("The class '" + eClass.getName() + "' is not a valid classifier");
 		        }
 		    }
-		«FOR type : packageTypes»
+		
+		«FOR type : packageTypes SEPARATOR blankLine»
 			«createFactoryMethod(type)»
 		«ENDFOR»
 		
@@ -124,9 +125,8 @@ class EFactoryImplementationGenerator extends ClassGenerator {
 	 * Creates the content of an Ecore factory method.
 	 */
 	def private String createFactoryMethod(String className) '''
-		
 			/**
-		 	 * @generated
+			 * @generated
 			 */
 			public «className» create«className»() {
 				return new «className»(); // origin code instance

@@ -52,10 +52,11 @@ class EFactoryGenerator extends ClassGenerator {
 		     * @generated
 		     */
 		    «packageName»Factory eINSTANCE = «currentPackage».impl.«packageName»FactoryImpl.init();
-		«FOR type : packageTypes»
+			
+		«FOR type : packageTypes SEPARATOR blankLine»
 			«createFactoryMethod(type)»
 		«ENDFOR»
-		
+			
 		    /**
 		 	 * Returns the package supported by this factory.
 			 * @return the package supported by this factory.
@@ -70,7 +71,6 @@ class EFactoryGenerator extends ClassGenerator {
 	 * Creates the content of an Ecore factory method.
 	 */
 	def private String createFactoryMethod(String className) '''
-		
 			/**
 			 * Returns a new object of class '<em>«className»</em>'.
 			 * @return a new object of class '<em>«className»</em>'.

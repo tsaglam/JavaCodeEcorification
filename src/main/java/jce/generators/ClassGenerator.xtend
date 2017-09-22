@@ -52,4 +52,11 @@ class ClassGenerator {
 			folder.create(false, true, monitor)
 		}
 	}
+	
+	/**
+	 * Generates a blank line in a template.
+	 */
+	def protected String getBlankLine() '''
+		
+	'''
 }

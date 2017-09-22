@@ -62,7 +62,6 @@ class WrapperConstructor {
 			super(«buildNames»)
 			ecoreImplementation = instance
 		}
-		
 	'''
 
 	/** 

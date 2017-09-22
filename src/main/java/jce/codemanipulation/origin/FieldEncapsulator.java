@@ -29,7 +29,7 @@ public class FieldEncapsulator extends OriginCodeManipulator {
 
     @Override
     protected void manipulate(ICompilationUnit unit) throws JavaModelException {
-        ASTUtil.applyVisitorModifications(unit, new FieldUnfinalizationVisitor(), monitor); // make final fields not final
+        ASTUtil.applyVisitorModifications(unit, new FieldUnfinalizationVisitor(), monitor); // make fields not final
         CompilationUnit parsedUnit = ASTUtil.parse(unit, monitor);
         parsedUnit.accept(new FieldEncapsulationVisitor(properties));
     }

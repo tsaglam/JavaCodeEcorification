@@ -37,7 +37,7 @@ class WrapperRepresentation {
 	 * Creates a new wrapper representation from an EClass and the EcorificationProperties. The EClass specifies which
 	 * types are unified. The properties specify the employed naming scheme.
 	 */
-	new(EClass eClass, IJavaProject project, EcorificationProperties properties) { // TODO (HIGH) clean code.
+	new(EClass eClass, IJavaProject project, EcorificationProperties properties) {
 		this.eClass = eClass
 		this.properties = properties
 		nameUtil = new PathHelper('.')
@@ -63,11 +63,14 @@ class WrapperRepresentation {
 		/**
 		 * Unification class for the class «eClass.name»
 		 */
+		 ««« method signature:
 		«IF eClass.abstract»abstract «ENDIF»class «wrapperName» extends «createSuperType(superClass)» implements «eClass.name» {
+			
 			«delegateAnnotation»
 			protected var «eClass.name» ecoreImplementation
 			
-			«constructors»
+		 	«constructors»
+			
 			«instanceMethod»
 		}
 	'''
@@ -100,13 +103,12 @@ class WrapperRepresentation {
 	 * Creates the constructors depending on the super class.
 	 */
 	def private String getConstructors() '''
-		«IF superClass === null»
+		«IF superClass === null || wrapperConstructors.empty»
 			new() {
 				ecoreImplementation = instance
 			}
-			
 		«ELSE»
-			«FOR constructor : wrapperConstructors»
+			«FOR constructor : wrapperConstructors SEPARATOR blankLine»
 				«constructor.content»
 			«ENDFOR»
 		«ENDIF»
@@ -196,4 +198,11 @@ class WrapperRepresentation {
 		}
 		return package.cutFirstSegment // cut Ecore package name
 	}
+
+	/**
+	 * Generates a blank line in a template.
+	 */
+	def private String getBlankLine() '''
+		
+	'''
 }
