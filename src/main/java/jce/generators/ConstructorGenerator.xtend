@@ -16,12 +16,13 @@ import org.eclipse.jdt.core.dom.ASTVisitor
 import org.eclipse.jdt.core.dom.CompilationUnit
 import org.eclipse.jdt.core.dom.MethodDeclaration
 import org.eclipse.xtend.lib.annotations.Accessors
+import java.util.Collections
 
 final class ConstructorGenerator {
 	static final Logger logger = LogManager.getLogger(ConstructorGenerator.name)
 
 	private new() {
-		throw new AssertionError("Suppress default constructor for noninstantiability");
+		throw new AssertionError("Suppress default constructor for noninstantiability")
 	}
 
 	/**
@@ -30,11 +31,15 @@ final class ConstructorGenerator {
 	 */
 	def static List<WrapperConstructor> generate(String typeName, IJavaProject project, EcorificationProperties properties) {
 		if(typeName === null) {
-			return new LinkedList<WrapperConstructor>()
+			return noConstructors
 		}
-		val IType type = project.findType(typeName)
-		val ConstructorVisitor visitor = new ConstructorVisitor(type)
 		val IProgressMonitor monitor = MonitorFactory.createProgressMonitor(logger, properties)
+		val IType type = project.findType(typeName, monitor)
+		if(type.compilationUnit === null) {
+			logger.error("Could not get compilation unit of " + typeName)
+			return noConstructors
+		}
+		val ConstructorVisitor visitor = new ConstructorVisitor(type)
 		val CompilationUnit parsedUnit = ASTUtil.parse(type.compilationUnit, monitor)
 		parsedUnit.accept(visitor)
 		return visitor.constructors
@@ -62,5 +67,12 @@ final class ConstructorGenerator {
 			}
 			return false
 		}
+	}
+
+	/**
+	 * Returns an empty immutable list of type WrapperConstructors. That means it returns no constructors.
+	 */
+	def private static List<WrapperConstructor> noConstructors() {
+		return Collections.emptyList
 	}
 }
