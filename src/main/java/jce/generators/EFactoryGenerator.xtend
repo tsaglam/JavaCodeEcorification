@@ -37,9 +37,9 @@ class EFactoryGenerator extends ClassGenerator {
 	 */
 	def private String createFactoryContent(String currentPackage, String packageName, List<String> packageTypes) '''
 		package «currentPackage»;
-		
+			
 		import org.eclipse.emf.ecore.EFactory;
-		
+			
 		/**
 		 * The <b>Factory</b> for the model.
 		 * It provides a create method for each non-abstract class of the model.
@@ -53,9 +53,9 @@ class EFactoryGenerator extends ClassGenerator {
 		     */
 		    «packageName»Factory eINSTANCE = «currentPackage».impl.«packageName»FactoryImpl.init();
 			
-		«FOR type : packageTypes SEPARATOR blankLine»
-			«createFactoryMethod(type)»
-		«ENDFOR»
+			«FOR type : packageTypes SEPARATOR blankLine»
+				«createFactoryMethod(type)»
+			«ENDFOR»
 			
 		    /**
 		 	 * Returns the package supported by this factory.
@@ -63,7 +63,7 @@ class EFactoryGenerator extends ClassGenerator {
 			 * @generated
 			 */
 			«packageName»Package get«packageName»Package();
-		
+			
 		} //«packageName»Factory
 	'''
 
@@ -71,11 +71,11 @@ class EFactoryGenerator extends ClassGenerator {
 	 * Creates the content of an Ecore factory method.
 	 */
 	def private String createFactoryMethod(String className) '''
-			/**
-			 * Returns a new object of class '<em>«className»</em>'.
-			 * @return a new object of class '<em>«className»</em>'.
-			 * @generated
-			 */
-			«className» create«className»();	    
+		/**
+		 * Returns a new object of class '<em>«className»</em>'.
+		 * @return a new object of class '<em>«className»</em>'.
+		 * @generated
+		 */
+		«className» create«className»();	    
 	'''
 }

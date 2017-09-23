@@ -63,7 +63,6 @@ class WrapperRepresentation {
 		/**
 		 * Unification class for the class «eClass.name»
 		 */
-		 ««« method signature:
 		«IF eClass.abstract»abstract «ENDIF»class «wrapperName» extends «createSuperType(superClass)» implements «eClass.name» {
 			
 			«delegateAnnotation»
