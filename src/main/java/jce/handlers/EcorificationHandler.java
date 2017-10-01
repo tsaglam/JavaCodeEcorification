@@ -2,14 +2,14 @@ package jce.handlers;
 
 import org.eclipse.core.resources.IProject;
 
-import eme.handlers.MainHandler;
+import eme.handlers.ProjectHandler;
 import jce.JavaCodeEcorification;
 
 /**
  * Handler for starting the Java code ecorification.
  * @author Timur Saglam
  */
-public class EcorificationHandler extends MainHandler {
+public class EcorificationHandler extends ProjectHandler {
 
     /**
      * Basic constructor, sets the message box title.
@@ -19,7 +19,7 @@ public class EcorificationHandler extends MainHandler {
     }
 
     /**
-     * @see eme.handlers.MainHandler#startExtraction(org.eclipse.core.resources.IProject)
+     * @see eme.handlersProjectHandler#startExtraction(org.eclipse.core.resources.IProject)
      */
     @Override
     protected void startExtraction(IProject project) {

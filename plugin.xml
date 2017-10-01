@@ -1,40 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-   <extension
-         point="org.eclipse.ui.commands">
-      <category
-            name="JavaCodeEcorification"
-            id="JavaCodeEcorification.commands.category">
-      </category>
-      <command
-            name="Ecorify From..."
-            categoryId="JavaCodeEcorification.commands.category"
-            id="JavaCodeEcorification.commands.ecorifyCommand">
-      </command>
+   <extension point="org.eclipse.ui.commands">
+      <category name="JCE" id="JCE.commands.category" />
+      <command name="Ecorify From..." categoryId="JCE.commands.category" id="JCE.commands.ecorifyCommand" />
    </extension>
-   <extension
-         point="org.eclipse.ui.handlers">
-      <handler
-            commandId="JavaCodeEcorification.commands.ecorifyCommand"
-            class="jce.handlers.EcorificationHandler">
-      </handler>
+   <extension point="org.eclipse.ui.handlers">
+      <handler commandId="JCE.commands.ecorifyCommand" class="jce.handlers.EcorificationHandler" />
    </extension>
-   <extension
-         point="org.eclipse.ui.menus">
-      <menuContribution
-            locationURI="menu:org.eclipse.ui.main.menu?after=additions">
-         <menu
-               label="JCE"
-               mnemonic="M"
-               id="JavaCodeEcorification.menus.sampleMenu">
-            <command
-                  commandId="JavaCodeEcorification.commands.ecorifyCommand"
-                  mnemonic="S"
-                  id="JavaCodeEcorification.menus.ecorifyCommand">
-            </command>
+   <extension point="org.eclipse.ui.menus">
+      <menuContribution locationURI="popup:org.eclipse.jdt.ui.PackageExplorer">
+         <menu label="JCE">
+            <command commandId="JCE.commands.ecorifyCommand" id="JCE.menus.extractCommand" label="Ecorify Java Project..." mnemonic="S" tooltip="Start the Ecorification of Java code." />
          </menu>
       </menuContribution>
    </extension>
-
 </plugin>
