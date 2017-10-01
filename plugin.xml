@@ -10,7 +10,10 @@
    </extension>
    <extension point="org.eclipse.ui.menus">
       <menuContribution locationURI="popup:org.eclipse.jdt.ui.PackageExplorer">
-         <menu label="JCE">
+         <menu
+               icon="src/main/resources/jce.gif"
+               label="JCE"
+               tooltip="Java Code Ecorification">
             <command commandId="JCE.commands.ecorifyCommand" id="JCE.menus.extractCommand" label="Ecorify Java Project..." mnemonic="S" tooltip="Start the Ecorification of Java code." />
          </menu>
       </menuContribution>
