@@ -75,7 +75,7 @@ public class JavaCodeEcorification {
         check(originalProject);
         logger.info("Starting Ecorification...");
         // 1. generate metamodel, GenModel, model code and make Project copy:
-        GeneratedEcoreMetamodel metamodel = metamodelGenerator.extractAndSaveFrom(originalProject);
+        GeneratedEcoreMetamodel metamodel = metamodelGenerator.extract(originalProject);
         GenModel genModel = genModelGenerator.generate(metamodel);
         IProject project = getProject(metamodel.getSavingInformation()); // Retrieve output project
         ModelCodeGenerator.generate(genModel, properties);
