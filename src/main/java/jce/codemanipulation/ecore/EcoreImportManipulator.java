@@ -25,7 +25,8 @@ import jce.util.jdt.PackageFilter;
  * any import declaration that references a type from the Ecore package which has a counterpart in the Ecore metamodel
  * and the origin code. Unproblematic is any import declaration referencing Ecore package types or Ecore factory types.
  * This class basically changes all problematic imports in all Ecore implementation classes and adds the changed imports
- * to the correlating Ecore interfaces while retaining the correct super interfaces of the implementation classes.
+ * to the correlating Ecore interfaces while retaining the correct super interfaces of the implementation classes. The
+ * changed imports refer to the types of the origin code instead of the Ecore code.
  * @author Timur Saglam
  */
 public class EcoreImportManipulator extends AbstractCodeManipulator {
