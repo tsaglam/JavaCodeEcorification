@@ -13,6 +13,9 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.emf.codegen.ecore.genmodel.GenModel;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PlatformUI;
 
 import eme.EcoreMetamodelExtraction;
 import eme.generator.GeneratedEcoreMetamodel;
@@ -44,11 +47,11 @@ public class JavaCodeEcorification {
     private static final Logger logger = LogManager.getLogger(JavaCodeEcorification.class.getName());
     private final FieldEncapsulator fieldEncapsulator;
     private final GenModelGenerator genModelGenerator;
+    private final ImportOrganizer importOrganizer;
     private final InheritanceManipulator inheritanceManipulator;
     private final EcoreMetamodelExtraction metamodelGenerator;
     private final EcorificationProperties properties;
     private final WrapperGenerator wrapperGenerator;
-    private final ImportOrganizer importOrganizer;
 
     /**
      * Basic constructor.
@@ -94,9 +97,9 @@ public class JavaCodeEcorification {
         new MemberRemover(metamodel, properties).manipulate(project);
         importOrganizer.manipulate(project);
         inheritanceManipulator.manipulate(project);
-        // 6. build project and make changes visible in the Eclipse IDE:
+        // 6. build project and make changes visible in the Eclipse IDE. Notify the user:
         rebuild(project, properties);
-        logger.info("Ecorification complete!");
+        notifyUser(originalProject);
     }
 
     /**
@@ -140,6 +143,16 @@ public class JavaCodeEcorification {
             }
         }
         return null;
+    }
+
+    /**
+     * Tells the user the ecorification of an {@link IProject} is complete.
+     */
+    private void notifyUser(IProject project) {
+        logger.info("Ecorification complete!");
+        Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+        String message = "Ecorification of " + project.getName() + " complete!";
+        MessageDialog.openInformation(shell, "Java Code Ecorification", message);
     }
 
     /**
