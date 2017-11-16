@@ -10,6 +10,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
 import eme.generator.GeneratedEcoreMetamodel;
@@ -124,7 +125,8 @@ public class EcoreImportManipulator extends AbstractCodeManipulator {
      * Retains the super interface declarations of an compilation unit. .
      */
     private void retainInterface(ICompilationUnit unit) throws JavaModelException {
-        ASTUtil.applyVisitorModifications(unit, new InterfaceRetentionVisitor(unit.getImports(), unit.getParent().getElementName()), monitor);
+        ASTVisitor visitor = new InterfaceRetentionVisitor(unit.getImports(), unit.getParent().getElementName());
+        ASTUtil.applyVisitorModifications(unit, visitor, monitor);
     }
 
     @Override

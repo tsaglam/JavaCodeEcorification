@@ -2,6 +2,7 @@ package jce.codemanipulation.origin;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.ASTVisitor;
 
 import jce.properties.EcorificationProperties;
 import jce.util.jdt.ASTUtil;
@@ -23,6 +24,7 @@ public class InheritanceManipulator extends OriginCodeManipulator {
 
     @Override
     protected void manipulate(ICompilationUnit unit) throws JavaModelException {
-        ASTUtil.applyVisitorModifications(unit, new InheritanceManipulationVisitor(unit.getParent().getElementName(), properties), monitor);
+        ASTVisitor visitor = new InheritanceManipulationVisitor(unit.getParent().getElementName(), properties);
+        ASTUtil.applyVisitorModifications(unit, visitor, monitor);
     }
 }
