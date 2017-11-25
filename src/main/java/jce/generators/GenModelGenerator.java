@@ -3,14 +3,22 @@ package jce.generators;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Map;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.eclipse.emf.codegen.ecore.genmodel.GenJDKLevel;
 import org.eclipse.emf.codegen.ecore.genmodel.GenModel;
 import org.eclipse.emf.codegen.ecore.genmodel.GenModelFactory;
+import org.eclipse.emf.codegen.ecore.genmodel.GenModelPackage;
 import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.impl.MinimalEObjectImpl;
+import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.resource.ResourceSet;
+import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.xmi.XMLResource;
+import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
 
 import eme.generator.GeneratedEcoreMetamodel;
@@ -19,7 +27,8 @@ import jce.util.PathHelper;
 import jce.util.ResourceRefresher;
 
 /**
- * Creates generation models from Ecore metamodels.
+ * Factory class for the creation of generation models (see {@link GenModel}) from Ecore metamodels. This allows also
+ * makes the generation models persistent.
  * @author Timur Saglam
  */
 public class GenModelGenerator {
@@ -31,7 +40,8 @@ public class GenModelGenerator {
     private final String xmlEncoding;
 
     /**
-     * Basic constructor builds GenModelGenerator with default values.
+     * Basic constructor builds GenModelGenerator with default values: JDK Level 8.0, root super class
+     * {@link MinimalEObjectImpl.Container}, UTF8 XML encoding and the default importer ID.
      */
     public GenModelGenerator() {
         complianceLevel = GenJDKLevel.JDK80_LITERAL;
@@ -42,10 +52,10 @@ public class GenModelGenerator {
 
     /**
      * Constructor that builds the GenModelGenerator with custom values.
-     * @param complianceLevel is the compliance level (see {@link GenJDKLevel})
-     * @param importerID is the the new value of the 'Importer ID' attribute.
-     * @param rootExtendsClass is the value of the 'Root Extends Class' attribute.
-     * @param xmlEncoding is the XML encoding (e.g. UTF-8 or ASCII)
+     * @param complianceLevel is the JDK compliance level (see {@link GenJDKLevel})
+     * @param importerID is the the value of the 'Importer ID' attribute. Default is "org.eclipse.emf.importer.ecore".
+     * @param rootExtendsClass is the the name of the class which is extended by the roots.
+     * @param xmlEncoding is the XML encoding (e.g. UTF-8 or ASCII).
      */
     public GenModelGenerator(GenJDKLevel complianceLevel, String importerID, String rootExtendsClass, String xmlEncoding) {
         this.complianceLevel = complianceLevel;
@@ -77,18 +87,33 @@ public class GenModelGenerator {
             genModel.setImportOrganizing(true);
             genModel.getForeignModel().add(modelName + ".ecore");
             genModel.initialize(Collections.singleton(metamodel.getRoot()));
-            saveGenModel(genModel, modelPath, modelName);
-            return genModel;
+            URI uri = saveGenModel(genModel, modelPath, modelName); // IMPORTANT: first save the GenModel
+            return loadGenModel(uri); // and then LOAD IT AGAIN (prevents package URI exception)!
         }
         throw new IllegalArgumentException("Can create GenModel only from saved metamodels!");
     }
 
     /**
-     * Saves a GenModel as a file and refreshes the output folder.
+     * Loads and returns a GenModel from a specific URI.
      */
-    private void saveGenModel(GenModel genModel, String modelPath, String modelName) {
+    private GenModel loadGenModel(URI uri) {
+        ResourceSet resourceSet = new ResourceSetImpl();
+        Map<String, Object> extensionMap = resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap();
+        extensionMap.put(Resource.Factory.Registry.DEFAULT_EXTENSION, new EcoreResourceFactoryImpl());
+        resourceSet.getPackageRegistry().put(GenModelPackage.eNS_URI, GenModelPackage.eINSTANCE);
+        EObject object = resourceSet.getResource(uri, true).getContents().get(0);
+        if (object instanceof GenModel) {
+            return (GenModel) object;
+        }
+        throw new IllegalArgumentException("URI does not lead to a GenModel!");
+    }
+
+    /**
+     * Saves a GenModel as a file and refreshes the output folder. Returns the URI of the file.
+     */
+    private URI saveGenModel(GenModel genModel, String modelPath, String modelName) {
+        URI genModelURI = URI.createFileURI(modelPath + modelName + ".genmodel");
         try {
-            URI genModelURI = URI.createFileURI(modelPath + modelName + ".genmodel");
             final XMIResourceImpl genModelResource = new XMIResourceImpl(genModelURI);
             genModelResource.getDefaultSaveOptions().put(XMLResource.OPTION_ENCODING, xmlEncoding);
             genModelResource.getContents().add(genModel);
@@ -98,5 +123,6 @@ public class GenModelGenerator {
             logger.error("Error while saving the generator model: ", exception);
         }
         logger.info("The genmodel was saved under: " + modelPath);
+        return genModelURI;
     }
 }
