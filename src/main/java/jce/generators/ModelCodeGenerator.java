@@ -10,7 +10,7 @@ import jce.properties.EcorificationProperties;
 import jce.util.logging.MonitorFactory;
 
 /**
- * Class for code generation (e.g generating Java code from Ecore GenModels).
+ * Class for model code generation (e.g generating Java code from Ecore GenModels).
  */
 public final class ModelCodeGenerator {
     private static final Logger logger = LogManager.getLogger(ModelCodeGenerator.class.getName());
@@ -20,7 +20,7 @@ public final class ModelCodeGenerator {
     }
 
     /**
-     * Uses a specific GenModel to generate Java Code.
+     * Uses a specific {@link GenModel} to generate the model code for an Ecore metamodel.
      * @param genModel is the specific GenModel.
      * @param properties are the Ecorification properties.
      */
@@ -31,7 +31,8 @@ public final class ModelCodeGenerator {
         genModel.setCanGenerate(true); // allow generation
         Generator generator = new Generator(); // create generator
         generator.setInput(genModel); // set the model-level input object
+        logger.info("Starting model code generation...");
         generator.generate(genModel, GenBaseGeneratorAdapter.MODEL_PROJECT_TYPE, MonitorFactory.createMonitor(logger, properties));
-        logger.info("Generated Java code from GenModel in: " + generator.getGeneratedOutputs().toString());
+        logger.info("Generated Java code from GenModel in: " + generator.getGeneratedOutputs());
     }
 }
