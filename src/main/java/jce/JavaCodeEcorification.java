@@ -28,7 +28,7 @@ import jce.codemanipulation.ecore.EcoreImportManipulator;
 import jce.codemanipulation.ecore.FactoryRenamer;
 import jce.codemanipulation.origin.FieldEncapsulator;
 import jce.codemanipulation.origin.InheritanceManipulator;
-import jce.codemanipulation.origin.InnerClassExposer;
+import jce.codemanipulation.origin.ClassExposer;
 import jce.codemanipulation.origin.MemberRemover;
 import jce.generators.EcoreFactoryGenerator;
 import jce.generators.GenModelGenerator;
@@ -85,7 +85,7 @@ public class JavaCodeEcorification {
         // 2. Build custom factories:
         new FactoryRenamer(metamodel, properties).manipulate(project);
         new EcoreFactoryGenerator(properties).buildFactories(metamodel, project);
-        new InnerClassExposer(properties).manipulate(project);
+        new ClassExposer(properties).manipulate(project);
         // 3. generate wrappers:
         XtendLibraryHelper.addXtendLibs(project, properties);
         ResourceRefresher.refresh(project);
