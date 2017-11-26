@@ -8,7 +8,7 @@ import eme.properties.IBinaryProperty;
  */
 public enum BinaryProperty implements IBinaryProperty {
     FULL_LOGGING("FullLogging", false),
-    EXPOSE_INNER_CLASSES("ExposeInnerClasses", true);
+    EXPOSE_CLASSES("ExposeClasses", true);
     private final boolean defaultValue;
     private final String key;
 

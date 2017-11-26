@@ -7,15 +7,16 @@ import org.apache.log4j.Logger;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import jce.properties.EcorificationProperties;
+import jce.util.RawTypeUtil;
 import jce.util.logging.MonitorFactory;
 
 /**
- * {@link ASTVisitor} that makes all inner classes that have default visibility visible through changing the visibility
- * to public.
+ * {@link ASTVisitor} that makes all classes visible through changing the visibility to public.
  * @author Timur Saglam
  */
 public class ClassExpositionVisitor extends ASTVisitor {
@@ -33,8 +34,11 @@ public class ClassExpositionVisitor extends ASTVisitor {
     @SuppressWarnings("unchecked")
     @Override
     public boolean visit(TypeDeclaration node) {
-        if (isInnerClass(node) && isDefault(node)) { // if is default inner class
+        if (isHidden(node)) { // if should be exposed
             AST ast = node.getAST();
+            if (isPrivate(node)) {
+                removePrivateKeyword(node);
+            }
             Modifier modifier = ast.newModifier(PUBLIC_KEYWORD); // create public modifier
             node.modifiers().add(modifier); // add to type declaration
             monitor.beginTask("Exposed: " + node.getName().getFullyQualifiedName(), 0);
@@ -43,18 +47,32 @@ public class ClassExpositionVisitor extends ASTVisitor {
     }
 
     /**
-     * Checks whether a {@link TypeDeclaration} is default and not static, which means it does not have the modifiers
-     * public, private, protected or static.
+     * Checks whether a {@link TypeDeclaration} is default or private and not an interface, which means it does not have
+     * the modifiers public, protected or static.
      */
-    private boolean isDefault(TypeDeclaration node) {
+    private boolean isHidden(TypeDeclaration node) {
         int flags = node.getModifiers();
-        return !Modifier.isPublic(flags) && !Modifier.isProtected(flags) && !Modifier.isPrivate(flags) && !Modifier.isStatic(flags);
+        return !node.isInterface() && !Modifier.isPublic(flags) && !Modifier.isProtected(flags);
     }
 
     /**
-     * Checks whether a {@link TypeDeclaration} is a inner class, which means it is a member type and not an interface.
+     * Checks whether a type declaration node is private.
      */
-    private boolean isInnerClass(TypeDeclaration node) {
-        return node.isMemberTypeDeclaration() && !node.isInterface(); // is member class
+    private boolean isPrivate(TypeDeclaration node) {
+        return Modifier.isPrivate(node.getModifiers());
+    }
+
+    /**
+     * Removes private keyword from a type declaration node.
+     */
+    private void removePrivateKeyword(TypeDeclaration node) {
+        for (IExtendedModifier extendedModifier : RawTypeUtil.castList(IExtendedModifier.class, node.modifiers())) {
+            if (extendedModifier.isModifier()) { // if is modifier (not annotation)
+                Modifier modifier = (Modifier) extendedModifier; // cast modifier
+                if (modifier.isPrivate()) { // if is keyword private
+                    modifier.delete(); // remove from node
+                }
+            }
+        }
     }
 }
