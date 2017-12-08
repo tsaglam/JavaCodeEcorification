@@ -38,10 +38,10 @@ class ClassExpositionVisitor extends ASTVisitor {
     @Override
     public boolean visit(TypeDeclaration node) {
         if (isHidden(node)) { // if should be exposed
-            removeKeywords(node); // remove private and protected keywords
-            Modifier modifier = node.getAST().newModifier(PUBLIC_KEYWORD); // create public modifier
-            node.modifiers().add(modifier); // add to type declaration
-            monitor.beginTask("Exposed: " + node.getName().getFullyQualifiedName(), 0);
+            Modifier removed = removeModifiers(node); // remove private and protected keywords
+            Modifier created = node.getAST().newModifier(PUBLIC_KEYWORD); // create public modifier
+            node.modifiers().add(created); // add to type declaration
+            log(node, removed, created);
         }
         return super.visit(node);
     }
@@ -70,16 +70,29 @@ class ClassExpositionVisitor extends ASTVisitor {
     }
 
     /**
-     * Removes private and protected keyword from a type declaration node.
+     * Logs the exposition of a type.
      */
-    private void removeKeywords(TypeDeclaration node) {
+    private void log(TypeDeclaration node, Modifier removed, Modifier created) {
+        String original = removed == null ? "default" : removed.toString(); // null modifier is logged as default
+        String type = node.isMemberTypeDeclaration() ? "inner class" : "class"; // inner class or not
+        String nodeName = node.getName().getFullyQualifiedName();
+        monitor.beginTask("Exposed " + type + " " + nodeName + ": " + original + " to " + created, 0);
+    }
+
+    /**
+     * Removes private and protected keyword in form of a {@link Modifier} from a type declaration node. Returns the
+     * removed {@link Modifier} or null of none was removed.
+     */
+    private Modifier removeModifiers(TypeDeclaration node) {
         for (IExtendedModifier extendedModifier : RawTypeUtil.castList(IExtendedModifier.class, node.modifiers())) {
             if (extendedModifier.isModifier()) { // if is modifier (not annotation)
-                Modifier modifier = (Modifier) extendedModifier; // cast modifier
-                if (modifier.isPrivate() || modifier.isProtected()) { // if is keyword private
-                    modifier.delete(); // remove from node
+                Modifier modifier = (Modifier) extendedModifier; // cast to modifier
+                if (modifier.isPrivate() || modifier.isProtected()) {
+                    modifier.delete(); // remove modifier from node
+                    return modifier;
                 }
             }
         }
+        return null;
     }
 }
