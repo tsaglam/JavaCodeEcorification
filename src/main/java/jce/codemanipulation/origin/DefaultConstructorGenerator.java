@@ -6,15 +6,13 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.BodyDeclaration;
-import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import jce.properties.EcorificationProperties;
-import jce.util.RawTypeUtil;
 import jce.util.jdt.ASTUtil;
+import jce.util.jdt.ModifierUtil;
 
 /**
  * This class generates default constructors for every class that does not support default constructors. This is a
@@ -75,7 +73,7 @@ public class DefaultConstructorGenerator extends OriginCodeManipulator {
         private void ensureVisibility(TypeDeclaration node) {
             MethodDeclaration constructor = getDefaultConstructor(node);
             if (!Modifier.isPublic(constructor.getModifiers())) {
-                removeModifiers(constructor);
+                ModifierUtil.removeModifiers(constructor);
                 Modifier modifier = node.getAST().newModifier(PUBLIC_KEYWORD);
                 constructor.modifiers().add(modifier); // make public
             }
@@ -112,23 +110,6 @@ public class DefaultConstructorGenerator extends OriginCodeManipulator {
          */
         private boolean hasDefaultConstructor(TypeDeclaration type) {
             return getDefaultConstructor(type) != null;
-        }
-
-        /**
-         * Removes private and protected keyword in form of a {@link Modifier} from a type declaration node. Returns the
-         * removed {@link Modifier} or null of none was removed.
-         */ // TODO (HIGH) remove duplicate code with ClassExpositionVisitor
-        private Modifier removeModifiers(BodyDeclaration node) {
-            for (IExtendedModifier extendedModifier : RawTypeUtil.castList(IExtendedModifier.class, node.modifiers())) {
-                if (extendedModifier.isModifier()) { // if is modifier (not annotation)
-                    Modifier modifier = (Modifier) extendedModifier; // cast to modifier
-                    if (modifier.isPrivate() || modifier.isProtected()) {
-                        modifier.delete(); // remove modifier from node
-                        return modifier;
-                    }
-                }
-            }
-            return null;
         }
     }
 }

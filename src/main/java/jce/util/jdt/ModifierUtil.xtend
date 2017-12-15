@@ -21,9 +21,8 @@ final class ModifierUtil {
 	 * @return returns the removed modifier or null if none was removed.
 	 */
 	def static Modifier removeModifiers(BodyDeclaration node) {
-		for (extendedModifier : RawTypeUtil.castList(IExtendedModifier, node.modifiers())) {
-			if(extendedModifier.isModifier) { // if is modifier (not annotation)
-				val Modifier modifier = extendedModifier as Modifier // cast to modifier
+		for (modifier : RawTypeUtil.castList(IExtendedModifier, node.modifiers())) {
+			if(modifier instanceof Modifier) { // if is modifier (not annotation)
 				if(modifier.isPrivate || modifier.isProtected) {
 					modifier.delete // remove modifier from node
 					return modifier
