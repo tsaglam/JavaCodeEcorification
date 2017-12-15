@@ -29,6 +29,7 @@ import jce.codemanipulation.ecore.FactoryRenamer;
 import jce.codemanipulation.origin.FieldEncapsulator;
 import jce.codemanipulation.origin.InheritanceManipulator;
 import jce.codemanipulation.origin.ClassExposer;
+import jce.codemanipulation.origin.DefaultConstructorGenerator;
 import jce.codemanipulation.origin.MemberRemover;
 import jce.generators.EcoreFactoryGenerator;
 import jce.generators.GenModelGenerator;
@@ -93,10 +94,11 @@ public class JavaCodeEcorification {
         // 4. adapt Ecore code
         new EcoreImportManipulator(metamodel, properties).manipulate(project);
         // 5. adapt origin code:
-        fieldEncapsulator.manipulate(project);
-        new MemberRemover(metamodel, properties).manipulate(project);
+        // fieldEncapsulator.manipulate(project);
+        // new MemberRemover(metamodel, properties).manipulate(project);
         importOrganizer.manipulate(project);
         inheritanceManipulator.manipulate(project);
+        new DefaultConstructorGenerator(properties).manipulate(project);
         // 6. build project and make changes visible in the Eclipse IDE. Notify the user:
         rebuild(project, properties);
         notifyUser(originalProject);

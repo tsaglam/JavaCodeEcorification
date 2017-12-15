@@ -6,12 +6,11 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import jce.properties.EcorificationProperties;
-import jce.util.RawTypeUtil;
+import jce.util.jdt.ModifierUtil;
 import jce.util.logging.MonitorFactory;
 
 /**
@@ -38,7 +37,7 @@ class ClassExpositionVisitor extends ASTVisitor {
     @Override
     public boolean visit(TypeDeclaration node) {
         if (isHidden(node)) { // if should be exposed
-            Modifier removed = removeModifiers(node); // remove private and protected keywords
+            Modifier removed = ModifierUtil.removeModifiers(node); // remove private and protected keywords
             Modifier created = node.getAST().newModifier(PUBLIC_KEYWORD); // create public modifier
             node.modifiers().add(created); // add to type declaration
             log(node, removed, created);
@@ -77,22 +76,5 @@ class ClassExpositionVisitor extends ASTVisitor {
         String type = node.isMemberTypeDeclaration() ? "inner class" : "class"; // inner class or not
         String nodeName = node.getName().getFullyQualifiedName();
         monitor.beginTask("Exposed " + type + " " + nodeName + ": " + original + " to " + created, 0);
-    }
-
-    /**
-     * Removes private and protected keyword in form of a {@link Modifier} from a type declaration node. Returns the
-     * removed {@link Modifier} or null of none was removed.
-     */
-    private Modifier removeModifiers(TypeDeclaration node) {
-        for (IExtendedModifier extendedModifier : RawTypeUtil.castList(IExtendedModifier.class, node.modifiers())) {
-            if (extendedModifier.isModifier()) { // if is modifier (not annotation)
-                Modifier modifier = (Modifier) extendedModifier; // cast to modifier
-                if (modifier.isPrivate() || modifier.isProtected()) {
-                    modifier.delete(); // remove modifier from node
-                    return modifier;
-                }
-            }
-        }
-        return null;
     }
 }
