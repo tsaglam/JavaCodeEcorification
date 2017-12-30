@@ -26,10 +26,10 @@ import eme.properties.TextProperty;
 import jce.codemanipulation.ImportOrganizer;
 import jce.codemanipulation.ecore.EcoreImportManipulator;
 import jce.codemanipulation.ecore.FactoryRenamer;
-import jce.codemanipulation.origin.FieldEncapsulator;
-import jce.codemanipulation.origin.InheritanceManipulator;
 import jce.codemanipulation.origin.ClassExposer;
 import jce.codemanipulation.origin.DefaultConstructorGenerator;
+import jce.codemanipulation.origin.FieldEncapsulator;
+import jce.codemanipulation.origin.InheritanceManipulator;
 import jce.codemanipulation.origin.MemberRemover;
 import jce.generators.EcoreFactoryGenerator;
 import jce.generators.GenModelGenerator;
@@ -78,30 +78,41 @@ public class JavaCodeEcorification {
         // 0. initialize:
         check(originalProject);
         logger.info("Starting Ecorification...");
-        // 1. generate metamodel, GenModel, model code and make Project copy:
-        GeneratedEcoreMetamodel metamodel = metamodelGenerator.extract(originalProject);
-        GenModel genModel = genModelGenerator.generate(metamodel);
-        IProject project = getProject(metamodel.getSavingInformation()); // Retrieve output project
-        ModelCodeGenerator.generate(genModel, properties);
-        // 2. Build custom factories:
-        new FactoryRenamer(metamodel, properties).manipulate(project);
-        new EcoreFactoryGenerator(properties).buildFactories(metamodel, project);
-        new ClassExposer(properties).manipulate(project);
-        // 3. generate wrappers:
-        XtendLibraryHelper.addXtendLibs(project, properties);
-        ResourceRefresher.refresh(project);
-        wrapperGenerator.buildWrappers(metamodel, project);
-        // 4. adapt Ecore code
-        new EcoreImportManipulator(metamodel, properties).manipulate(project);
-        // 5. adapt origin code:
-        // fieldEncapsulator.manipulate(project);
-        // new MemberRemover(metamodel, properties).manipulate(project);
-        importOrganizer.manipulate(project);
-        inheritanceManipulator.manipulate(project);
-        new DefaultConstructorGenerator(properties).manipulate(project);
+        GeneratedEcoreMetamodel metamodel = extractMetamodel(originalProject); // 1
+        IProject project = getProject(metamodel.getSavingInformation()); // 1,5. Retrieve output project
+        buildFactories(metamodel, project); // 2.
+        generateWrappers(metamodel, project); // 3.
+        new EcoreImportManipulator(metamodel, properties).manipulate(project);  // 4. adapt imports
+        adaptOriginCode(metamodel, project); // 5.
         // 6. build project and make changes visible in the Eclipse IDE. Notify the user:
         rebuild(project, properties);
         notifyUser(originalProject);
+    }
+
+    /**
+     * Encapsulates all fields of the origin code. Removes public, non-static fields and their access methods, organizes
+     * all imports, manipulates the inheritance relations to extend the wrappers, creates default constructors where
+     * they are missing.
+     * @param metamodel is the {@link GeneratedEcoreMetamodel}.
+     * @param project is the {@link IProject} where the metamodel is located.
+     */
+    private void adaptOriginCode(GeneratedEcoreMetamodel metamodel, IProject project) {
+        fieldEncapsulator.manipulate(project);
+        new MemberRemover(metamodel, properties).manipulate(project);
+        importOrganizer.manipulate(project);
+        inheritanceManipulator.manipulate(project);
+        new DefaultConstructorGenerator(properties).manipulate(project);
+    }
+
+    /**
+     * Builds the custom Ecore factories, while renaming the old ones.
+     * @param metamodel is the {@link GeneratedEcoreMetamodel}.
+     * @param project is the {@link IProject} where the metamodel is located.
+     */
+    private void buildFactories(GeneratedEcoreMetamodel metamodel, IProject project) {
+        new FactoryRenamer(metamodel, properties).manipulate(project);
+        new EcoreFactoryGenerator(properties).buildFactories(metamodel, project);
+        new ClassExposer(properties).manipulate(project);
     }
 
     /**
@@ -130,6 +141,30 @@ public class JavaCodeEcorification {
         properties.set(BinaryProperty.ROOT_CONTAINER, true);
         properties.set(BinaryProperty.FINAL_AS_UNCHANGEABLE, false);
         properties.set(BinaryProperty.NESTED_TYPES, false);
+    }
+
+    /**
+     * Extracts a Ecore metamodel in form of an {@link GeneratedEcoreMetamodel} from the original {@link IProject}.
+     * Generates a {@link GenModel}.
+     * @param originalProject the original {@link IProject}.
+     * @return the {@link GeneratedEcoreMetamodel}.
+     */
+    private GeneratedEcoreMetamodel extractMetamodel(IProject originalProject) {
+        GeneratedEcoreMetamodel metamodel = metamodelGenerator.extract(originalProject);
+        GenModel genModel = genModelGenerator.generate(metamodel);
+        ModelCodeGenerator.generate(genModel, properties);
+        return metamodel;
+    }
+
+    /**
+     * Generates the wrappers, which are the classes that unify the origin code with the Ecore code.
+     * @param metamodel is the {@link GeneratedEcoreMetamodel}.
+     * @param project is the {@link IProject} where the metamodel is located.
+     */
+    private void generateWrappers(GeneratedEcoreMetamodel metamodel, IProject project) {
+        XtendLibraryHelper.addXtendLibs(project, properties);
+        ResourceRefresher.refresh(project);
+        wrapperGenerator.buildWrappers(metamodel, project);
     }
 
     /**
