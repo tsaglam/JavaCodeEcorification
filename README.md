@@ -14,4 +14,4 @@ This process is depicted in the following diagram:
 3. Do the steps one and two for the [EcoreMetamodelExtraction project](https://github.com/tsaglam/EcoreMetamodelExtraction).
 4. You need the Eclipse Modeling Framework, the Eclipse Java Development Tools, the Eclipse Plug-in Development Environment, the Xtend IDE and [XAnnotations](https://github.com/kit-sdq/XAnnotations). Make sure that all five are installed.
 5. Run the project as Eclipse Application.
-6. You can start the extraction from the JCE menu in the menubar (provisional UI).
+6. You can start the extraction from the context menu of a Java project (provisional UI).
