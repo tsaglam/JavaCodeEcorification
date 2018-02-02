@@ -91,7 +91,7 @@ public final class XtendLibraryHelper {
     }
 
     /**
-     * Retrieves the class path file from the {@link IJavaProject}, adds an {@link IClasspathEntry} for the xtend-gen
+     * Retrieves the class path file from the {@link IProject}, adds an {@link IClasspathEntry} for the xtend-gen
      * source folder and sets the changed content.
      */
     private static void addClasspathEntry(IProject project, IProgressMonitor monitor) {
@@ -115,7 +115,7 @@ public final class XtendLibraryHelper {
 
     /**
      * Adds Xtend manifest entries to the manifest file.
-     * @param project is the {@link IJavaProject}.
+     * @param project is the {@link IProject}.
      */
     private static void addManifestEntries(IProject project) {
         IPath workspace = ResourcesPlugin.getWorkspace().getRoot().getLocation(); // workspace path
