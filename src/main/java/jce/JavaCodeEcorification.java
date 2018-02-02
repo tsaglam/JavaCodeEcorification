@@ -60,7 +60,7 @@ public class JavaCodeEcorification {
     public JavaCodeEcorification() {
         properties = new EcorificationProperties();
         metamodelGenerator = new EcoreMetamodelExtraction();
-        genModelGenerator = new GenModelGenerator();
+        genModelGenerator = new GenModelGenerator(properties);
         wrapperGenerator = new WrapperGenerator(properties);
         fieldEncapsulator = new FieldEncapsulator(properties);
         importOrganizer = new ImportOrganizer(properties);
@@ -76,7 +76,7 @@ public class JavaCodeEcorification {
      */
     public void start(IProject originalProject) {
         // 0. initialize:
-        check(originalProject);
+        SourceFolderAnalyzer.verify(originalProject, properties);
         logger.info("Starting Ecorification...");
         GeneratedEcoreMetamodel metamodel = extractMetamodel(originalProject); // 1
         IProject project = getProject(metamodel.getSavingInformation()); // 1,5. Retrieve output project
@@ -113,18 +113,6 @@ public class JavaCodeEcorification {
         new FactoryRenamer(metamodel, properties).manipulate(project);
         new EcoreFactoryGenerator(properties).buildFactories(metamodel, project);
         new ClassExposer(properties).manipulate(project);
-    }
-
-    /**
-     * Checks whether a specific {@link IProject} is valid (neither null nor nonexistent)
-     * @param project is the specific {@link IProject}.
-     */
-    private void check(IProject project) {
-        if (project == null) {
-            throw new IllegalArgumentException("Project can't be null!");
-        } else if (!project.exists()) {
-            throw new IllegalArgumentException("Project " + project.toString() + "does not exist!");
-        }
     }
 
     /**
@@ -202,7 +190,7 @@ public class JavaCodeEcorification {
         try {
             project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
         } catch (CoreException exception) {
-            exception.printStackTrace();
+            logger.error(exception);
         }
     }
 }
