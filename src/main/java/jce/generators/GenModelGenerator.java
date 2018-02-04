@@ -1,5 +1,7 @@
 package jce.generators;
 
+import static jce.properties.TextProperty.SOURCE_FOLDER;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
@@ -24,7 +26,6 @@ import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
 import eme.generator.GeneratedEcoreMetamodel;
 import eme.generator.saving.SavingInformation;
 import jce.properties.EcorificationProperties;
-import jce.properties.TextProperty;
 import jce.util.PathHelper;
 import jce.util.ResourceRefresher;
 
@@ -38,9 +39,9 @@ public class GenModelGenerator {
     private static final char SLASH = File.separatorChar;
     private final GenJDKLevel complianceLevel;
     private final String importerID;
+    private final EcorificationProperties properties;
     private final String rootExtendsClass;
     private final String xmlEncoding;
-    private final String sourceFolder;
 
     /**
      * Basic constructor builds GenModelGenerator with default values: JDK Level 8.0, root super class
@@ -48,7 +49,7 @@ public class GenModelGenerator {
      * @param properties are the ecorification properties.
      */
     public GenModelGenerator(EcorificationProperties properties) {
-        sourceFolder = properties.get(TextProperty.SOURCE_FOLDER);
+        this.properties = properties;
         complianceLevel = GenJDKLevel.JDK80_LITERAL;
         importerID = "org.eclipse.emf.importer.ecore";
         rootExtendsClass = "org.eclipse.emf.ecore.impl.MinimalEObjectImpl$Container";
@@ -57,14 +58,15 @@ public class GenModelGenerator {
 
     /**
      * Constructor that builds the GenModelGenerator with custom values.
-     * @param sourceFolder is the target source folder of the project.
+     * @param properties are the ecorification properties.
      * @param complianceLevel is the JDK compliance level (see {@link GenJDKLevel}).
      * @param importerID is the the value of the 'Importer ID' attribute. Default is "org.eclipse.emf.importer.ecore".
      * @param rootExtendsClass is the the name of the class which is extended by the roots.
      * @param xmlEncoding is the XML encoding (e.g. UTF-8 or ASCII).
      */
-    public GenModelGenerator(String sourceFolder, GenJDKLevel complianceLevel, String importerID, String rootExtendsClass, String xmlEncoding) {
-        this.sourceFolder = sourceFolder;
+    public GenModelGenerator(EcorificationProperties properties, GenJDKLevel complianceLevel, String importerID, String rootExtendsClass,
+            String xmlEncoding) {
+        this.properties = properties;
         this.complianceLevel = complianceLevel;
         this.importerID = importerID;
         this.rootExtendsClass = rootExtendsClass;
@@ -84,7 +86,7 @@ public class GenModelGenerator {
             String modelPath = information.getFilePath();
             String projectName = SLASH + pathHelper.getLastSegment(pathHelper.cutLastSegment(modelPath));
             GenModel genModel = GenModelFactory.eINSTANCE.createGenModel();
-            genModel.setModelDirectory(projectName + File.separator + sourceFolder);
+            genModel.setModelDirectory(projectName + File.separator + properties.get(SOURCE_FOLDER));
             genModel.setModelPluginID(projectName.substring(1));
             genModel.setModelName(modelName);
             genModel.setRootExtendsClass(rootExtendsClass);
