@@ -95,6 +95,9 @@ public final class SourceFolderAnalyzer {
                 sourceFolders.add(root);
             }
         }
+        if (sourceFolders.isEmpty()) {
+            throw new IllegalArgumentException("This project does not contain any source folder: " + project);
+        }
         return sourceFolders;
     }
 
