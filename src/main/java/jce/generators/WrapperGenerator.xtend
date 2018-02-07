@@ -19,8 +19,6 @@ import static jce.properties.TextProperty.WRAPPER_PACKAGE
  * @author Timur Saglam
  */
 final class WrapperGenerator extends ClassGenerator {
-	final String sourceFolder
-	final String wrapperFolder
 	IJavaProject javaProject
 
 	/**
@@ -28,8 +26,6 @@ final class WrapperGenerator extends ClassGenerator {
 	 */
 	new(EcorificationProperties properties) {
 		super(properties)
-		sourceFolder = SOURCE_FOLDER.get
-		wrapperFolder = append(sourceFolder, WRAPPER_PACKAGE.get)
 	}
 
 	/** 
@@ -42,7 +38,7 @@ final class WrapperGenerator extends ClassGenerator {
 		this.javaProject = JavaCore.create(project)
 		createFolder(wrapperFolder, project) // build wrapper base folder
 		buildWrappers(metamodel.root, "")
-		ResourceRefresher.refresh(project, sourceFolder) // makes wrappers visible in the Eclipse IDE
+		ResourceRefresher.refresh(project, SOURCE_FOLDER.get) // makes wrappers visible in the Eclipse IDE
 	}
 
 	/** 
@@ -94,5 +90,12 @@ final class WrapperGenerator extends ClassGenerator {
 	 */
 	def private boolean isRootContainer(EClass eClass, String path) {
 		return "" === path && eClass.name === ROOT_CONTAINER.get
+	}
+
+	/**
+	 * Generates the wrapper folder path by appending the source folder path and the wrapper package name.
+	 */
+	def private String wrapperFolder() {
+		append(SOURCE_FOLDER.get, WRAPPER_PACKAGE.get)
 	}
 }
