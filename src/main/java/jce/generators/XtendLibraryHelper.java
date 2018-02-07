@@ -33,7 +33,6 @@ import org.eclipse.pde.core.plugin.PluginRegistry;
 import jce.properties.EcorificationProperties;
 import jce.util.ResourceRefresher;
 import jce.util.logging.MonitorFactory;
-import jce.util.logging.ProgressMonitorAdapter;
 
 /**
  * Helper class that edits an project do add the Xtend dependencies.
@@ -91,8 +90,8 @@ public final class XtendLibraryHelper {
     }
 
     /**
-     * Retrieves the class path file from the {@link IProject}, adds an {@link IClasspathEntry} for the xtend-gen
-     * source folder and sets the changed content.
+     * Retrieves the class path file from the {@link IProject}, adds an {@link IClasspathEntry} for the xtend-gen source
+     * folder and sets the changed content.
      */
     private static void addClasspathEntry(IProject project, IProgressMonitor monitor) {
         IJavaProject javaProject = JavaCore.create(project);
@@ -165,6 +164,21 @@ public final class XtendLibraryHelper {
     }
 
     /**
+     * Extends an array by copying all the elements of the old array to a new array and adding the new element in the
+     * last position. If the array already contains the new element the original array is returned.
+     */
+    private static <T> T[] extendArray(T[] oldArray, T[] newArray, T element) {
+        if (Arrays.asList(oldArray).contains(element)) {
+            logger.warn(".project already contains " + element.toString());
+            return oldArray; // array is not changed.
+        } else {
+            System.arraycopy(oldArray, 0, newArray, 0, oldArray.length);
+            newArray[oldArray.length] = element;
+            return newArray;
+        }
+    }
+
+    /**
      * Reads a file from a path and return its content.
      */
     private static List<String> readFile(Path path) {
@@ -186,36 +200,17 @@ public final class XtendLibraryHelper {
     private static void updateProjectDescription(IProject project) {
         String builderName = "org.eclipse.xtext.ui.shared.xtextBuilder";
         String xtextNature = "org.eclipse.xtext.ui.shared.xtextNature";
-        IProjectDescription description = null;
         try {
-            description = project.getDescription();
-        } catch (CoreException exception) {
-            exception.printStackTrace();
-        }
-        // add xtext builder:
-        ICommand[] commands = description.getBuildSpec();
-        ICommand command = description.newCommand();
-        command.setBuilderName(builderName);
-        if (Arrays.asList(commands).contains(command)) {
-            logger.warn(".project already contains " + builderName);
-        } else {
-            ICommand[] newCommands = new ICommand[commands.length + 1];
-            System.arraycopy(commands, 0, newCommands, 0, commands.length);
-            newCommands[commands.length] = command;
-            description.setBuildSpec(newCommands);
-        }
-        // Add xtext nature:
-        String[] natures = description.getNatureIds();
-        if (Arrays.asList(natures).contains(xtextNature)) {
-            logger.warn(".project already contains " + xtextNature);
-        } else {
-            String[] newNatures = new String[natures.length + 1];
-            System.arraycopy(natures, 0, newNatures, 0, natures.length);
-            newNatures[natures.length] = xtextNature;
-            description.setNatureIds(newNatures);
-        }
-        try {
-            project.setDescription(description, new ProgressMonitorAdapter(logger));
+            IProjectDescription description = project.getDescription();
+            // add xtext builder:
+            ICommand[] commands = description.getBuildSpec();
+            ICommand command = description.newCommand();
+            command.setBuilderName(builderName);
+            description.setBuildSpec(extendArray(commands, new ICommand[commands.length + 1], command));
+            // Add xtext nature:
+            String[] natures = description.getNatureIds();
+            description.setNatureIds(extendArray(natures, new String[natures.length + 1], xtextNature));
+            // Set updated description:
         } catch (CoreException exception) {
             logger.fatal(exception);
         }
