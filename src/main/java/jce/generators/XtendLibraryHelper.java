@@ -1,5 +1,7 @@
 package jce.generators;
 
+import static jce.properties.TextProperty.SOURCE_FOLDER;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -31,6 +33,7 @@ import org.eclipse.pde.core.plugin.IPluginModelBase;
 import org.eclipse.pde.core.plugin.PluginRegistry;
 
 import jce.properties.EcorificationProperties;
+import jce.util.PathHelper;
 import jce.util.ResourceRefresher;
 import jce.util.logging.MonitorFactory;
 
@@ -56,9 +59,11 @@ public final class XtendLibraryHelper {
         logger.info("Adding Xtend dependencies...");
         IProgressMonitor monitor = MonitorFactory.createProgressMonitor(logger, properties);
         ResourceRefresher.refresh(project);
-        createXtendFolder(project, monitor);
-        addClasspathEntry(project, monitor);
-        addBuildProperty(project);
+        PathHelper path = new PathHelper(SLASH);
+        String xtendDirectory = path.append(path.cutLastSegment(properties.get(SOURCE_FOLDER)) + SLASH + XTEND);
+        createXtendFolder(project, xtendDirectory, monitor);
+        addClasspathEntry(project, xtendDirectory, monitor);
+        addBuildProperty(project, xtendDirectory);
         addManifestEntries(project);
         updateProjectDescription(project);
     }
@@ -66,13 +71,13 @@ public final class XtendLibraryHelper {
     /**
      * Adds the Xtend folder (xtend-gen) to the build.properties file.
      */
-    private static void addBuildProperty(IProject project) {
+    private static void addBuildProperty(IProject project, String xtendDirectory) {
         try {
             IPluginModelBase base = PluginRegistry.findModel(project);
             if (base != null) {
                 IBuildModel buildModel = PluginRegistry.createBuildModel(base);
                 IBuildEntry entry = buildModel.getBuild().getEntry("source..");
-                String token = XTEND + SLASH;
+                String token = xtendDirectory + SLASH;
                 if (entry.contains(token)) {
                     logger.warn("build.properties already contains " + token);
                 } else {
@@ -93,10 +98,9 @@ public final class XtendLibraryHelper {
      * Retrieves the class path file from the {@link IProject}, adds an {@link IClasspathEntry} for the xtend-gen source
      * folder and sets the changed content.
      */
-    private static void addClasspathEntry(IProject project, IProgressMonitor monitor) {
+    private static void addClasspathEntry(IProject project, String xtendDirectory, IProgressMonitor monitor) {
         IJavaProject javaProject = JavaCore.create(project);
-        String xtendDirectory = SLASH + javaProject.getElementName() + SLASH + XTEND;
-        IClasspathEntry newEntry = JavaCore.newSourceEntry(new org.eclipse.core.runtime.Path(xtendDirectory));
+        IClasspathEntry newEntry = JavaCore.newSourceEntry(new org.eclipse.core.runtime.Path(SLASH + xtendDirectory + SLASH));
         try {
             IClasspathEntry[] entries = javaProject.getRawClasspath();
             if (Arrays.asList(entries).contains(newEntry)) {
@@ -132,8 +136,8 @@ public final class XtendLibraryHelper {
     /**
      * Creates the binary file folder for Xtend. This is the xtend-bin folder.
      */
-    private static void createXtendFolder(IProject project, IProgressMonitor monitor) {
-        IFolder folder = project.getFolder(XTEND);
+    private static void createXtendFolder(IProject project, String folderPath, IProgressMonitor monitor) {
+        IFolder folder = project.getFolder(folderPath);
         if (!folder.exists()) {
             try {
                 folder.create(false, true, monitor);
