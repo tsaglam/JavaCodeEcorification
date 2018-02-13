@@ -1,9 +1,5 @@
 package jce;
 
-import static jce.properties.TextProperty.ECORE_PACKAGE;
-import static jce.properties.TextProperty.PROJECT_SUFFIX;
-import static jce.properties.TextProperty.ROOT_CONTAINER;
-
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.eclipse.core.resources.IProject;
@@ -20,9 +16,6 @@ import org.eclipse.ui.PlatformUI;
 import eme.EcoreMetamodelExtraction;
 import eme.generator.GeneratedEcoreMetamodel;
 import eme.generator.saving.SavingInformation;
-import eme.properties.BinaryProperty;
-import eme.properties.ExtractionProperties;
-import eme.properties.TextProperty;
 import jce.codemanipulation.ImportOrganizer;
 import jce.codemanipulation.ecore.EcoreImportManipulator;
 import jce.codemanipulation.ecore.FactoryRenamer;
@@ -59,13 +52,12 @@ public class JavaCodeEcorification {
      */
     public JavaCodeEcorification() {
         properties = new EcorificationProperties();
-        metamodelGenerator = new EcoreMetamodelExtraction();
+        metamodelGenerator = new EcorificationExtraction(properties);
         genModelGenerator = new GenModelGenerator(properties);
         wrapperGenerator = new WrapperGenerator(properties);
         fieldEncapsulator = new FieldEncapsulator(properties);
         importOrganizer = new ImportOrganizer(properties);
         inheritanceManipulator = new InheritanceManipulator(properties);
-        configureExtraction(metamodelGenerator.getProperties());
     }
 
     /**
@@ -113,23 +105,6 @@ public class JavaCodeEcorification {
         new FactoryRenamer(metamodel, properties).manipulate(project);
         new EcoreFactoryGenerator(properties).buildFactories(metamodel, project);
         new ClassExposer(properties).manipulate(project);
-    }
-
-    /**
-     * Configures the extraction properties. JCE Properties are referenced directly, EME properties are referenced witht
-     * the class name.
-     */
-    private void configureExtraction(ExtractionProperties properties) {
-        properties.set(TextProperty.PROJECT_SUFFIX, this.properties.get(PROJECT_SUFFIX));
-        properties.set(TextProperty.DEFAULT_PACKAGE, this.properties.get(ECORE_PACKAGE));
-        properties.set(TextProperty.ROOT_NAME, this.properties.get(ROOT_CONTAINER));
-        properties.set(TextProperty.SAVING_STRATEGY, "CopyProject");
-        properties.set(TextProperty.DATATYPE_PACKAGE, "datatypes");
-        properties.set(BinaryProperty.DUMMY_CLASS, false);
-        properties.set(BinaryProperty.ROOT_CONTAINER, true);
-        properties.set(BinaryProperty.FINAL_AS_UNCHANGEABLE, false);
-        properties.set(BinaryProperty.NESTED_TYPES, false);
-        properties.set(BinaryProperty.PARAMETER_MULTIPLICITIES, false);
     }
 
     /**
