@@ -65,7 +65,7 @@ public final class XtendLibraryHelper {
         addClasspathEntry(project, xtendDirectory, monitor);
         addBuildProperty(project, xtendDirectory);
         addManifestEntries(project);
-        updateProjectDescription(project);
+        updateProjectDescription(project, monitor);
     }
 
     /**
@@ -100,16 +100,15 @@ public final class XtendLibraryHelper {
      */
     private static void addClasspathEntry(IProject project, String xtendDirectory, IProgressMonitor monitor) {
         IJavaProject javaProject = JavaCore.create(project);
-        IClasspathEntry newEntry = JavaCore.newSourceEntry(new org.eclipse.core.runtime.Path(SLASH + xtendDirectory + SLASH));
+        IPath path = javaProject.getPath().append(xtendDirectory); // Path to xtend folder
+        IClasspathEntry newEntry = JavaCore.newSourceEntry(path); // Entry for the .classpath file
         try {
             IClasspathEntry[] entries = javaProject.getRawClasspath();
             if (Arrays.asList(entries).contains(newEntry)) {
                 logger.warn(".classpath already contains " + xtendDirectory);
             } else {
-                IClasspathEntry[] newEntries = new IClasspathEntry[entries.length + 1];
-                System.arraycopy(entries, 0, newEntries, 0, entries.length);
-                newEntries[entries.length] = newEntry;
-                javaProject.setRawClasspath(newEntries, monitor);
+                entries = extendArray(entries, new IClasspathEntry[entries.length + 1], newEntry);
+                javaProject.setRawClasspath(entries, monitor);
             }
         } catch (JavaModelException exception) {
             logger.error(exception);
@@ -169,7 +168,9 @@ public final class XtendLibraryHelper {
 
     /**
      * Extends an array by copying all the elements of the old array to a new array and adding the new element in the
-     * last position. If the array already contains the new element the original array is returned.
+     * last position. If the array already contains the new element the original array is returned. Because it is not
+     * able to dynamically create generic arrays in Java, the new array has to be passes as a parameter. It should have
+     * the size of the old arrays plus one.
      */
     private static <T> T[] extendArray(T[] oldArray, T[] newArray, T element) {
         if (Arrays.asList(oldArray).contains(element)) {
@@ -201,7 +202,7 @@ public final class XtendLibraryHelper {
     /**
      * Adds the xtext nature and builder command to the .project file of the project.
      */
-    private static void updateProjectDescription(IProject project) {
+    private static void updateProjectDescription(IProject project, IProgressMonitor monitor) {
         String builderName = "org.eclipse.xtext.ui.shared.xtextBuilder";
         String xtextNature = "org.eclipse.xtext.ui.shared.xtextNature";
         try {
@@ -215,6 +216,7 @@ public final class XtendLibraryHelper {
             String[] natures = description.getNatureIds();
             description.setNatureIds(extendArray(natures, new String[natures.length + 1], xtextNature));
             // Set updated description:
+            project.setDescription(description, monitor);
         } catch (CoreException exception) {
             logger.fatal(exception);
         }
