@@ -60,7 +60,7 @@ public final class XtendLibraryHelper {
         IProgressMonitor monitor = MonitorFactory.createProgressMonitor(logger, properties);
         ResourceRefresher.refresh(project);
         PathHelper path = new PathHelper(SLASH);
-        String xtendDirectory = path.append(path.cutLastSegment(properties.get(SOURCE_FOLDER)) + SLASH + XTEND);
+        String xtendDirectory = path.append(path.getParent(properties.get(SOURCE_FOLDER)), XTEND);
         createXtendFolder(project, xtendDirectory, monitor);
         addClasspathEntry(project, xtendDirectory, monitor);
         addBuildProperty(project, xtendDirectory);

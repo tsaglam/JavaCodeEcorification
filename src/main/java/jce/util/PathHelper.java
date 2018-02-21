@@ -55,13 +55,14 @@ public class PathHelper {
     }
 
     /**
-     * Cuts the last segment of a path. If the path ends on a separator, it gets removed first.
+     * Cuts the last segment of a path. If the path ends on a separator, it gets removed first. If the path has only one
+     * segment, the original path is returned as it is.
      * @param path is the original path.
-     * @return the path without the last segment.
+     * @return the path without the last segment or the original path.
      */
     public String cutLastSegment(String path) {
         String newPath = removeTrailingSeparator(path);
-        if (newPath.contains(separatorString)) {
+        if (hasMultipleSegments(newPath)) {
             return newPath.substring(0, newPath.lastIndexOf(separator));
         }
         return newPath;
@@ -104,7 +105,22 @@ public class PathHelper {
     }
 
     /**
-     * Checks whether a path has at least two segments.
+     * Cuts the last segment of a path. If the path ends on a separator, it gets removed first. If the path has only one
+     * segment, an empty String is returned. This is the difference to {@link PathHelper#cutLastSegment(String)}.
+     * @param path is the original path.
+     * @return the path without the last segment or an empty string.
+     */
+    public String getParent(String path) {
+        String newPath = removeTrailingSeparator(path);
+        if (hasMultipleSegments(newPath)) {
+            return cutLastSegment(newPath);
+        }
+        return "";
+    }
+
+    /**
+     * Checks whether a path has at least two segments. This method does not recognize trailing separators. Therefore
+     * they have to be removed first.
      * @param path is the path.
      * @return true if it multiple.
      */
