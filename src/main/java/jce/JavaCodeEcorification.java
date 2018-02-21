@@ -67,26 +67,22 @@ public class JavaCodeEcorification {
      * @param originalProject is the specific Java project as {@link IProject}.
      */
     public void start(IProject originalProject) {
-        // 0. initialize:
-        SourceFolderAnalyzer.verify(originalProject, properties);
+        SourceFolderAnalyzer.verify(originalProject, properties); // 0. initialize:
         logger.info("Starting Ecorification...");
         GeneratedEcoreMetamodel metamodel = extractMetamodel(originalProject); // 1
-        IProject project = getProject(metamodel.getSavingInformation()); // 1,5. Retrieve output project
+        IProject project = getProject(metamodel.getSavingInformation()); // 1.5. Retrieve output project
         buildFactories(metamodel, project); // 2.
         generateWrappers(metamodel, project); // 3.
         new EcoreImportManipulator(metamodel, properties).manipulate(project);  // 4. adapt imports
         adaptOriginCode(metamodel, project); // 5.
-        // 6. build project and make changes visible in the Eclipse IDE. Notify the user:
-        rebuild(project, properties);
+        rebuild(project, properties); // 6. build project
         notifyUser(originalProject);
     }
 
     /**
-     * Encapsulates all fields of the origin code. Removes public, non-static fields and their access methods, organizes
-     * all imports, manipulates the inheritance relations to extend the wrappers, creates default constructors where
-     * they are missing.
-     * @param metamodel is the {@link GeneratedEcoreMetamodel}.
-     * @param project is the {@link IProject} where the metamodel is located.
+     * 5. Encapsulates all fields of the origin code. Removes public, non-static fields and their access methods,
+     * organizes all imports, manipulates the inheritance relations to extend the wrappers, creates default constructors
+     * where they are missing.
      */
     private void adaptOriginCode(GeneratedEcoreMetamodel metamodel, IProject project) {
         fieldEncapsulator.manipulate(project);
@@ -97,9 +93,7 @@ public class JavaCodeEcorification {
     }
 
     /**
-     * Builds the custom Ecore factories, while renaming the old ones.
-     * @param metamodel is the {@link GeneratedEcoreMetamodel}.
-     * @param project is the {@link IProject} where the metamodel is located.
+     * 2. Builds the custom Ecore factories, while renaming the old ones.
      */
     private void buildFactories(GeneratedEcoreMetamodel metamodel, IProject project) {
         new FactoryRenamer(metamodel, properties).manipulate(project);
@@ -108,10 +102,8 @@ public class JavaCodeEcorification {
     }
 
     /**
-     * Extracts a Ecore metamodel in form of an {@link GeneratedEcoreMetamodel} from the original {@link IProject}.
+     * 1. Extracts a Ecore metamodel in form of an {@link GeneratedEcoreMetamodel} from the original {@link IProject}.
      * Generates a {@link GenModel}.
-     * @param originalProject the original {@link IProject}.
-     * @return the {@link GeneratedEcoreMetamodel}.
      */
     private GeneratedEcoreMetamodel extractMetamodel(IProject originalProject) {
         GeneratedEcoreMetamodel metamodel = metamodelGenerator.extract(originalProject);
@@ -121,9 +113,7 @@ public class JavaCodeEcorification {
     }
 
     /**
-     * Generates the wrappers, which are the classes that unify the origin code with the Ecore code.
-     * @param metamodel is the {@link GeneratedEcoreMetamodel}.
-     * @param project is the {@link IProject} where the metamodel is located.
+     * 3. Generates the wrappers, which are the classes that unify the origin code with the Ecore code.
      */
     private void generateWrappers(GeneratedEcoreMetamodel metamodel, IProject project) {
         XtendLibraryHelper.addXtendLibs(project, properties);
@@ -157,7 +147,7 @@ public class JavaCodeEcorification {
     }
 
     /**
-     * Tries to build the project.
+     * 6. Tries to build the project.
      */
     private void rebuild(IProject project, EcorificationProperties properties) {
         ResourceRefresher.refresh(project);
