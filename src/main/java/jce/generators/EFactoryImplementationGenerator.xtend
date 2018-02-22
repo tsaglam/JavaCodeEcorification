@@ -36,8 +36,7 @@ class EFactoryImplementationGenerator extends ClassGenerator {
 	/**
 	 * Creates the content of an Ecore factory.
 	 */
-	def private String createFactoryContent(String currentPackage, String packageName, String interfacePackage,
-		List<String> packageTypes) '''
+	def private String createFactoryContent(String currentPackage, String packageName, String interfacePackage, List<String> packageTypes) '''
 		package «currentPackage»;
 		
 		import org.eclipse.emf.ecore.EClass;
@@ -91,20 +90,20 @@ class EFactoryImplementationGenerator extends ClassGenerator {
 		    public EObject create(EClass eClass) {
 		        switch (eClass.getClassifierID()) {
 					«FOR type : packageTypes»
-					case «packageName»Package.«constantName(type)»: return create«type»();
+						case «packageName»Package.«constantName(type)»: return create«type»();
 					«ENDFOR»
-		            default:
-		                throw new IllegalArgumentException("The class '" + eClass.getName() + "' is not a valid classifier");
-		        }
-		    }
+					default:
+					    throw new IllegalArgumentException("The class '" + eClass.getName() + "' is not a valid classifier");
+					     }
+					 }
 			
 			«FOR type : packageTypes SEPARATOR blankLine»
 				«createFactoryMethod(type)»
 			«ENDFOR»
 			
 			/**
-			* @generated
-			*/
+			 * @generated
+			 */
 			public «packageName»Package get«packageName»Package() {
 			return («packageName»Package)getEPackage();
 			}
@@ -140,7 +139,7 @@ class EFactoryImplementationGenerator extends ClassGenerator {
 		var constantName = "" // empty result string
 		var wasLowerCase = true // last word was lower case
 		for (String word : typeName.split("(?=\\p{Upper})")) { // iterate over every word
-			if (containsLowerCase(word) || wasLowerCase) { // if has or comes after lower case letter.
+			if(containsLowerCase(word) || wasLowerCase) { // if has or comes after lower case letter.
 				constantName += '_' // add separator
 			}
 			constantName += word.toUpperCase()

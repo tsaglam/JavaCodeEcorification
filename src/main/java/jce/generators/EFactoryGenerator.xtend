@@ -57,8 +57,8 @@ class EFactoryGenerator extends ClassGenerator {
 				«createFactoryMethod(type)»
 			«ENDFOR»
 			
-		    /**
-		 	 * Returns the package supported by this factory.
+			/**
+			 * Returns the package supported by this factory.
 			 * @return the package supported by this factory.
 			 * @generated
 			 */

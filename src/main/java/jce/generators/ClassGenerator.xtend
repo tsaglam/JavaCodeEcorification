@@ -16,7 +16,7 @@ import static jce.properties.TextProperty.SOURCE_FOLDER
 class ClassGenerator {
 	extension protected final PathHelper pathUtil
 	extension protected final EcorificationProperties properties
-	
+
 	protected static final Logger logger = LogManager.getLogger(ClassGenerator.name)
 	protected final IProgressMonitor monitor
 
@@ -35,7 +35,7 @@ class ClassGenerator {
 	def public void createClass(String path, String name, String content, IProject project) {
 		var folder = project.getFolder(append(SOURCE_FOLDER.get, path))
 		var file = folder.getFile(name)
-		if (file.exists) {
+		if(file.exists) {
 			logger.error("File " + file.name + " already exists!")
 		} else {
 			val source = new ByteArrayInputStream(content.bytes)
@@ -48,11 +48,11 @@ class ClassGenerator {
 	 */
 	def public void createFolder(String path, IProject project) {
 		var IFolder folder = project.getFolder(path)
-		if (!folder.exists) {
+		if(!folder.exists) {
 			folder.create(false, true, monitor)
 		}
 	}
-	
+
 	/**
 	 * Generates a blank line in a template.
 	 */
