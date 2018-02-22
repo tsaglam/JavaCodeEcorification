@@ -4,9 +4,18 @@
    <extension point="org.eclipse.ui.commands">
       <category name="JCE" id="JCE.commands.category" />
       <command name="Ecorify From..." categoryId="JCE.commands.category" id="JCE.commands.ecorifyCommand" />
+      <command
+            categoryId="JCE.commands.category"
+            id="JCE.commands.extractCommand"
+            name="Extract From...">
+      </command>
    </extension>
    <extension point="org.eclipse.ui.handlers">
       <handler commandId="JCE.commands.ecorifyCommand" class="jce.handlers.EcorificationHandler" />
+      <handler
+            class="jce.handlers.ExtractionHandler"
+            commandId="JCE.commands.extractCommand">
+      </handler>
    </extension>
    <extension point="org.eclipse.ui.menus">
       <menuContribution locationURI="popup:org.eclipse.jdt.ui.PackageExplorer">
@@ -15,6 +24,12 @@
                label="JCE"
                tooltip="Java Code Ecorification">
             <command commandId="JCE.commands.ecorifyCommand" id="JCE.menus.extractCommand" label="Ecorify Java Project..." mnemonic="S" tooltip="Start the Ecorification of Java code." />
+            <command
+                  commandId="JCE.commands.extractCommand"
+                  id="JCE.menus.extractCommand"
+                  label="Extract Ecore Metamodel..."
+                  tooltip="Start only the Ecore metamodel extraction of the Ecorification of Java code.">
+            </command>
          </menu>
       </menuContribution>
    </extension>
