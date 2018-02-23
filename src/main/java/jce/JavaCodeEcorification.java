@@ -18,6 +18,7 @@ import eme.generator.GeneratedEcoreMetamodel;
 import eme.generator.saving.SavingInformation;
 import jce.codemanipulation.ImportOrganizer;
 import jce.codemanipulation.ecore.EcoreImportManipulator;
+import jce.codemanipulation.ecore.FactoryImplementationRenamer;
 import jce.codemanipulation.ecore.FactoryRenamer;
 import jce.codemanipulation.origin.ClassExposer;
 import jce.codemanipulation.origin.DefaultConstructorGenerator;
@@ -73,7 +74,7 @@ public class JavaCodeEcorification {
         IProject project = getProject(metamodel.getSavingInformation()); // 1.5. Retrieve output project
         buildFactories(metamodel, project); // 2.
         generateWrappers(metamodel, project); // 3.
-        new EcoreImportManipulator(metamodel, properties).manipulate(project);  // 4. adapt imports
+        new EcoreImportManipulator(metamodel, properties).manipulate(project); // 4. adapt imports
         adaptOriginCode(metamodel, project); // 5.
         rebuild(project, properties); // 6. build project
         notifyUser(originalProject);
@@ -89,7 +90,6 @@ public class JavaCodeEcorification {
         new MemberRemover(metamodel, properties).manipulate(project);
         importOrganizer.manipulate(project);
         inheritanceManipulator.manipulate(project);
-        new DefaultConstructorGenerator(properties).manipulate(project);
     }
 
     /**
@@ -97,6 +97,8 @@ public class JavaCodeEcorification {
      */
     private void buildFactories(GeneratedEcoreMetamodel metamodel, IProject project) {
         new FactoryRenamer(metamodel, properties).manipulate(project);
+        new FactoryImplementationRenamer(metamodel, properties).manipulate(project);
+        new DefaultConstructorGenerator(properties).manipulate(project); // TODO (HIGH) Is this too early?
         new EcoreFactoryGenerator(properties).buildFactories(metamodel, project);
         new ClassExposer(properties).manipulate(project);
     }
