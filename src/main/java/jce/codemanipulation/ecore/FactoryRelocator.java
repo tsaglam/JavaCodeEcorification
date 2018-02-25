@@ -3,10 +3,7 @@ package jce.codemanipulation.ecore;
 import static jce.properties.TextProperty.FACTORY_PACKAGE;
 import static jce.properties.TextProperty.SOURCE_FOLDER;
 
-import java.util.List;
-
 import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -28,7 +25,6 @@ import jce.properties.EcorificationProperties;
 import jce.properties.TextProperty;
 import jce.util.MetamodelSearcher;
 import jce.util.PathHelper;
-import jce.util.jdt.PackageFilter;
 
 /**
  * Code manipulator that moves the original Ecore factory implementation class into a new subpackage.
@@ -44,7 +40,7 @@ public class FactoryRelocator extends AbstractCodeManipulator {
      * @param properties are the {@link EcorificationProperties}.
      */
     public FactoryRelocator(GeneratedEcoreMetamodel metamodel, EcorificationProperties properties) {
-        super(properties);
+        super(properties.get(TextProperty.ECORE_PACKAGE), properties);
         this.metamodel = metamodel;
     }
 
@@ -91,11 +87,6 @@ public class FactoryRelocator extends AbstractCodeManipulator {
             composite.add(change);
         }
         composite.perform(monitor);
-    }
-
-    @Override
-    protected List<IPackageFragment> filterPackages(IProject project, EcorificationProperties properties) {
-        return PackageFilter.startsWith(project, properties.get(TextProperty.ECORE_PACKAGE));
     }
 
     @Override

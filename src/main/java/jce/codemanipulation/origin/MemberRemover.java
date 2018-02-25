@@ -4,7 +4,9 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 
 import eme.generator.GeneratedEcoreMetamodel;
+import jce.codemanipulation.AbstractCodeManipulator;
 import jce.properties.EcorificationProperties;
+import jce.properties.TextProperty;
 import jce.util.jdt.ASTUtil;
 
 /**
@@ -12,7 +14,7 @@ import jce.util.jdt.ASTUtil;
  * Ecore metamodel which was extracted from the origin code.
  * @author Timur Saglam
  */
-public class MemberRemover extends OriginCodeManipulator {
+public class MemberRemover extends AbstractCodeManipulator {
     private GeneratedEcoreMetamodel metamodel;
 
     /**
@@ -21,15 +23,12 @@ public class MemberRemover extends OriginCodeManipulator {
      * @param properties are the {@link EcorificationProperties}.
      */
     public MemberRemover(GeneratedEcoreMetamodel metamodel, EcorificationProperties properties) {
-        super(properties);
+        super(properties, properties.get(TextProperty.ECORE_PACKAGE), properties.get(TextProperty.WRAPPER_PACKAGE));
         this.metamodel = metamodel;
     }
 
     @Override
     protected void manipulate(ICompilationUnit unit) throws JavaModelException {
-        if (metamodel == null) {
-            throw new IllegalStateException("Please set the generated Ecore metamodel before calling manipulate().");
-        }
         ASTUtil.applyVisitorModifications(unit, new MemberRemovalVisitor(metamodel, properties), monitor);
     }
 }

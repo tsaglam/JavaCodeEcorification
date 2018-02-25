@@ -1,12 +1,9 @@
 package jce.codemanipulation.ecore;
 
-import java.util.List;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -19,7 +16,6 @@ import jce.properties.EcorificationProperties;
 import jce.properties.TextProperty;
 import jce.util.MetamodelSearcher;
 import jce.util.jdt.ASTUtil;
-import jce.util.jdt.PackageFilter;
 
 /**
  * Base class for the adaption of problematic import declarations in the Ecore code. A problematic import declaration is
@@ -40,7 +36,7 @@ public class EcoreImportManipulator extends AbstractCodeManipulator {
      * @param properties are the {@link EcorificationProperties}.
      */
     public EcoreImportManipulator(GeneratedEcoreMetamodel metamodel, EcorificationProperties properties) {
-        super(properties);
+        super(properties.get(TextProperty.ECORE_PACKAGE), properties);
         this.metamodel = metamodel;
     }
 
@@ -127,11 +123,6 @@ public class EcoreImportManipulator extends AbstractCodeManipulator {
     private void retainInterface(ICompilationUnit unit) throws JavaModelException {
         ASTVisitor visitor = new InterfaceRetentionVisitor(unit.getImports(), unit.getParent().getElementName());
         ASTUtil.applyVisitorModifications(unit, visitor, monitor);
-    }
-
-    @Override
-    protected List<IPackageFragment> filterPackages(IProject project, EcorificationProperties properties) {
-        return PackageFilter.startsWith(project, properties.get(TextProperty.ECORE_PACKAGE));
     }
 
     /**

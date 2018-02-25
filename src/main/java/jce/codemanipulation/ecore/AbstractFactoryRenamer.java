@@ -3,13 +3,9 @@ package jce.codemanipulation.ecore;
 import static jce.properties.TextProperty.ECORE_PACKAGE;
 import static jce.properties.TextProperty.FACTORY_SUFFIX;
 
-import java.util.List;
-
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameCompilationUnitProcessor;
 import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
@@ -20,7 +16,6 @@ import jce.properties.EcorificationProperties;
 import jce.properties.TextProperty;
 import jce.util.MetamodelSearcher;
 import jce.util.PathHelper;
-import jce.util.jdt.PackageFilter;
 import jce.util.jdt.RefactoringUtil;
 
 /**
@@ -39,7 +34,7 @@ public abstract class AbstractFactoryRenamer extends AbstractCodeManipulator {
      * @param properties are the {@link EcorificationProperties}.
      */
     public AbstractFactoryRenamer(GeneratedEcoreMetamodel metamodel, EcorificationProperties properties) {
-        super(properties);
+        super(properties.get(TextProperty.ECORE_PACKAGE), properties);
         this.metamodel = metamodel;
         String ecorePackage = properties.get(ECORE_PACKAGE);
         rootFactory = nameUtil.append(ecorePackage, PathHelper.capitalize(ecorePackage) + "Factory");
@@ -86,11 +81,6 @@ public abstract class AbstractFactoryRenamer extends AbstractCodeManipulator {
         } else {
             logger.error("Could not rename " + unit.getElementName() + " to " + newName);
         }
-    }
-
-    @Override
-    protected final List<IPackageFragment> filterPackages(IProject project, EcorificationProperties properties) {
-        return PackageFilter.startsWith(project, properties.get(TextProperty.ECORE_PACKAGE));
     }
 
     /**

@@ -10,21 +10,23 @@ import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
+import jce.codemanipulation.AbstractCodeManipulator;
 import jce.properties.EcorificationProperties;
+import jce.properties.TextProperty;
 import jce.util.jdt.ASTUtil;
 
 /**
  * Encapsulates the fields of the origin code. This is necessary for the removal of the fields.
  * @author Timur Saglam
  */
-public class FieldEncapsulator extends OriginCodeManipulator {
+public class FieldEncapsulator extends AbstractCodeManipulator {
 
     /**
      * Simple constructor that sets the properties.
      * @param properties are the {@link EcorificationProperties}.
      */
     public FieldEncapsulator(EcorificationProperties properties) {
-        super(properties);
+        super(properties, properties.get(TextProperty.ECORE_PACKAGE), properties.get(TextProperty.WRAPPER_PACKAGE));
     }
 
     @Override

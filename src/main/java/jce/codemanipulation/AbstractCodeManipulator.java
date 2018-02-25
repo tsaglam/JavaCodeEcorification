@@ -14,6 +14,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import jce.properties.EcorificationProperties;
 import jce.util.PathHelper;
 import jce.util.ResourceRefresher;
+import jce.util.jdt.PackageFilter;
 import jce.util.logging.MonitorFactory;
 
 /**
@@ -22,20 +23,34 @@ import jce.util.logging.MonitorFactory;
  * @author Timur Saglam
  */
 public abstract class AbstractCodeManipulator {
+    private String[] excludedPackages;
+    private String packageName;
     protected Logger logger;
     protected final IProgressMonitor monitor;
-    protected final EcorificationProperties properties;
     protected PathHelper nameUtil;
+    protected final EcorificationProperties properties;
 
     /**
-     * Simple constructor that sets the properties.
+     * Simple constructor for the manipulation for multiple packages.
      * @param properties are the {@link EcorificationProperties}.
+     * @param excludedPackages are the package prefixes whose packages should not be manipulated.
      */
-    public AbstractCodeManipulator(EcorificationProperties properties) {
+    public AbstractCodeManipulator(EcorificationProperties properties, String... excludedPackages) {
         this.properties = properties;
+        this.excludedPackages = excludedPackages;
         logger = LogManager.getLogger(this.getClass().getName());
         monitor = MonitorFactory.createProgressMonitor(logger, properties);
         nameUtil = new PathHelper('.');
+    }
+
+    /**
+     * Simple constructor for the manipulation of one specific package.
+     * @param packageName is the name of the specific package.
+     * @param properties are the {@link EcorificationProperties}.
+     */
+    public AbstractCodeManipulator(String packageName, EcorificationProperties properties) {
+        this(properties);
+        this.packageName = packageName;
     }
 
     /**
@@ -60,12 +75,18 @@ public abstract class AbstractCodeManipulator {
     }
 
     /**
-     * Defines the {@link IPackageFragment} list which will be manipulated.
+     * Defines the {@link IPackageFragment} list which will be manipulated. Either selects one specific package of
+     * filters out a set of packages.
      * @param project is the {@link IProject} to manipulate.
      * @param properties are the {@link EcorificationProperties}.
      * @return the target packages of this code manipulator.
      */
-    protected abstract List<IPackageFragment> filterPackages(IProject project, EcorificationProperties properties);
+    private List<IPackageFragment> filterPackages(IProject project, EcorificationProperties properties) {
+        if (packageName == null) {
+            return PackageFilter.startsNotWith(project, excludedPackages);
+        }
+        return PackageFilter.startsWith(project, packageName);
+    }
 
     /**
      * Returns the name of the package member type of a compilation unit. E.g. "model.Main" from "Main.java"

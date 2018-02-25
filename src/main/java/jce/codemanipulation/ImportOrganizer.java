@@ -1,15 +1,11 @@
 package jce.codemanipulation;
 
-import java.util.List;
-
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -19,7 +15,6 @@ import org.eclipse.text.edits.TextEdit;
 import jce.properties.EcorificationProperties;
 import jce.properties.TextProperty;
 import jce.util.jdt.ASTUtil;
-import jce.util.jdt.PackageFilter;
 import jce.util.logging.MonitorFactory;
 
 /**
@@ -36,13 +31,8 @@ public class ImportOrganizer extends AbstractCodeManipulator {
      * @param properties are the {@link EcorificationProperties}.
      */
     public ImportOrganizer(EcorificationProperties properties) {
-        super(properties);
+        super(properties.get(TextProperty.ECORE_PACKAGE), properties);
         monitor = MonitorFactory.createProgressMonitor(logger, properties);
-    }
-
-    @Override
-    protected List<IPackageFragment> filterPackages(IProject project, EcorificationProperties properties) {
-        return PackageFilter.startsNotWith(project, properties.get(TextProperty.WRAPPER_PACKAGE));
     }
 
     @Override
