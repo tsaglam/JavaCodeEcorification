@@ -1,6 +1,7 @@
 package jce.generators
 
 import java.lang.reflect.Modifier
+import java.util.Collections
 import java.util.LinkedList
 import java.util.List
 import jce.properties.EcorificationProperties
@@ -16,8 +17,10 @@ import org.eclipse.jdt.core.dom.ASTVisitor
 import org.eclipse.jdt.core.dom.CompilationUnit
 import org.eclipse.jdt.core.dom.MethodDeclaration
 import org.eclipse.xtend.lib.annotations.Accessors
-import java.util.Collections
 
+/**
+ * Generator class for the generation of constructor representations for the wrapper classes.
+ */
 final class ConstructorGenerator {
 	static final Logger logger = LogManager.getLogger(ConstructorGenerator.name)
 
@@ -29,7 +32,7 @@ final class ConstructorGenerator {
 	 * Builds the constructor representations from all constructors of an IType. The IType is the correlating super type
 	 * of the wrapper which should use the generated constructors.
 	 */
-	def static List<WrapperConstructor> generate(String typeName, IJavaProject project, EcorificationProperties properties) {
+	def static List<ConstructorRepresentation> generate(String typeName, IJavaProject project, EcorificationProperties properties) {
 		if(typeName === null) {
 			return noConstructors
 		}
@@ -50,7 +53,7 @@ final class ConstructorGenerator {
 	 */
 	@Accessors(PUBLIC_GETTER)
 	static class ConstructorVisitor extends ASTVisitor {
-		List<WrapperConstructor> constructors
+		List<ConstructorRepresentation> constructors
 		ICompilationUnit unit
 
 		/**
@@ -63,7 +66,7 @@ final class ConstructorGenerator {
 
 		override visit(MethodDeclaration node) {
 			if(node.isConstructor && Modifier.isPublic(node.getModifiers)) {
-				constructors.add(new WrapperConstructor(node, unit))
+				constructors.add(new ConstructorRepresentation(node, unit))
 			}
 			return false
 		}
@@ -72,7 +75,7 @@ final class ConstructorGenerator {
 	/**
 	 * Returns an empty immutable list of type WrapperConstructors. That means it returns no constructors.
 	 */
-	def private static List<WrapperConstructor> noConstructors() {
+	def private static List<ConstructorRepresentation> noConstructors() {
 		return Collections.emptyList
 	}
 }
