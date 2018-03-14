@@ -6,6 +6,7 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -58,6 +59,15 @@ public class InterfaceRetentionVisitor extends ASTVisitor {
         if (isNotEObject(interfaceType)) {
             String newName = getName(interfaceType);
             Type newSuperType = ast.newSimpleType(ast.newName(newName));
+            if (superInterface.isParameterizedType()) { // add parameters: TODO (MEDIUM) improve this method.
+                ParameterizedType parameterizedType = ast.newParameterizedType(newSuperType);
+                ParameterizedType castedType = (ParameterizedType) superInterface;
+                for (Type type : RawTypeUtil.castList(Type.class, castedType.typeArguments())) {
+                    type.delete();
+                    parameterizedType.typeArguments().add(type);
+                }
+                newSuperType = parameterizedType; // use parameterized type
+            }
             node.superInterfaceTypes().remove(superInterface);
             node.superInterfaceTypes().add(newSuperType);
         }

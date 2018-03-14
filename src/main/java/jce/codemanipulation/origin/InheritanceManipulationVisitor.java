@@ -10,12 +10,15 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.TypeParameter;
 
 import jce.properties.EcorificationProperties;
 import jce.util.PathHelper;
+import jce.util.RawTypeUtil;
 import jce.util.logging.MonitorFactory;
 
 /**
@@ -73,10 +76,21 @@ public class InheritanceManipulationVisitor extends ASTVisitor {
     /**
      * Builds an {@link SimpleType} out of an fully qualified name and a {@link TypeDeclaration}.
      */
+    @SuppressWarnings("unchecked")
     private Type nameToType(TypeDeclaration declaration, String qualifiedName) {
         AST ast = declaration.getAST();
         Name name = ast.newName(qualifiedName);
-        return ast.newSimpleType(name);
+        Type type = ast.newSimpleType(name);
+        if (!declaration.typeParameters().isEmpty()) { // TODO (MEDIUM) optimize this, reduce duplication
+            ParameterizedType parameterizedType = ast.newParameterizedType(type);
+            for (TypeParameter parameter : RawTypeUtil.castList(TypeParameter.class, declaration.typeParameters())) {
+                Name parameterName = ast.newSimpleName(parameter.getName().getIdentifier());
+                parameterizedType.typeArguments().add(ast.newSimpleType(parameterName));
+            }
+            type = parameterizedType;
+        }
+
+        return type;
     }
 
     /**
