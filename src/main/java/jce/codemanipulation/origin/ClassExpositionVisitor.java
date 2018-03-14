@@ -21,7 +21,7 @@ import jce.util.logging.MonitorFactory;
  * (e.g. the Ecore interface or implementation class) or package.
  * @author Timur Saglam
  */
-class ClassExpositionVisitor extends ASTVisitor {
+public class ClassExpositionVisitor extends ASTVisitor {
     private static final Logger logger = LogManager.getLogger(ClassExpositionVisitor.class.getName());
     private IProgressMonitor monitor;
 

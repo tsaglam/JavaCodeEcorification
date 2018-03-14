@@ -5,8 +5,6 @@ import jce.properties.EcorificationProperties
 import jce.util.PathHelper
 import org.eclipse.jdt.core.JavaModelException
 
-import static extension jce.util.PathHelper.capitalize
-
 /**
  * Code manipulator that renames the original factory implementation classes.
  * @author Timur Saglam

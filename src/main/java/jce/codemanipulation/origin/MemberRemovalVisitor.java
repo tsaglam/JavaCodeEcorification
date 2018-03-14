@@ -26,8 +26,8 @@ import jce.util.logging.MonitorFactory;
  */
 public class MemberRemovalVisitor extends ASTVisitor {
     private final GeneratedEcoreMetamodel metamodel;
-    private final List<String> removedFields;
     private final IProgressMonitor monitor;
+    private final List<String> removedFields;
 
     /**
      * Basic constructor.
