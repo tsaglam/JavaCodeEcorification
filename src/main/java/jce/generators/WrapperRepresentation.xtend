@@ -181,7 +181,7 @@ class WrapperRepresentation {
 	 */
 	def private String getTypeParameters() { // TODO (MEDIUM) remove duplicate code.
 		if(typeParameters.empty) {
-			return "";
+			return ""
 		}
 		val StringJoiner joiner = new StringJoiner(", ")
 		for (parameter : typeParameters) {
@@ -192,7 +192,7 @@ class WrapperRepresentation {
 
 	def private String getGenericArguments() { // TODO (MEDIUM) remove duplicate code.
 		if(typeParameters.empty) {
-			return "";
+			return ""
 		}
 		val StringJoiner joiner = new StringJoiner(", ")
 		for (parameter : typeParameters) {

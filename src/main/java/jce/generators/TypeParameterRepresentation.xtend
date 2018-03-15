@@ -24,7 +24,7 @@ class TypeParameterRepresentation {
 	new(ETypeParameter eTypeParameter, ICompilationUnit ecoreInterface) {
 		this.eTypeParameter = eTypeParameter
 		name = eTypeParameter.name
-		content = buildContent()
+		content = buildContent
 		buildImports(ecoreInterface)
 	}
 
