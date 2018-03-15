@@ -5,6 +5,8 @@ import jce.properties.EcorificationProperties
 import jce.util.PathHelper
 import org.eclipse.jdt.core.JavaModelException
 
+import static extension jce.util.PathHelper.capitalize
+
 /**
  * Abstract code manipulator that renames the original Ecore factory interfaces.
  * @author Timur Saglam
