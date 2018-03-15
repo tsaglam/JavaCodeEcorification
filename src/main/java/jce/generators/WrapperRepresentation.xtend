@@ -49,7 +49,7 @@ class WrapperRepresentation {
 		superClass = getSuperClassName(eClass)
 		wrapperConstructors = ConstructorGenerator.generate(superClass, project, properties)
 		typeParameters = TypeParameterGenerator.generate(eClass.ETypeParameters, append(ECORE_PACKAGE.get, packageName, factoryName), project,
-			properties)
+			properties) // TODO (HIGH) is this call right? using the factory name? not the ecore interface (eClass.name)
 		importDeclarations = new HashSet // add import declarations:
 		wrapperConstructors.forEach[constructor|importDeclarations.addAll(constructor.imports)]
 		typeParameters.forEach[parameter|importDeclarations.addAll(parameter.imports)]
