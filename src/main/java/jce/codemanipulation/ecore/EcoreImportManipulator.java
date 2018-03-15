@@ -47,28 +47,26 @@ public class EcoreImportManipulator extends AbstractCodeManipulator {
     }
 
     /**
-     * Edits an {@link IImportDeclaration} with the help of an {@link ImportRewrite} instance to refer to the origin
-     * code instead to the Ecore code.
-     */
-    private void edit(IImportDeclaration importDeclaration, ImportRewrite implementationRewrite, ImportRewrite interfaceRewrite) {
-        String oldName = importDeclaration.getElementName();
-        String newName = nameUtil.cutFirstSegment(oldName); // generate new import string
-        if (implementationRewrite.removeImport(oldName)) { // remove old import
-            implementationRewrite.addImport(newName); // add to implementation class
-            interfaceRewrite.removeImport(oldName); // remove old import as well
-            interfaceRewrite.addImport(newName); // add to Ecore interface
-        } else {
-            logger.fatal("Could not remove Ecore import " + oldName);
-        }
-    }
-
-    /**
      * Finds the Ecore interface of an {@link ICompilationUnit} which is an Ecore implementation class.
      */
     private ICompilationUnit findEcoreInterface(ICompilationUnit unit) throws JavaModelException {
         String interfaceName = getInterfaceName(getPackageMemberName(unit));
         IType iType = project.findType(interfaceName);
         return iType.getCompilationUnit();
+    }
+
+    /**
+     * Checks for cases where the Ecore interface uses instances of itself. In those cases the import manipulation
+     * cannot change the type of the instances, because the origin code type import would clash with the Ecore interface
+     * itself. Therefore the correlating parameters are retyped manually.
+     */
+    private void fixSelfImports(ICompilationUnit ecoreInterface, IImportDeclaration importDeclaration) throws JavaModelException {
+        String interfaceName = getPackageMemberName(ecoreInterface);
+        if (importDeclaration.getElementName().equals(interfaceName)) {
+            String typeName = nameUtil.cutFirstSegment(importDeclaration.getElementName());
+            ASTVisitor visitor = new TypeManipulationVisitor(typeName);
+            ASTUtil.applyVisitorModifications(ecoreInterface, visitor, monitor);
+        }
     }
 
     /**
@@ -126,6 +124,38 @@ public class EcoreImportManipulator extends AbstractCodeManipulator {
     }
 
     /**
+     * Edits an {@link IImportDeclaration} with the help of an {@link ImportRewrite} instance to refer to the origin
+     * code instead to the Ecore code.
+     */
+    private void rewriteImport(IImportDeclaration importDeclaration, ImportRewrite implementationRewrite, ImportRewrite interfaceRewrite) {
+        String oldName = importDeclaration.getElementName();
+        String newName = nameUtil.cutFirstSegment(oldName); // generate new import string
+        if (implementationRewrite.removeImport(oldName)) { // remove old import
+            implementationRewrite.addImport(newName); // add to implementation class
+            interfaceRewrite.removeImport(oldName); // remove old import as well
+            interfaceRewrite.addImport(newName); // add to Ecore interface
+        } else {
+            logger.fatal("Could not remove Ecore import " + oldName);
+        }
+    }
+
+    /**
+     * Actually changes all the import declarations of the Ecore implementation class and the Ecore interface.
+     */
+    private void rewriteImports(ICompilationUnit ecoreImplementation, ICompilationUnit ecoreInterface) throws JavaModelException {
+        ImportRewrite implementationRewrite = ImportRewrite.create(ecoreImplementation, true);
+        ImportRewrite interfaceRewrite = ImportRewrite.create(ecoreInterface, true);
+        for (IImportDeclaration importDeclaration : ecoreImplementation.getImports()) {
+            if (isProblematic(importDeclaration)) { // edit every problematic import declaration
+                rewriteImport(importDeclaration, implementationRewrite, interfaceRewrite);
+                fixSelfImports(ecoreInterface, importDeclaration);
+            }
+        }
+        ASTUtil.applyImportRewrite(ecoreImplementation, implementationRewrite, monitor);
+        ASTUtil.applyImportRewrite(ecoreInterface, interfaceRewrite, monitor);
+    }
+
+    /**
      * Changes the imports of a compilation unit and its Ecore interface if it is an Ecore implementation class. The
      * super interface declarations of the classes are retained, while the import declarations of the Ecore type are
      * changed to the relating types of the origin code.
@@ -134,19 +164,11 @@ public class EcoreImportManipulator extends AbstractCodeManipulator {
      */
     @Override
     protected void manipulate(ICompilationUnit unit) throws JavaModelException {
-        if (isEcoreImplementation(unit)) { // is interface or implementation class of an EClass
-            ICompilationUnit ecoreInterface = findEcoreInterface(unit); // get ecore interface
+        if (isEcoreImplementation(unit)) { // if is ecore implementation class of an EClass
+            ICompilationUnit ecoreInterface = findEcoreInterface(unit); // get the correlating ecore interface
             retainInterface(unit); // retain the super interfaces of both
             retainInterface(ecoreInterface);
-            ImportRewrite implementationRewrite = ImportRewrite.create(unit, true);
-            ImportRewrite interfaceRewrite = ImportRewrite.create(ecoreInterface, true);
-            for (IImportDeclaration importDeclaration : unit.getImports()) {
-                if (isProblematic(importDeclaration)) { // edit every problematic import declaration
-                    edit(importDeclaration, implementationRewrite, interfaceRewrite);
-                }
-            }
-            ASTUtil.applyImportRewrite(unit, implementationRewrite, monitor);
-            ASTUtil.applyImportRewrite(ecoreInterface, interfaceRewrite, monitor);
+            rewriteImports(unit, ecoreInterface);
         }
     }
 }
