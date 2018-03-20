@@ -34,6 +34,7 @@ class WrapperRepresentation {
 	final List<TypeParameterRepresentation> typeParameters
 	final List<ConstructorRepresentation> wrapperConstructors
 	final Set<String> importDeclarations
+	final String ecoreInterface
 
 	/**
 	 * Creates a new wrapper representation from an EClass and the EcorificationProperties. The EClass specifies which
@@ -48,8 +49,8 @@ class WrapperRepresentation {
 		factoryName = '''«PathHelper.capitalize(packageName.getLastSegment)»Factory«FACTORY_SUFFIX.get»'''
 		superClass = getSuperClassName(eClass)
 		wrapperConstructors = ConstructorGenerator.generate(superClass, project, properties)
-		typeParameters = TypeParameterGenerator.generate(eClass.ETypeParameters, append(ECORE_PACKAGE.get, packageName, factoryName), project,
-			properties) // TODO (HIGH) is this call right? using the factory name? not the ecore interface (eClass.name)
+		ecoreInterface = append(ECORE_PACKAGE.get, packageName, eClass.name)
+		typeParameters = TypeParameterGenerator.generate(eClass.ETypeParameters, ecoreInterface, project, properties)
 		importDeclarations = new HashSet // add import declarations:
 		wrapperConstructors.forEach[constructor|importDeclarations.addAll(constructor.imports)]
 		typeParameters.forEach[parameter|importDeclarations.addAll(parameter.imports)]
@@ -131,7 +132,7 @@ class WrapperRepresentation {
 	 * Creates the import declarations depending on the super class.
 	 */
 	def private String getImports() '''
-		import «append(ECORE_PACKAGE.get, packageName, eClass.name)»
+		import «ecoreInterface»
 		«IF !eClass.abstract»
 			import «append(ECORE_PACKAGE.get, packageName, factoryName)»
 		«ENDIF»
