@@ -1,10 +1,12 @@
 package jce.generators
 
-import java.util.LinkedList
-import java.util.List
+import java.util.HashSet
+import java.util.Set
 import java.util.StringJoiner
+import org.eclipse.emf.ecore.EGenericType
 import org.eclipse.emf.ecore.ETypeParameter
 import org.eclipse.jdt.core.ICompilationUnit
+import org.eclipse.jdt.core.IImportDeclaration
 import org.eclipse.xtend.lib.annotations.Accessors
 
 /**
@@ -13,7 +15,7 @@ import org.eclipse.xtend.lib.annotations.Accessors
  */
 @Accessors(PUBLIC_GETTER)
 class TypeParameterRepresentation {
-	List<String> imports
+	Set<String> imports
 	String content
 	String name
 	ETypeParameter eTypeParameter
@@ -26,20 +28,6 @@ class TypeParameterRepresentation {
 		name = eTypeParameter.name
 		content = buildContent
 		buildImports(ecoreInterface)
-	}
-
-	/** 
-	 * Builds the list of types that need to be imported to use the type parameter.
-	 */
-	def private void buildImports(ICompilationUnit ecoreInterface) {
-		imports = new LinkedList
-		for (import : ecoreInterface.imports) { // for every import
-			for (bound : eTypeParameter.EBounds) {
-				if(import.elementName.endsWith(bound.EClassifier.name)) {
-					imports.add(import.elementName) // add to import string list.
-				}
-			}
-		}
 	}
 
 	/**
@@ -65,4 +53,34 @@ class TypeParameterRepresentation {
 		return result
 	}
 
+	/** 
+	 * Builds the list of types that need to be imported to use the type parameter.
+	 */
+	def private void buildImports(ICompilationUnit ecoreInterface) {
+		imports = new HashSet
+		for (import : ecoreInterface.imports) { // for every import
+			for (bound : eTypeParameter.EBounds) { // for every type parameter bound
+				checkGenericType(bound, import, ecoreInterface) // check if import is referenced
+			}
+		}
+	}
+
+	/**
+	 * Recursion method for {@link TypeParameterRepresentation#buildImports()}. Checks whether a generic type or any its ETypeArguments is referenced by an import declaration.
+	 */
+	def private void checkGenericType(EGenericType type, IImportDeclaration importDeclaration, ICompilationUnit ecoreInterface) {
+		checkImport(importDeclaration, type) // check if import is referenced
+		for (argument : type.ETypeArguments) { // call this method recursivley on all type arguments:
+			checkGenericType(argument, importDeclaration, ecoreInterface)
+		}
+	}
+
+	/**
+	 * Checks if a import declarations ends with the name of the EClassifier of an EGenericType (which is either a type parameter bound or a generic argument of a type parameter bound). If that is the case, the import will be added to the list of necessary imports.
+	 */
+	def private void checkImport(IImportDeclaration importDeclaration, EGenericType type) {
+		if(importDeclaration.elementName.endsWith(type.EClassifier.name)) {
+			imports.add(importDeclaration.elementName) // add to import string list.
+		}
+	}
 }
