@@ -36,7 +36,8 @@ import jce.util.ResourceRefresher;
  */
 public class GenModelGenerator {
     private static final Logger logger = LogManager.getLogger(GenModelGenerator.class.getName());
-    private static final char SLASH = File.separatorChar;
+    private static final char SYSTEM_DEPENDENT_SEPARATOR = File.separatorChar;
+    private static final char SYSTEM_INDEPENDENT_SEPARATOR = '/';
     private final GenJDKLevel complianceLevel;
     private final String importerID;
     private final EcorificationProperties properties;
@@ -80,13 +81,13 @@ public class GenModelGenerator {
      */
     public GenModel generate(GeneratedEcoreMetamodel metamodel) {
         if (metamodel.isSaved()) {
-            PathHelper pathHelper = new PathHelper(SLASH);
+            PathHelper pathHelper = new PathHelper(SYSTEM_DEPENDENT_SEPARATOR);
             SavingInformation information = metamodel.getSavingInformation();
             String modelName = information.getFileName();
             String modelPath = information.getFilePath();
-            String projectName = SLASH + pathHelper.getLastSegment(pathHelper.cutLastSegment(modelPath));
+            String projectName = SYSTEM_INDEPENDENT_SEPARATOR + pathHelper.getLastSegment(pathHelper.cutLastSegment(modelPath));
             GenModel genModel = GenModelFactory.eINSTANCE.createGenModel();
-            genModel.setModelDirectory(projectName + File.separator + properties.get(SOURCE_FOLDER));
+            genModel.setModelDirectory(projectName + SYSTEM_INDEPENDENT_SEPARATOR + properties.get(SOURCE_FOLDER));
             genModel.setModelPluginID(projectName.substring(1));
             genModel.setModelName(modelName);
             genModel.setRootExtendsClass(rootExtendsClass);
