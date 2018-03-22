@@ -54,23 +54,32 @@ public class InterfaceRetentionVisitor extends ASTVisitor {
      * Changes the a super interface declaration of a {@link TypeDeclaration} to contain the fully qualified name.
      */
     @SuppressWarnings("unchecked")
-    private void changeSuperInterface(Type superInterface, TypeDeclaration node, AST ast) {
-        SimpleType interfaceType = TypeUtil.getSimpleType(superInterface);
+    private void changeSuperInterface(Type oldInterface, TypeDeclaration node, AST ast) {
+        SimpleType interfaceType = TypeUtil.getSimpleType(oldInterface);
         if (isNotEObject(interfaceType)) {
             String newName = getName(interfaceType);
-            Type newSuperType = ast.newSimpleType(ast.newName(newName));
-            if (superInterface.isParameterizedType()) { // add parameters: TODO (MEDIUM) improve this method.
-                ParameterizedType parameterizedType = ast.newParameterizedType(newSuperType);
-                ParameterizedType castedType = (ParameterizedType) superInterface;
-                for (Type type : RawTypeUtil.castList(Type.class, castedType.typeArguments())) {
-                    type.delete();
-                    parameterizedType.typeArguments().add(type);
-                }
-                newSuperType = parameterizedType; // use parameterized type
-            }
-            node.superInterfaceTypes().remove(superInterface);
-            node.superInterfaceTypes().add(newSuperType);
+            Type newSuperInterface = ast.newSimpleType(ast.newName(newName));
+            newSuperInterface = copyParameters(oldInterface, newSuperInterface, ast);
+            node.superInterfaceTypes().remove(oldInterface);
+            node.superInterfaceTypes().add(newSuperInterface);
         }
+    }
+
+    /**
+     * Adds all type parameters the old super interface to the new super interface.
+     */
+    @SuppressWarnings("unchecked")
+    private Type copyParameters(Type oldInterface, Type newInterface, AST ast) {
+        if (oldInterface.isParameterizedType()) { // if interface has parameters
+            ParameterizedType parameterizedType = ast.newParameterizedType(newInterface); // parameterized new interface
+            ParameterizedType castedType = (ParameterizedType) oldInterface; // cast old interface
+            for (Type type : RawTypeUtil.castList(Type.class, castedType.typeArguments())) {
+                type.delete(); // delete type parameter from old interface
+                parameterizedType.typeArguments().add(type); // and add to the new one
+            }
+            return parameterizedType; // use parameterized type with copied parameters
+        }
+        return newInterface; // just use the original type
     }
 
     /**
