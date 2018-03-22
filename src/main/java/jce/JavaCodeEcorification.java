@@ -74,10 +74,9 @@ public class JavaCodeEcorification {
         IProject project = getProject(metamodel.getSavingInformation()); // 1.5. Retrieve output project
         buildFactories(metamodel, project); // 2.
         generateWrappers(metamodel, project); // 3.
-        new EcoreImportManipulator(metamodel, properties).manipulate(project); // 4. adapt imports
+        manipulateEcoreImports(metamodel, project); // 4.
         adaptOriginCode(metamodel, project); // 5.
-        rebuild(project, properties); // 6. build project
-        notifyUser(originalProject);
+        finish(project); // 6.
     }
 
     /**
@@ -115,6 +114,15 @@ public class JavaCodeEcorification {
     }
 
     /**
+     * 6. Finishes the ecorification: Organizes all imports, rebuilds the project and notifies the user.
+     */
+    private void finish(IProject project) {
+        importOrganizer.manipulate(project);
+        rebuild(project, properties);
+        notifyUser(project);
+    }
+
+    /**
      * 3. Generates the wrappers, which are the classes that unify the origin code with the Ecore code.
      */
     private void generateWrappers(GeneratedEcoreMetamodel metamodel, IProject project) {
@@ -139,17 +147,26 @@ public class JavaCodeEcorification {
     }
 
     /**
-     * Tells the user the ecorification of an {@link IProject} is complete.
+     * 4. Manipulates the imports of the Ecore code. Every Ecore interface and every correlating implementation class
+     * will use the origin code types instead of ecore code types.
      */
-    private void notifyUser(IProject project) {
-        logger.info("Ecorification complete!");
-        Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-        String message = "Ecorification of " + project.getName() + " complete!";
-        MessageDialog.openInformation(shell, "Java Code Ecorification", message);
+    private void manipulateEcoreImports(GeneratedEcoreMetamodel metamodel, IProject project) {
+        new EcoreImportManipulator(metamodel, properties).manipulate(project); // 4. adapt imports
     }
 
     /**
-     * 6. Tries to build the project.
+     * Tells the user the ecorification of an {@link IProject} is complete.
+     */
+    private void notifyUser(IProject project) {
+        Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+        String title = "Ecorification complete!";
+        String message = "Ecorification of complete! The ecorified code can be found in the project " + project.getName();
+        logger.info(title + " " + message);
+        MessageDialog.openInformation(shell, title, message);
+    }
+
+    /**
+     * Tries to build the project.
      */
     private void rebuild(IProject project, EcorificationProperties properties) {
         ResourceRefresher.refresh(project);

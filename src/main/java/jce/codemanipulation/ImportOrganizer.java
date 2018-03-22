@@ -13,12 +13,11 @@ import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation
 import org.eclipse.text.edits.TextEdit;
 
 import jce.properties.EcorificationProperties;
-import jce.properties.TextProperty;
 import jce.util.jdt.ASTUtil;
 import jce.util.logging.MonitorFactory;
 
 /**
- * Organizes the imports of the origin code.
+ * Organizes the imports of the whole source code of a project.
  * @author Timur Saglam
  */
 @SuppressWarnings("restriction")  // TODO (LOW) This class uses LTK classes & methods that are not marked as API
@@ -31,7 +30,7 @@ public class ImportOrganizer extends AbstractCodeManipulator {
      * @param properties are the {@link EcorificationProperties}.
      */
     public ImportOrganizer(EcorificationProperties properties) {
-        super(properties.get(TextProperty.ECORE_PACKAGE), properties);
+        super(properties);
         monitor = MonitorFactory.createProgressMonitor(logger, properties);
     }
 
