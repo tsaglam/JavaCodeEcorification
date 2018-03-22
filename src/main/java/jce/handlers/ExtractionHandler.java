@@ -1,5 +1,7 @@
 package jce.handlers;
 
+import static jce.properties.TextProperty.PROJECT_SUFFIX;
+
 import org.eclipse.core.resources.IProject;
 
 import eme.handlers.ProjectHandler;
@@ -24,6 +26,8 @@ public class ExtractionHandler extends ProjectHandler {
      */
     @Override
     protected void startExtraction(IProject project) {
-        new EcorificationExtraction(new EcorificationProperties()).extract(project);
+        EcorificationProperties properties = new EcorificationProperties(); // new properties
+        properties.set(PROJECT_SUFFIX, properties.get(PROJECT_SUFFIX) + "Model"); // edit the project suffix
+        new EcorificationExtraction(properties).extract(project); // start only the ecorification extraction
     }
 }
