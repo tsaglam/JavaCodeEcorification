@@ -35,6 +35,7 @@ class WrapperRepresentation {
 	final List<ConstructorRepresentation> wrapperConstructors
 	final Set<String> importDeclarations
 	final String ecoreInterface
+	final String ecoreImplementation
 
 	/**
 	 * Creates a new wrapper representation from an EClass and the EcorificationProperties. The EClass specifies which
@@ -50,7 +51,8 @@ class WrapperRepresentation {
 		superClass = getSuperClassName(eClass)
 		wrapperConstructors = ConstructorGenerator.generate(superClass, project, properties)
 		ecoreInterface = append(ECORE_PACKAGE.get, packageName, eClass.name)
-		typeParameters = TypeParameterGenerator.generate(eClass.ETypeParameters, ecoreInterface, project, properties)
+		ecoreImplementation = append(ECORE_PACKAGE.get, packageName, "impl", eClass.name + "Impl")
+		typeParameters = TypeParameterGenerator.generate(eClass.ETypeParameters, ecoreImplementation, project, properties)
 		importDeclarations = new HashSet // add import declarations:
 		wrapperConstructors.forEach[constructor|importDeclarations.addAll(constructor.imports)]
 		typeParameters.forEach[parameter|importDeclarations.addAll(parameter.imports)]
