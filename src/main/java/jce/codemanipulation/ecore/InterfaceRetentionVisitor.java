@@ -79,7 +79,7 @@ public class InterfaceRetentionVisitor extends ASTVisitor {
     private String getName(SimpleType type) {
         String typeName = type.getName().getFullyQualifiedName();
         for (IImportDeclaration declaration : imports) {
-            if (declaration.getElementName().endsWith(typeName)) {
+            if (declaration.getElementName().endsWith("." + typeName)) {
                 return declaration.getElementName();
             }
         }
