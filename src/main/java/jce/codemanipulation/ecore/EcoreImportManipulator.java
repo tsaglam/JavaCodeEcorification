@@ -47,6 +47,15 @@ public class EcoreImportManipulator extends AbstractCodeManipulator {
     }
 
     /**
+     * Retains the super interface declarations and type parameter bounds of a compilation unit with a specific set of
+     * imports.
+     */
+    private void applyRetentionVisitor(ICompilationUnit unit, IImportDeclaration[] imports) throws JavaModelException {
+        ASTVisitor visitor = new TypeRetentionVisitor(unit, imports, properties);
+        ASTUtil.applyVisitorModifications(unit, visitor, monitor);
+    }
+
+    /**
      * Finds the Ecore interface of an {@link ICompilationUnit} which is an Ecore implementation class.
      */
     private ICompilationUnit findEcoreInterface(ICompilationUnit unit) throws JavaModelException {
@@ -116,11 +125,12 @@ public class EcoreImportManipulator extends AbstractCodeManipulator {
     }
 
     /**
-     * Retains the super interface declarations of an compilation unit. .
+     * Retains the super interface declarations and type parameter bounds of the Ecore interface and its implementation.
      */
-    private void retainInterface(ICompilationUnit unit) throws JavaModelException {
-        ASTVisitor visitor = new InterfaceRetentionVisitor(unit.getImports(), unit.getParent().getElementName());
-        ASTUtil.applyVisitorModifications(unit, visitor, monitor);
+    private void retainTypes(ICompilationUnit ecoreImplementation, ICompilationUnit ecoreInterface) throws JavaModelException {
+        // always use the implementation imports to resolve classes in the same package with the interface:
+        applyRetentionVisitor(ecoreImplementation, ecoreImplementation.getImports());
+        applyRetentionVisitor(ecoreInterface, ecoreImplementation.getImports());
     }
 
     /**
@@ -166,8 +176,7 @@ public class EcoreImportManipulator extends AbstractCodeManipulator {
     protected void manipulate(ICompilationUnit unit) throws JavaModelException {
         if (isEcoreImplementation(unit)) { // if is ecore implementation class of an EClass
             ICompilationUnit ecoreInterface = findEcoreInterface(unit); // get the correlating ecore interface
-            retainInterface(unit); // retain the super interfaces of both
-            retainInterface(ecoreInterface);
+            retainTypes(unit, ecoreInterface); // retain the super interfaces of both
             rewriteImports(unit, ecoreInterface);
         }
     }
