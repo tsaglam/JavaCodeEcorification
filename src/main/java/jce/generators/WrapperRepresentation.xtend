@@ -16,6 +16,9 @@ import static jce.properties.TextProperty.FACTORY_SUFFIX
 import static jce.properties.TextProperty.WRAPPER_PACKAGE
 import static jce.properties.TextProperty.WRAPPER_PREFIX
 import static jce.properties.TextProperty.WRAPPER_SUFFIX
+import org.eclipse.emf.ecore.InternalEObject
+import org.eclipse.emf.ecore.EObject
+import org.eclipse.emf.common.notify.Notifier
 
 /**
  * This class models a wrapper class which unifies an origin code type with its Ecore counterparts in the Ecore model
@@ -54,6 +57,11 @@ class WrapperRepresentation {
 		ecoreImplementation = append(ECORE_PACKAGE.get, packageName, "impl", eClass.name + "Impl")
 		typeParameters = TypeParameterGenerator.generate(eClass.ETypeParameters, ecoreImplementation, project, properties)
 		importDeclarations = new HashSet // add import declarations:
+		if (superClass === null) {
+			importDeclarations += InternalEObject.name
+			importDeclarations += EObject.name
+			importDeclarations += Notifier.name
+		}
 		wrapperConstructors.forEach[constructor|importDeclarations.addAll(constructor.imports)]
 		typeParameters.forEach[parameter|importDeclarations.addAll(parameter.imports)]
 	}
@@ -74,7 +82,13 @@ class WrapperRepresentation {
 			«delegateAnnotation»
 			protected var «eClass.name + genericArguments» ecoreImplementation
 			
-				«constructors»
+			«IF superClass === null»
+				// Methods of InternalEObject must also be delegated to the wrapped class
+				@DelegateExcept(«Notifier.simpleName», «EObject.simpleName»)
+				protected var «InternalEObject.simpleName» internalEcoreImplementation
+			«ENDIF»
+
+			«constructors»
 			
 			«instanceMethod»
 		}
@@ -111,6 +125,9 @@ class WrapperRepresentation {
 		«IF superClass === null || wrapperConstructors.empty»
 			new() {
 				ecoreImplementation = instance
+				«IF superClass === null»
+					internalEcoreImplementation = ecoreImplementation as «InternalEObject.simpleName»
+				«ENDIF»
 			}
 		«ELSE»
 			«FOR constructor : wrapperConstructors SEPARATOR blankLine»
@@ -141,6 +158,7 @@ class WrapperRepresentation {
 		«IF superClass === null»
 			import org.eclipse.emf.ecore.impl.MinimalEObjectImpl
 			import org.eclipse.xtend.lib.annotations.Delegate
+			import edu.kit.ipd.sdq.activextendannotations.DelegateExcept
 		«ELSE»
 			import edu.kit.ipd.sdq.activextendannotations.DelegateDeclared
 			import «superClass»

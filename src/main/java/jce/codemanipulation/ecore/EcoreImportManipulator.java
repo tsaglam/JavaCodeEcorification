@@ -1,9 +1,11 @@
 package jce.codemanipulation.ecore;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.emf.ecore.EClass;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -73,10 +75,22 @@ public class EcoreImportManipulator extends AbstractCodeManipulator {
         String interfaceName = getPackageMemberName(ecoreInterface);
         if (importDeclaration.getElementName().equals(interfaceName)) {
             String typeName = nameUtil.cutFirstSegment(importDeclaration.getElementName());
-            ASTVisitor visitor = new TypeManipulationVisitor(typeName);
-            ASTUtil.applyVisitorModifications(ecoreInterface, visitor, monitor);
+            addQualifiedNamesToTypeReferences(ecoreInterface, typeName);
         }
     }
+
+    /**
+     * Makes all type references to the type with the given name in the given {@link ICompilationUnit} explicit
+     * using qualified names.
+     * @param unit is the {@link ICompilationUnit} to manipulate.
+     * @param typeName is the name of the type to make references to explicit.
+     * @throws JavaModelException if there are problems with the Java model.
+     */
+	private void addQualifiedNamesToTypeReferences(ICompilationUnit unit, String typeName)
+			throws JavaModelException {
+		ASTVisitor visitor = new TypeManipulationVisitor(typeName);
+		ASTUtil.applyVisitorModifications(unit, visitor, monitor);
+	}
 
     /**
      * Returns the name of the Ecore interface of an Ecore implementation class name. E.g. returns "model.Main" when
@@ -108,6 +122,27 @@ public class EcoreImportManipulator extends AbstractCodeManipulator {
      */
     private boolean isEcoreImplementationName(String typeName) {
         return nameUtil.getLastSegment(nameUtil.cutLastSegment(typeName)).equals("impl") && typeName.endsWith("Impl");
+    }
+
+    /**
+     * Checks and returns whether an {@link ICompilationUnit} is the representation of an Ecore interface.
+     */
+    private boolean isEcoreInterface(ICompilationUnit unit) throws JavaModelException {
+        String typeName = nameUtil.cutFirstSegment(getPackageMemberName(unit));
+        EClass potentialEClass = MetamodelSearcher.findEClass(typeName, metamodel.getRoot());
+        return potentialEClass != null && potentialEClass.isInterface();
+    }
+
+    /**
+     * Checks and returns whether an {@link ICompilationUnit} is the representation of an interface of an Ecore
+     * implementation class.
+     */
+    private boolean isInterfaceOfEcoreClass(ICompilationUnit unit) throws JavaModelException {
+        String typeName = nameUtil.cutFirstSegment(getPackageMemberName(unit));
+        EClass potentialEClass = MetamodelSearcher.findEClass(typeName, metamodel.getRoot());
+        // Ensure that the class is not the representation of an Ecore interface but only an interface of an
+        // implementation class
+        return potentialEClass != null && !potentialEClass.isInterface();
     }
 
     /**
@@ -166,18 +201,62 @@ public class EcoreImportManipulator extends AbstractCodeManipulator {
     }
 
     /**
+     * Changes the imports of a compilation unit and its Ecore interface if it is an Ecore implementation class and
+     * the imports of types in the same package if it is an Ecore interface. The super interface declarations of the
+     * classes are retained, while the import declarations of the Ecore type are changed to the relating types of
+     * the origin code.
+     * @param unit is the {@link ICompilationUnit}.
+     * @throws JavaModelException if there are problems with the Java model.
+     */
+    @Override
+    protected void manipulate(ICompilationUnit unit) throws JavaModelException {
+        manipulateEcoreClass(unit);
+        manipulateEcoreInterface(unit);
+    }
+
+    /**
+     * Changes the imports in the same package of a compilation unit if it is an Ecore interface. The
+     * super interface declarations of the classes are retained, while the import declarations of the Ecore type are
+     * changed to the relating types of the origin code, which are not represented as imports, as the Ecore types of the
+     * interfaces reside in the same package.
+     * @param unit is the {@link ICompilationUnit}.
+     * @throws JavaModelException if there are problems with the Java model.
+     */
+	private void manipulateEcoreInterface(ICompilationUnit unit) throws JavaModelException {
+		if (isEcoreInterface(unit)) {
+			retainInterface(unit); // retain the super interface of the interface
+			ICompilationUnit[] unitsInSamePackage = ((IPackageFragment) unit.getParent()).getCompilationUnits();
+			// Add explicit import for types in same package
+			for (ICompilationUnit samePackageUnit : unitsInSamePackage) {
+				if (isEcoreInterface(samePackageUnit) || isInterfaceOfEcoreClass(samePackageUnit)) {
+					String samePackageUnitQualifiedName = nameUtil.cutFirstSegment(getPackageMemberName(samePackageUnit));
+					ImportRewrite explicitSamePackageImportRewrite = ImportRewrite.create(unit, true);
+					explicitSamePackageImportRewrite.addImport(samePackageUnitQualifiedName);
+					ASTUtil.applyImportRewrite(unit, explicitSamePackageImportRewrite, monitor);
+					// Fix imports of type with same name
+					if (getPackageMemberName(samePackageUnit).equals(getPackageMemberName(unit)) ) {
+						addQualifiedNamesToTypeReferences(unit, samePackageUnitQualifiedName);
+					}
+				}
+			}
+			// Change imports in same package to those of original classes
+			rewriteImports(unit, unit);
+        }
+	}
+
+	/**
      * Changes the imports of a compilation unit and its Ecore interface if it is an Ecore implementation class. The
      * super interface declarations of the classes are retained, while the import declarations of the Ecore type are
      * changed to the relating types of the origin code.
      * @param unit is the {@link ICompilationUnit}.
      * @throws JavaModelException if there are problems with the Java model.
      */
-    @Override
-    protected void manipulate(ICompilationUnit unit) throws JavaModelException {
-        if (isEcoreImplementation(unit)) { // if is ecore implementation class of an EClass
+	private void manipulateEcoreClass(ICompilationUnit unit) throws JavaModelException {
+		if (isEcoreImplementation(unit)) { // if is ecore implementation class of an EClass
             ICompilationUnit ecoreInterface = findEcoreInterface(unit); // get the correlating ecore interface
             retainTypes(unit, ecoreInterface); // retain the super interfaces of both
             rewriteImports(unit, ecoreInterface);
         }
-    }
+	}
+
 }
