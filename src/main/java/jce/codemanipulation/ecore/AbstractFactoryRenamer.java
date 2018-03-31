@@ -101,9 +101,20 @@ public abstract class AbstractFactoryRenamer extends AbstractCodeManipulator {
         return MetamodelSearcher.findEClass(modelName, metamodel.getRoot()) != null; // search metamodel counterpart
     }
 
+    /**
+     * Returns whether the given {@link ICompilationUnit} is an Ecore factory and not the root factory,
+     * so that it has to be updated
+     * @param unit the {@link CompilationUnit} to check.
+     * @return true if factory is relevant for modifications
+     * @throws JavaModelException  if there is a problem with the JDT API.
+     */
+    protected final boolean isRelevantEcoreFactoryClassifier(ICompilationUnit unit) throws JavaModelException {
+        return isEcoreFactory(unit) && !isRootFactory(unit);
+    }
+
     @Override
-    protected final void manipulate(ICompilationUnit unit) throws JavaModelException {
-        if (isEcoreFactory(unit) && !isRootFactory(unit)) {
+    protected void manipulate(ICompilationUnit unit) throws JavaModelException {
+        if (isRelevantEcoreFactoryClassifier(unit)) {
             String name = unit.getElementName();
             String newName = nameUtil.cutLastSegment(name) + properties.get(FACTORY_SUFFIX); // new name of class
             newName = nameUtil.append(newName, nameUtil.getLastSegment(name)); // add file extension

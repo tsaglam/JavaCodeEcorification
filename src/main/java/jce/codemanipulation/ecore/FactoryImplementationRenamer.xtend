@@ -6,10 +6,12 @@ import jce.util.PathHelper
 import org.eclipse.jdt.core.JavaModelException
 
 import static extension jce.util.PathHelper.capitalize
+import jce.util.jdt.ASTUtil
+import org.eclipse.jdt.core.ICompilationUnit
 
 /**
  * Code manipulator that renames the original factory implementation classes.
- * @author Timur Saglam
+ * @author Timur Saglam, Heiko Klare
  */
 class FactoryImplementationRenamer extends AbstractFactoryRenamer {
 	extension PathHelper nameUtil = super.nameUtil
@@ -36,4 +38,19 @@ class FactoryImplementationRenamer extends AbstractFactoryRenamer {
 		}
 		return false; // Does not have Ecore implementation name and package
 	}
+
+	/**
+	 * Removes the namespace URI-based factory determination in originally generated factories,
+	 * because they are only used internally and not globally registered.
+	 * Afterwards applies the general manipulation logic of
+	 * {@link AbstractFactoryRenamer#manipulate(ICompilationUnit) AbstractFactoryRenamer}.
+	 * @param unit the {@link ICompilationUnit} to manipulate
+	 */
+	override manipulate(ICompilationUnit unit) {
+		if (isRelevantEcoreFactoryClassifier(unit)) {
+			ASTUtil.applyVisitorModifications(unit, new FactoryInitMethodCorrectionVisitor(), monitor);
+		}
+		super.manipulate(unit);
+	}
+
 }
