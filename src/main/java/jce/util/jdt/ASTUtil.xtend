@@ -84,6 +84,8 @@ final class ASTUtil {
 		parsedUnit.accept(visitor)
 		var TextEdit edits = parsedUnit.rewrite(new Document(unit.source), null)
 		applyTextEdit(edits, unit, monitor)
+		unit.commitWorkingCopy(true, monitor);
+		unit.discardWorkingCopy();
 	}
 
 	/** 
