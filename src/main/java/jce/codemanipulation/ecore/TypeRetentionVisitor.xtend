@@ -135,6 +135,9 @@ class TypeRetentionVisitor extends ASTVisitor {
 	 * The name is resolved from the import declarations and the current package.
 	 */
 	def private String resolveInterfaceName(SimpleType type) {
+		if (type.name.qualifiedName) {
+			return type.name.fullyQualifiedName
+		}
 		return nameFromImports(type) ?: pathHelper.append(currentPackage, type.name.fullyQualifiedName)
 	}
 
