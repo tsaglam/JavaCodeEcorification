@@ -16,4 +16,29 @@ class EPackageUtil {
 		return ePackage.EClassifiers.filter(EClass).filter[!interface && !abstract].map[name].toList
 	}
 
+	/**
+	 * Returns the package with the given fully qualified name, starting from the given root {@link EPackage}.
+	 * 
+	 * @param rootPackage the root {@link EPackage} of a metamodel to start from
+	 * @param fullyQualifiedName the fully qualified name of the package to search for
+	 * @return the resolved {@link EPackage} or <code>null</code> if none was found
+	 */
+	def static EPackage findPackage(EPackage rootPackage, String fullyQualifiedName) {
+		val pathHelper = new PathHelper(".");
+		if (rootPackage.ESuperPackage !== null || rootPackage.name != pathHelper.getFirstSegment(fullyQualifiedName)) {
+			return null;
+		}
+		var relativeName = pathHelper.cutFirstSegment(fullyQualifiedName, false);
+		var currentPackage = rootPackage;
+		while (!relativeName.empty) {
+			val currentPackageName = pathHelper.getFirstSegment(relativeName);
+			currentPackage = currentPackage.ESubpackages.findFirst[name == currentPackageName];
+			if (currentPackage === null) {
+				return null;
+			}
+			relativeName = pathHelper.cutFirstSegment(relativeName, false);
+		}
+		return currentPackage; 
+	}
+	
 }
