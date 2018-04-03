@@ -20,6 +20,7 @@ import jce.codemanipulation.ImportOrganizer;
 import jce.codemanipulation.ecore.EcoreImportManipulator;
 import jce.codemanipulation.ecore.FactoryImplementationRenamer;
 import jce.codemanipulation.ecore.FactoryRenamer;
+import jce.codemanipulation.ecore.PackageImplFactoryCorrector;
 import jce.codemanipulation.origin.ClassExposer;
 import jce.codemanipulation.origin.DefaultConstructorGenerator;
 import jce.codemanipulation.origin.FieldEncapsulator;
@@ -99,6 +100,7 @@ public class JavaCodeEcorification {
         new FactoryImplementationRenamer(metamodel, properties).manipulate(project);
         new DefaultConstructorGenerator(properties).manipulate(project); // TODO (HIGH) Is this too early?
         new EcoreFactoryGenerator(properties).buildFactories(metamodel, project);
+        new PackageImplFactoryCorrector(metamodel, properties).manipulate(project);
         new ClassExposer(properties).manipulate(project);
     }
 
