@@ -45,13 +45,25 @@ public class PathHelper {
     /**
      * Cuts the first segment of a path.
      * @param path is the path.
+     * @param keepSingleSegment specifies whether the path shall be preserved if only one segment is present
+     * @return the path without the first segment, or the original if it has no parents and keepSingleSegment is <code>true</code>.
+     */
+    public String cutFirstSegment(String path, boolean keepSingleSegment) {
+        if (path.contains(separatorString)) {
+            return path.substring(path.indexOf(separator) + 1);
+        } else if (!keepSingleSegment) {
+            return "";
+        }
+        return path;
+    }
+
+    /**
+     * Cuts the first segment of a path.
+     * @param path is the path.
      * @return the path without the first segment, or the original if it has no parents.
      */
     public String cutFirstSegment(String path) {
-        if (path.contains(separatorString)) {
-            return path.substring(path.indexOf(separator) + 1);
-        }
-        return path;
+        return cutFirstSegment(path, true);
     }
 
     /**
