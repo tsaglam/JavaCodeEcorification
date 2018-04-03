@@ -2,8 +2,6 @@ package jce.generators
 
 import eme.generator.GeneratedEcoreMetamodel
 import java.io.File
-import java.util.LinkedList
-import java.util.List
 import jce.properties.EcorificationProperties
 import jce.util.PathHelper
 import jce.util.ResourceRefresher
@@ -12,11 +10,12 @@ import org.apache.log4j.LogManager
 import org.apache.log4j.Logger
 import org.eclipse.core.resources.IProject
 import org.eclipse.core.runtime.IProgressMonitor
-import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EPackage
 
 import static jce.properties.TextProperty.ECORE_PACKAGE
 import static jce.properties.TextProperty.SOURCE_FOLDER
+
+import static extension jce.util.EPackageUtil.*;
 
 /** 
  * Creates and manages custom EFactories. Every EFactory has an interface and an implementation class.
@@ -71,18 +70,4 @@ final class EcoreFactoryGenerator {
 		}
 	}
 
-	/**
-	 * Returns the list of names of all EClasses in an EPackage.
-	 */
-	def private List<String> getClassNames(EPackage ePackage) {
-		val classes = new LinkedList<String>()
-		for (eClassifier : ePackage.EClassifiers) { // for every classifier
-			if (eClassifier instanceof EClass) { // if is EClass
-				if (!eClassifier.interface && !eClassifier.abstract) { // if is not interface
-					classes.add(eClassifier.name) // store name
-				}
-			}
-		}
-		return classes
-	}
 }
