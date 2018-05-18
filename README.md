@@ -5,7 +5,7 @@ The basic idea of the Ecorification is to find an Ecore representation of the Ja
 
 This process is depicted in the following diagram:
 <p align="center"> 
-<img alt="The Ecorification Process" src="https://www.lucidchart.com/publicSegments/view/19c5bae0-9aed-4e40-b805-dba516a92472/image.png" width="700">
+<img alt="The Ecorification Process" src="https://www.lucidchart.com/publicSegments/view/1fe0e941-1931-4d9b-afa2-395a4016498b/image.png" width="700">
 </p>
 
 ## How to install:
