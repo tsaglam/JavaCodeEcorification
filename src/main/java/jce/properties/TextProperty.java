@@ -15,8 +15,9 @@ public enum TextProperty implements ITextProperty {
     PROJECT_SUFFIX("ProjectSuffix", "Ecorified"),
     SOURCE_FOLDER("SourceFolder", "src"),
     ROOT_CONTAINER("RootContainerName", "RootContainer"),
-    FACTORY_SUFFIX("OriginalFactorySuffix", "Old");
-
+    FACTORY_SUFFIX("OriginalFactorySuffix", "Old"),
+    MODEL_FILE_EXTENSION("ModelFileExtension", "ecorified");
+	
     private final String defaultValue;
     private final String key;
 

@@ -13,6 +13,7 @@ import org.eclipse.emf.codegen.ecore.genmodel.GenJDKLevel;
 import org.eclipse.emf.codegen.ecore.genmodel.GenModel;
 import org.eclipse.emf.codegen.ecore.genmodel.GenModelFactory;
 import org.eclipse.emf.codegen.ecore.genmodel.GenModelPackage;
+import org.eclipse.emf.codegen.ecore.genmodel.GenPackage;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.impl.MinimalEObjectImpl;
@@ -26,6 +27,7 @@ import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
 import eme.generator.GeneratedEcoreMetamodel;
 import eme.generator.saving.SavingInformation;
 import jce.properties.EcorificationProperties;
+import jce.properties.TextProperty;
 import jce.util.PathHelper;
 import jce.util.ResourceRefresher;
 
@@ -97,6 +99,10 @@ public class GenModelGenerator {
             genModel.setImportOrganizing(true);
             genModel.getForeignModel().add(modelName + ".ecore");
             genModel.initialize(Collections.singleton(metamodel.getRoot()));
+            GenPackage rootPackage = genModel.getGenPackages().get(0);
+            if (rootPackage != null) {
+            	rootPackage.setFileExtensions(properties.get(TextProperty.MODEL_FILE_EXTENSION));
+            }
             URI uri = saveGenModel(genModel, modelPath, modelName); // IMPORTANT: first save the GenModel
             return loadGenModel(uri); // and then LOAD IT AGAIN (prevents package URI exception)!
         }
