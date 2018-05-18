@@ -135,6 +135,9 @@ class TypeRetentionVisitor extends ASTVisitor {
 	 * The name is resolved from the import declarations and the current package.
 	 */
 	def private String resolveInterfaceName(SimpleType type) {
+		if (type.name.qualifiedName) {
+			return type.name.fullyQualifiedName
+		}
 		return nameFromImports(type) ?: pathHelper.append(currentPackage, type.name.fullyQualifiedName)
 	}
 
@@ -150,8 +153,10 @@ class TypeRetentionVisitor extends ASTVisitor {
 	 * Returns the fully qualified name of a {@link SimpleType} from the imports, or null if the imports do not contain such type.
 	 */
 	def private String nameFromImports(SimpleType type) {
+		// fully qualified name may also be simple, then we need to also match the dot to avoid equal suffix matches
+		val endsWithMatch = (if (type.name.simpleName) "." else "") + type.name.fullyQualifiedName
 		for (IImportDeclaration declaration : imports) {
-			if(declaration.elementName.endsWith(type.name.fullyQualifiedName)) {
+			if (declaration.elementName.endsWith(endsWithMatch)) {
 				return declaration.elementName
 			}
 		}
