@@ -44,8 +44,8 @@ public class FieldEncapsulator extends AbstractCodeManipulator {
         public boolean visit(TypeDeclaration node) {
             if (!node.isInterface() && node.isPackageMemberTypeDeclaration()) { // if is class
                 for (FieldDeclaration field : node.getFields()) { // for every field:
-                    if (Modifier.isFinal(field.getModifiers())) { // if is final
-                        removeFinalKeyword(field); // remove final keyword
+                    if (Modifier.isFinal(field.getModifiers()) && !Modifier.isStatic(field.getModifiers())) {
+                        removeFinalKeyword(field); // remove final keyword if not static
                     }
                 }
             }

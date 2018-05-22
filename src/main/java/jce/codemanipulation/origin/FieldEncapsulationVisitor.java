@@ -9,6 +9,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldRefactoring;
@@ -38,7 +39,9 @@ public class FieldEncapsulationVisitor extends ASTVisitor {
     public boolean visit(TypeDeclaration node) {
         if (!node.isInterface() && node.isPackageMemberTypeDeclaration()) { // if is class, manipulate inheritance:
             for (FieldDeclaration field : node.getFields()) { // for every field:
-                encapsulate(field); // resolve and encapsulate
+                if (!Modifier.isStatic(field.getModifiers())) {
+                    encapsulate(field); // resolve and encapsulate
+                }
             }
         }
         return super.visit(node);
