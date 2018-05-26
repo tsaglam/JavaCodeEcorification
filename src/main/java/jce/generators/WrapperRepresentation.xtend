@@ -19,7 +19,6 @@ import static jce.properties.TextProperty.WRAPPER_SUFFIX
 import org.eclipse.emf.ecore.InternalEObject
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.common.notify.Notifier
-import jce.util.EcoreToJavaUtil
 
 /**
  * This class models a wrapper class which unifies an origin code type with its Ecore counterparts in the Ecore model
@@ -198,15 +197,15 @@ class WrapperRepresentation {
 	 */
 	def private String getSpecialSetters() '''
 		«FOR field : eClass.EStructuralFeatures»
-			«IF field.upperBound == -1»				
-				def protected void set«field.name.toFirstUpper» (List<«EcoreToJavaUtil.getFeatureType(field.EGenericType)»> «field.name») {
+			«IF field.upperBound == -1»
+				def protected void set«field.name.toFirstUpper» (List «field.name») {
 					get«field.name.toFirstUpper».clear
 					get«field.name.toFirstUpper».addAll(«field.name»)
 				}
 					
 			«ENDIF»
 		«ENDFOR»
-	''' // TODO (HIGH) imports
+	''' // TODO (HIGH) replace raw type parameter and add imports
 
 	/**
 	 * Returns the fully qualified name of the super class of an EClass.

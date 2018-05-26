@@ -25,15 +25,15 @@ class EPackageUtil {
 	 */
 	def static EPackage findPackage(EPackage rootPackage, String fullyQualifiedName) { // TODO (HIGH) duplicate code with MetamodelSearchar.findEPackage()?
 		val pathHelper = new PathHelper(".");
-		if(rootPackage.ESuperPackage !== null || rootPackage.name != pathHelper.getFirstSegment(fullyQualifiedName)) {
+		if (rootPackage.ESuperPackage !== null || rootPackage.name != pathHelper.getFirstSegment(fullyQualifiedName)) {
 			return null;
 		}
 		var relativeName = pathHelper.cutFirstSegment(fullyQualifiedName, false);
 		var currentPackage = rootPackage;
-		while(!relativeName.empty) {
+		while (!relativeName.empty) {
 			val currentPackageName = pathHelper.getFirstSegment(relativeName);
 			currentPackage = currentPackage.ESubpackages.findFirst[name == currentPackageName];
-			if(currentPackage === null) {
+			if (currentPackage === null) {
 				return null;
 			}
 			relativeName = pathHelper.cutFirstSegment(relativeName, false);
