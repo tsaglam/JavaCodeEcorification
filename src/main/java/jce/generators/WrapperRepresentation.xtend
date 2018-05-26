@@ -19,6 +19,7 @@ import static jce.properties.TextProperty.WRAPPER_SUFFIX
 import org.eclipse.emf.ecore.InternalEObject
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.common.notify.Notifier
+import jce.util.EcoreToJavaUtil
 
 /**
  * This class models a wrapper class which unifies an origin code type with its Ecore counterparts in the Ecore model
@@ -57,7 +58,7 @@ class WrapperRepresentation {
 		ecoreImplementation = append(ECORE_PACKAGE.get, packageName, "impl", eClass.name + "Impl")
 		typeParameters = TypeParameterGenerator.generate(eClass.ETypeParameters, ecoreImplementation, project, properties)
 		importDeclarations = new HashSet // add import declarations:
-		if (superClass === null) {
+		if(superClass === null) {
 			importDeclarations += InternalEObject.name
 			importDeclarations += EObject.name
 			importDeclarations += Notifier.name
@@ -87,10 +88,12 @@ class WrapperRepresentation {
 				@DelegateExcept(«Notifier.simpleName», «EObject.simpleName»)
 				protected var «InternalEObject.simpleName» internalEcoreImplementation
 			«ENDIF»
-
+		
 			«constructors»
 			
 			«instanceMethod»
+			
+			«specialSetters»
 		}
 	'''
 
@@ -166,6 +169,10 @@ class WrapperRepresentation {
 		«FOR importDeclaration : importDeclarations»
 			import «importDeclaration»
 		«ENDFOR»
+			
+		«IF eClass.EStructuralFeatures.exists[field | field.upperBound == -1]»
+			import java.util.List
+		«ENDIF»
 	'''
 
 	/**
@@ -187,6 +194,21 @@ class WrapperRepresentation {
 	def private String getMethodKeyword() '''«IF superClass === null»def«ELSE»override«ENDIF»'''
 
 	/**
+	 * Returns a special setter for every field which was extracted using multiplicities.
+	 */
+	def private String getSpecialSetters() '''
+		«FOR field : eClass.EStructuralFeatures»
+			«IF field.upperBound == -1»				
+				def protected void set«field.name.toFirstUpper» (List<«EcoreToJavaUtil.getFeatureType(field.EGenericType)»> «field.name») {
+					get«field.name.toFirstUpper».clear
+					get«field.name.toFirstUpper».addAll(«field.name»)
+				}
+					
+			«ENDIF»
+		«ENDFOR»
+	''' // TODO (HIGH) imports
+
+	/**
 	 * Returns the fully qualified name of the super class of an EClass.
 	 */
 	def private String getSuperClassName(EClass eClass) {
@@ -200,7 +222,7 @@ class WrapperRepresentation {
 	/**
 	 * Generates the String of type type parameters with their respective bounds, e.g. "<T extends List<EString> & IFace<List<EString>>>"
 	 */
-	def private String getTypeParameters() { // TODO (MEDIUM) remove duplicate code.
+	def private String getTypeParameters() { // TODO (HIGH) remove duplicate code.
 		if(typeParameters.empty) {
 			return ""
 		}
@@ -211,7 +233,7 @@ class WrapperRepresentation {
 		return '''<«joiner»>'''
 	}
 
-	def private String getGenericArguments() { // TODO (MEDIUM) remove duplicate code.
+	def private String getGenericArguments() { // TODO (HIGH) remove duplicate code.
 		if(typeParameters.empty) {
 			return ""
 		}
