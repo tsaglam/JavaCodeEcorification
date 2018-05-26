@@ -98,7 +98,7 @@ public class JavaCodeEcorification {
     private void buildFactories(GeneratedEcoreMetamodel metamodel, IProject project) {
         new FactoryRenamer(metamodel, properties).manipulate(project);
         new FactoryImplementationRenamer(metamodel, properties).manipulate(project);
-        new DefaultConstructorGenerator(properties).manipulate(project); // TODO (HIGH) Is this too early?
+        new DefaultConstructorGenerator(properties).manipulate(project);
         new EcoreFactoryGenerator(properties).buildFactories(metamodel, project);
         new PackageImplFactoryCorrector(metamodel, properties).manipulate(project);
         new ClassExposer(properties).manipulate(project);

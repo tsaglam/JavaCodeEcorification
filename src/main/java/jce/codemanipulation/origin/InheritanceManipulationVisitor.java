@@ -56,7 +56,7 @@ public class InheritanceManipulationVisitor extends ASTVisitor {
     }
 
     /**
-     * Adds the correlating Ecore interface of an {@link TypeDeclaration} as super interface. Other superinterfaces are
+     * Adds the correlating Ecore interface of an {@link TypeDeclaration} as super interface. Other super interfaces are
      * being retained.
      */
     @SuppressWarnings("unchecked")
@@ -81,7 +81,7 @@ public class InheritanceManipulationVisitor extends ASTVisitor {
         AST ast = declaration.getAST();
         Name name = ast.newName(qualifiedName);
         Type type = ast.newSimpleType(name);
-        if (!declaration.typeParameters().isEmpty()) { // TODO (MEDIUM) optimize this, reduce duplication
+        if (!declaration.typeParameters().isEmpty()) { // TODO (HIGH) optimize this, reduce duplication
             ParameterizedType parameterizedType = ast.newParameterizedType(type);
             for (TypeParameter parameter : RawTypeUtil.castList(TypeParameter.class, declaration.typeParameters())) {
                 Name parameterName = ast.newSimpleName(parameter.getName().getIdentifier());
