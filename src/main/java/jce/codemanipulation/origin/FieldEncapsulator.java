@@ -10,34 +10,43 @@ import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
+import eme.model.IntermediateModel;
 import jce.codemanipulation.AbstractCodeManipulator;
 import jce.properties.EcorificationProperties;
 import jce.properties.TextProperty;
 import jce.util.jdt.ASTUtil;
 
 /**
- * Encapsulates the fields of the origin code. This is necessary for the removal of the fields.
+ * Encapsulates the fields of the origin code. This is necessary for the removal
+ * of the fields.
  * @author Timur Saglam
  */
 public class FieldEncapsulator extends AbstractCodeManipulator {
+    private IntermediateModel model;
 
     /**
      * Simple constructor that sets the properties.
+     * @param model is the {@link IntermediateModel} needed for the Ecorification
+     * scope.
      * @param properties are the {@link EcorificationProperties}.
      */
-    public FieldEncapsulator(EcorificationProperties properties) {
+    public FieldEncapsulator(IntermediateModel model, EcorificationProperties properties) {
         super(properties, properties.get(TextProperty.ECORE_PACKAGE), properties.get(TextProperty.WRAPPER_PACKAGE));
+        this.model = model;
     }
 
     @Override
     protected void manipulate(ICompilationUnit unit) throws JavaModelException {
-        ASTUtil.applyVisitorModifications(unit, new FieldUnfinalizationVisitor(), monitor); // make fields not final
-        CompilationUnit parsedUnit = ASTUtil.parse(unit, monitor);
-        parsedUnit.accept(new FieldEncapsulationVisitor(properties));
+        if (model.isTypeSelected(getPackageMemberName(unit))) { // only apply on origin type in scope
+            ASTUtil.applyVisitorModifications(unit, new FieldUnfinalizationVisitor(), monitor); // make fields not final
+            CompilationUnit parsedUnit = ASTUtil.parse(unit, monitor); // do not use applyVisitorModifications() here
+            parsedUnit.accept(new FieldEncapsulationVisitor(properties)); // because refactorings are applied, not modifications
+        }
     }
 
     /**
-     * {@link ASTVisitor} class that removes the modifier keyword final from all of its final fields.
+     * {@link ASTVisitor} class that removes the modifier keyword final from all of
+     * its final fields.
      */
     private class FieldUnfinalizationVisitor extends ASTVisitor {
         @Override

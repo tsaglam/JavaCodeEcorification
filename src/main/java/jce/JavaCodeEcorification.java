@@ -41,10 +41,8 @@ import jce.util.logging.MonitorFactory;
  */
 public class JavaCodeEcorification {
     private static final Logger logger = LogManager.getLogger(JavaCodeEcorification.class.getName());
-    private final FieldEncapsulator fieldEncapsulator;
     private final GenModelGenerator genModelGenerator;
     private final ImportOrganizer importOrganizer;
-    private final InheritanceManipulator inheritanceManipulator;
     private final EcoreMetamodelExtraction metamodelGenerator;
     private final EcorificationProperties properties;
     private final WrapperGenerator wrapperGenerator;
@@ -57,14 +55,13 @@ public class JavaCodeEcorification {
         metamodelGenerator = new EcorificationExtraction(properties);
         genModelGenerator = new GenModelGenerator(properties);
         wrapperGenerator = new WrapperGenerator(properties);
-        fieldEncapsulator = new FieldEncapsulator(properties);
         importOrganizer = new ImportOrganizer(properties);
-        inheritanceManipulator = new InheritanceManipulator(properties);
     }
 
     /**
-     * Starts the ecorification for a specific Java project. Initializes the different steps of the Ecorification
-     * pipeline: The extraction of an Ecore metamodel, the Ecore model code generation, the wrapper generation and the
+     * Starts the ecorification for a specific Java project. Initializes the
+     * different steps of the Ecorification pipeline: The extraction of an Ecore
+     * metamodel, the Ecore model code generation, the wrapper generation and the
      * origin code adaption.
      * @param originalProject is the specific Java project as {@link IProject}.
      */
@@ -81,15 +78,16 @@ public class JavaCodeEcorification {
     }
 
     /**
-     * 5. Encapsulates all fields of the origin code. Removes public, non-static fields and their access methods,
-     * organizes all imports, manipulates the inheritance relations to extend the wrappers, creates default constructors
+     * 5. Encapsulates all fields of the origin code. Removes public, non-static
+     * fields and their access methods, organizes all imports, manipulates the
+     * inheritance relations to extend the wrappers, creates default constructors
      * where they are missing.
      */
     private void adaptOriginCode(GeneratedEcoreMetamodel metamodel, IProject project) {
-        fieldEncapsulator.manipulate(project);
+        new FieldEncapsulator(metamodel.getIntermediateModel(), properties).manipulate(project);
         new MemberRemover(metamodel, properties).manipulate(project);
         importOrganizer.manipulate(project);
-        inheritanceManipulator.manipulate(project);
+        new InheritanceManipulator(metamodel.getIntermediateModel(), properties).manipulate(project);
     }
 
     /**
@@ -98,15 +96,15 @@ public class JavaCodeEcorification {
     private void buildFactories(GeneratedEcoreMetamodel metamodel, IProject project) {
         new FactoryRenamer(metamodel, properties).manipulate(project);
         new FactoryImplementationRenamer(metamodel, properties).manipulate(project);
-        new DefaultConstructorGenerator(properties).manipulate(project);
+        new DefaultConstructorGenerator(properties, metamodel.getIntermediateModel()).manipulate(project);
         new EcoreFactoryGenerator(properties).buildFactories(metamodel, project);
         new PackageImplFactoryCorrector(metamodel, properties).manipulate(project);
         new ClassExposer(properties).manipulate(project);
     }
 
     /**
-     * 1. Extracts a Ecore metamodel in form of an {@link GeneratedEcoreMetamodel} from the original {@link IProject}.
-     * Generates a {@link GenModel}.
+     * 1. Extracts a Ecore metamodel in form of an {@link GeneratedEcoreMetamodel}
+     * from the original {@link IProject}. Generates a {@link GenModel}.
      */
     private GeneratedEcoreMetamodel extractMetamodel(IProject originalProject) {
         GeneratedEcoreMetamodel metamodel = metamodelGenerator.extract(originalProject);
@@ -116,7 +114,8 @@ public class JavaCodeEcorification {
     }
 
     /**
-     * 6. Finishes the ecorification: Organizes all imports, rebuilds the project and notifies the user.
+     * 6. Finishes the ecorification: Organizes all imports, rebuilds the project
+     * and notifies the user.
      */
     private void finish(IProject project) {
         importOrganizer.manipulate(project);
@@ -125,7 +124,8 @@ public class JavaCodeEcorification {
     }
 
     /**
-     * 3. Generates the wrappers, which are the classes that unify the origin code with the Ecore code.
+     * 3. Generates the wrappers, which are the classes that unify the origin code
+     * with the Ecore code.
      */
     private void generateWrappers(GeneratedEcoreMetamodel metamodel, IProject project) {
         XtendLibraryHelper.addXtendLibs(project, properties);
@@ -149,8 +149,9 @@ public class JavaCodeEcorification {
     }
 
     /**
-     * 4. Manipulates the imports of the Ecore code. Every Ecore interface and every correlating implementation class
-     * will use the origin code types instead of ecore code types.
+     * 4. Manipulates the imports of the Ecore code. Every Ecore interface and every
+     * correlating implementation class will use the origin code types instead of
+     * ecore code types.
      */
     private void manipulateEcoreImports(GeneratedEcoreMetamodel metamodel, IProject project) {
         new EcoreImportManipulator(metamodel, properties).manipulate(project); // 4. adapt imports

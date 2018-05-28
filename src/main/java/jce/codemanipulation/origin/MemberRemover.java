@@ -10,8 +10,9 @@ import jce.properties.TextProperty;
 import jce.util.jdt.ASTUtil;
 
 /**
- * Removes all private non-static fields and their access methods from the origin code that have a counterpart in the
- * Ecore metamodel which was extracted from the origin code.
+ * Removes all private non-static fields and their access methods from the
+ * origin code that have a counterpart in the Ecore metamodel which was
+ * extracted from the origin code.
  * @author Timur Saglam
  */
 public class MemberRemover extends AbstractCodeManipulator {
@@ -19,7 +20,8 @@ public class MemberRemover extends AbstractCodeManipulator {
 
     /**
      * Simple constructor that sets the properties.
-     * @param metamodel is the Ecore metamodel which was extracted from the origin code.
+     * @param metamodel is the Ecore metamodel which was extracted from the origin
+     * code.
      * @param properties are the {@link EcorificationProperties}.
      */
     public MemberRemover(GeneratedEcoreMetamodel metamodel, EcorificationProperties properties) {
@@ -29,6 +31,8 @@ public class MemberRemover extends AbstractCodeManipulator {
 
     @Override
     protected void manipulate(ICompilationUnit unit) throws JavaModelException {
-        ASTUtil.applyVisitorModifications(unit, new MemberRemovalVisitor(metamodel, properties), monitor);
+        if (metamodel.getIntermediateModel().isTypeSelected(getPackageMemberName(unit))) { // only apply on origin type in scope
+            ASTUtil.applyVisitorModifications(unit, new MemberRemovalVisitor(metamodel, properties), monitor);
+        }
     }
 }

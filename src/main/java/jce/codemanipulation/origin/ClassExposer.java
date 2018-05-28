@@ -10,7 +10,8 @@ import jce.properties.TextProperty;
 import jce.util.jdt.ASTUtil;
 
 /**
- * Changes the visibility of default types and default inner classes of the origin code to public to make them visible.
+ * Changes the visibility of default types and default inner classes of the
+ * origin code to public to make them visible.
  * @author Timur Saglam
  */
 public class ClassExposer extends AbstractCodeManipulator {
@@ -25,7 +26,7 @@ public class ClassExposer extends AbstractCodeManipulator {
 
     @Override
     protected void manipulate(ICompilationUnit unit) throws JavaModelException {
-        if (properties.get(BinaryProperty.EXPOSE_CLASSES)) {
+        if (properties.get(BinaryProperty.EXPOSE_CLASSES)) { // TODO (HIGH) Apply scope here to be minimally intrusive
             ASTUtil.applyVisitorModifications(unit, new ClassExpositionVisitor(properties), monitor);
         }
     }
