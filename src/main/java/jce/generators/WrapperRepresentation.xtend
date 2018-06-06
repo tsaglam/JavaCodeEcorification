@@ -67,10 +67,10 @@ class WrapperRepresentation {
 		/**
 		 * Unification class for the class «eClass.name»
 		 */
-		«IF eClass.abstract»abstract «ENDIF»class «wrapperName + getTypeParameters» extends «createSuperType(superClass)» implements «eClass.name + genericArguments» {
+		«IF eClass.abstract»abstract «ENDIF»class «wrapperName + getParameters(true)» extends «createSuperType(superClass)» implements «eClass.name + getParameters(false)» {
 			
 			«delegateAnnotation»
-			protected var «eClass.name + genericArguments» ecoreImplementation
+			protected var «eClass.name + getParameters(false)» ecoreImplementation
 			
 			«IF superClass === null»
 				// Methods of InternalEObject must also be delegated to the wrapped class
@@ -99,7 +99,7 @@ class WrapperRepresentation {
 	def String getPackage() {
 		return packageName
 	}
-	
+
 	def private createContent(IJavaProject project) {
 		packageName = getPackage(eClass)
 		wrapperName = WRAPPER_PREFIX.get + eClass.name + WRAPPER_SUFFIX.get // name of the wrapper class
@@ -110,7 +110,7 @@ class WrapperRepresentation {
 		ecoreImplementation = append(ECORE_PACKAGE.get, packageName, "impl", eClass.name + "Impl")
 		typeParameters = TypeParameterGenerator.generate(eClass.ETypeParameters, ecoreImplementation, project, properties)
 		importDeclarations = new HashSet // add import declarations:
-		if(superClass === null) {
+		if (superClass === null) {
 			importDeclarations += InternalEObject.name
 			importDeclarations += EObject.name
 			importDeclarations += Notifier.name
@@ -123,7 +123,7 @@ class WrapperRepresentation {
 	 * Builds the super type declaration of a wrapper from a String that is either the super type or null.
 	 */
 	def private String createSuperType(String superClass) {
-		if(superClass === null) {
+		if (superClass === null) {
 			return append(typeof(MinimalEObjectImpl).simpleName, typeof(MinimalEObjectImpl.Container).simpleName)
 		}
 		return superClass.getLastSegment
@@ -188,9 +188,9 @@ class WrapperRepresentation {
 	 */
 	def private String getInstanceMethod() '''
 		«IF eClass.abstract»
-			«methodKeyword» protected abstract «eClass.name + genericArguments» getInstance()
+			«methodKeyword» protected abstract «eClass.name + getParameters(false)» getInstance()
 		«ELSE»
-			«methodKeyword» protected «eClass.name + genericArguments» getInstance() {
+			«methodKeyword» protected «eClass.name + getParameters(false)» getInstance() {
 				return «factoryName».eINSTANCE.create«eClass.name»
 			}
 		«ENDIF»
@@ -214,7 +214,7 @@ class WrapperRepresentation {
 			«ENDIF»
 		«ENDFOR»
 	''' // TODO (HIGH) replace raw type parameter and add imports
-	
+
 	def private String getGenericArguments(EStructuralFeature feature) {
 		var String result = ""
 		for (argument : IntermediateModelSearcher.findField(feature, model).genericArguments) {
@@ -228,35 +228,29 @@ class WrapperRepresentation {
 	 */
 	def private String getSuperClassName(EClass eClass) {
 		val EClass superType = getSuperClass(eClass)
-		if(superType !== null) {
+		if (superType !== null) {
 			return append(getPackage(superType), superType.name)
 		}
 		return null
 	}
 
 	/**
-	 * Generates the String of type type parameters with their respective bounds, e.g. "<T extends List<EString> & IFace<List<EString>>>"
+	 * Generates the String of type parameters.
+	 * @param includeBounds determines whether the String contains the parameters with their respective bounds, e.g. "<T extends List<EString> & IFace<List<EString>>>"
 	 */
-	def private String getTypeParameters() { // TODO (HIGH) remove duplicate code.
-		if(typeParameters.empty) {
-			return ""
+	def private String getParameters(boolean includeBounds) {
+		if (typeParameters.empty) {
+			return "" // no type parameters at all
 		}
-		val StringJoiner joiner = new StringJoiner(", ")
+		val StringJoiner joiner = new StringJoiner(", ") // join parameters with commas
 		for (parameter : typeParameters) {
-			joiner.add(parameter.content)
+			if (includeBounds) {
+				joiner.add(parameter.content) // name and bounds with their arguments
+			} else {
+				joiner.add(parameter.name) // only name
+			}
 		}
-		return '''<«joiner»>'''
-	}
-
-	def private String getGenericArguments() { // TODO (HIGH) remove duplicate code.
-		if(typeParameters.empty) {
-			return ""
-		}
-		val StringJoiner joiner = new StringJoiner(", ")
-		for (parameter : typeParameters) {
-			joiner.add(parameter.name)
-		}
-		return '''<«joiner»>'''
+		return '''<«joiner»>''' // return parameters with generic brackets
 	}
 
 	/**
@@ -264,7 +258,7 @@ class WrapperRepresentation {
 	 */
 	def private EClass getSuperClass(EClass eClass) {
 		for (superType : eClass.ESuperTypes) {
-			if(!superType.interface) {
+			if (!superType.interface) {
 				return superType
 			}
 		}
@@ -277,7 +271,7 @@ class WrapperRepresentation {
 	def private String getPackage(EClass eClass) {
 		var String package = ""
 		var EPackage current = eClass.EPackage
-		while(current !== null) { // iterate through package hierarchy
+		while (current !== null) { // iterate through package hierarchy
 			package = append(current.name, package) // concatenate package with super package name
 			current = current.ESuperPackage
 		}
