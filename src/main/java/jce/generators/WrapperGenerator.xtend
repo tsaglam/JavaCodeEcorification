@@ -20,6 +20,7 @@ import static jce.properties.TextProperty.WRAPPER_PACKAGE
  */
 final class WrapperGenerator extends ClassGenerator {
 	IJavaProject javaProject
+	GeneratedEcoreMetamodel metamodel
 
 	/**
 	 * Basic constructor, sets the properties.
@@ -36,6 +37,7 @@ final class WrapperGenerator extends ClassGenerator {
 	def void buildWrappers(GeneratedEcoreMetamodel metamodel, IProject project) {
 		logger.info("Starting the wrapper generation...")
 		this.javaProject = JavaCore.create(project)
+		this.metamodel = metamodel
 		createFolder(wrapperFolder, project) // build wrapper base folder
 		buildWrappers(metamodel.root, "")
 		ResourceRefresher.refresh(project, SOURCE_FOLDER.get) // makes wrappers visible in the Eclipse IDE
@@ -80,7 +82,7 @@ final class WrapperGenerator extends ClassGenerator {
 	 * Creates a Xtend Wrapper in a package path with a specific name. 
 	 */
 	def private void createXtendWrapper(EClass eClass, String path) {
-		val wrapper = new WrapperRepresentation(eClass, javaProject, properties) // build wrapper representation
+		val wrapper = new WrapperRepresentation(eClass, javaProject, metamodel.intermediateModel, properties) // build wrapper representation
 		val wrapperPath = append(WRAPPER_PACKAGE.get, path) // add wrapper prefix
 		createClass(wrapperPath, '''«wrapper.name».xtend''', wrapper.content, javaProject.project) // create wrapper
 	}

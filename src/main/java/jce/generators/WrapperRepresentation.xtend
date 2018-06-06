@@ -19,6 +19,9 @@ import static jce.properties.TextProperty.WRAPPER_SUFFIX
 import org.eclipse.emf.ecore.InternalEObject
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.common.notify.Notifier
+import jce.util.IntermediateModelSearcher
+import eme.model.IntermediateModel
+import org.eclipse.emf.ecore.EStructuralFeature
 
 /**
  * This class models a wrapper class which unifies an origin code type with its Ecore counterparts in the Ecore model
@@ -29,41 +32,28 @@ class WrapperRepresentation {
 	extension PathHelper nameUtil
 	extension EcorificationProperties properties
 
-	final String packageName
-	final String superClass
+	String packageName
+	String superClass
 	final EClass eClass
-	final String wrapperName
-	final String factoryName
-	final List<TypeParameterRepresentation> typeParameters
-	final List<ConstructorRepresentation> wrapperConstructors
-	final Set<String> importDeclarations
-	final String ecoreInterface
-	final String ecoreImplementation
+	String wrapperName
+	String factoryName
+	List<TypeParameterRepresentation> typeParameters
+	List<ConstructorRepresentation> wrapperConstructors
+	Set<String> importDeclarations
+	String ecoreInterface
+	String ecoreImplementation
+	final IntermediateModel model
 
 	/**
 	 * Creates a new wrapper representation from an EClass and the EcorificationProperties. The EClass specifies which
 	 * types are unified. The properties specify the employed naming scheme.
 	 */
-	new(EClass eClass, IJavaProject project, EcorificationProperties properties) {
+	new(EClass eClass, IJavaProject project, IntermediateModel model, EcorificationProperties properties) {
 		this.eClass = eClass
+		this.model = model
 		this.properties = properties
 		nameUtil = new PathHelper('.')
-		packageName = getPackage(eClass)
-		wrapperName = WRAPPER_PREFIX.get + eClass.name + WRAPPER_SUFFIX.get // name of the wrapper class
-		factoryName = '''«PathHelper.capitalize(packageName.getLastSegment)»Factory«FACTORY_SUFFIX.get»'''
-		superClass = getSuperClassName(eClass)
-		wrapperConstructors = ConstructorGenerator.generate(superClass, project, properties)
-		ecoreInterface = append(ECORE_PACKAGE.get, packageName, eClass.name)
-		ecoreImplementation = append(ECORE_PACKAGE.get, packageName, "impl", eClass.name + "Impl")
-		typeParameters = TypeParameterGenerator.generate(eClass.ETypeParameters, ecoreImplementation, project, properties)
-		importDeclarations = new HashSet // add import declarations:
-		if(superClass === null) {
-			importDeclarations += InternalEObject.name
-			importDeclarations += EObject.name
-			importDeclarations += Notifier.name
-		}
-		wrapperConstructors.forEach[constructor|importDeclarations.addAll(constructor.imports)]
-		typeParameters.forEach[parameter|importDeclarations.addAll(parameter.imports)]
+		createContent(project) // creates the important parts
 	}
 
 	/**
@@ -108,6 +98,25 @@ class WrapperRepresentation {
 	 */
 	def String getPackage() {
 		return packageName
+	}
+	
+	def private createContent(IJavaProject project) {
+		packageName = getPackage(eClass)
+		wrapperName = WRAPPER_PREFIX.get + eClass.name + WRAPPER_SUFFIX.get // name of the wrapper class
+		factoryName = '''«PathHelper.capitalize(packageName.getLastSegment)»Factory«FACTORY_SUFFIX.get»'''
+		superClass = getSuperClassName(eClass)
+		wrapperConstructors = ConstructorGenerator.generate(superClass, project, properties)
+		ecoreInterface = append(ECORE_PACKAGE.get, packageName, eClass.name)
+		ecoreImplementation = append(ECORE_PACKAGE.get, packageName, "impl", eClass.name + "Impl")
+		typeParameters = TypeParameterGenerator.generate(eClass.ETypeParameters, ecoreImplementation, project, properties)
+		importDeclarations = new HashSet // add import declarations:
+		if(superClass === null) {
+			importDeclarations += InternalEObject.name
+			importDeclarations += EObject.name
+			importDeclarations += Notifier.name
+		}
+		wrapperConstructors.forEach[constructor|importDeclarations.addAll(constructor.imports)]
+		typeParameters.forEach[parameter|importDeclarations.addAll(parameter.imports)]
 	}
 
 	/**
@@ -196,16 +205,23 @@ class WrapperRepresentation {
 	 * Returns a special setter for every field which was extracted using multiplicities.
 	 */
 	def private String getSpecialSetters() '''
-		«FOR field : eClass.EStructuralFeatures»
+		«FOR field : eClass.EStructuralFeatures SEPARATOR blankLine»
 			«IF field.upperBound == -1»
-				def protected void set«field.name.toFirstUpper» (List «field.name») {
+				def protected void set«field.name.toFirstUpper» (List<«getGenericArguments(field)»> «field.name») {
 					get«field.name.toFirstUpper».clear
 					get«field.name.toFirstUpper».addAll(«field.name»)
 				}
-					
 			«ENDIF»
 		«ENDFOR»
 	''' // TODO (HIGH) replace raw type parameter and add imports
+	
+	def private String getGenericArguments(EStructuralFeature feature) {
+		var String result = ""
+		for (argument : IntermediateModelSearcher.findField(feature, model).genericArguments) {
+			result += argument.typeString
+		}
+		return result
+	}
 
 	/**
 	 * Returns the fully qualified name of the super class of an EClass.
