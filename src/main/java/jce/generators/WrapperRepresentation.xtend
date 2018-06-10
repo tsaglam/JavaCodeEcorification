@@ -213,7 +213,7 @@ class WrapperRepresentation {
 				}
 			«ENDIF»
 		«ENDFOR»
-	''' // TODO (HIGH) replace raw type parameter and add imports
+	'''
 
 	def private String getGenericArguments(EStructuralFeature feature) {
 		var String result = ""

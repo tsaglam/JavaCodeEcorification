@@ -99,7 +99,7 @@ public class JavaCodeEcorification {
         new DefaultConstructorGenerator(properties, metamodel.getIntermediateModel()).manipulate(project);
         new EcoreFactoryGenerator(properties).buildFactories(metamodel, project);
         new PackageImplFactoryCorrector(metamodel, properties).manipulate(project);
-        new ClassExposer(properties).manipulate(project);
+        new ClassExposer(metamodel.getIntermediateModel(), properties).manipulate(project);
     }
 
     /**
