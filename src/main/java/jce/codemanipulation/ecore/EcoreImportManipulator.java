@@ -65,7 +65,7 @@ public class EcoreImportManipulator extends AbstractCodeManipulator {
      * imports.
      */
     private void applyRetentionVisitor(ICompilationUnit unit, IImportDeclaration[] imports) throws JavaModelException {
-        ASTVisitor visitor = new TypeRetentionVisitor(unit, imports, properties);
+        ASTVisitor visitor = new TypeRetentionVisitor(unit, imports);
         ASTUtil.applyVisitorModifications(unit, visitor, monitor);
     }
 

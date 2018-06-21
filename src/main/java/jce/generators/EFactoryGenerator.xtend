@@ -24,7 +24,7 @@ class EFactoryGenerator extends ClassGenerator {
 	/**
 	 * Creates a Ecore Factory in a package path with a specific name. 
 	 */
-	def public void create(String path, List<String> packageTypes, IProject project) {
+	def void create(String path, List<String> packageTypes, IProject project) {
 		val currentPackage = path.replace(File.separatorChar, '.') // path to package declaration
 		val packageName = currentPackage.getLastSegment.toFirstUpper
 		val content = createFactoryContent(currentPackage, packageName, packageTypes)

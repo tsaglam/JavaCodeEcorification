@@ -32,7 +32,7 @@ class ClassGenerator {
 	/**
 	 * Creates an IFile from a project relative path, a file name and creates the file content.
 	 */
-	def public void createClass(String path, String name, String content, IProject project) {
+	def void createClass(String path, String name, String content, IProject project) {
 		var folder = project.getFolder(append(SOURCE_FOLDER.get, path))
 		var file = folder.getFile(name)
 		if(file.exists) {
@@ -46,7 +46,7 @@ class ClassGenerator {
 	/**
 	 * Creates an {@link IFolder} in the project with a project relative path.
 	 */
-	def public void createFolder(String path, IProject project) {
+	def void createFolder(String path, IProject project) {
 		var IFolder folder = project.getFolder(path)
 		if(!folder.exists) {
 			folder.create(false, true, monitor)

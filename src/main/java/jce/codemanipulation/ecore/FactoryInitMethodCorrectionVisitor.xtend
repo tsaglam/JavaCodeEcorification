@@ -9,13 +9,13 @@ import org.eclipse.jdt.core.dom.ReturnStatement
  * @author Heiko Klare
  */
 class FactoryInitMethodCorrectionVisitor extends ASTVisitor {
-	private static final String FACTORY_INIT_METHOD_NAME = "init";
+	static final String FACTORY_INIT_METHOD_NAME = "init";
 	
 	/**
 	 * Removes the namespace-URI-based factory determination logic from the original Ecore factories, 
 	 * because they are are only used internally and are not registered globally. 
 	 */
-	public override boolean visit(MethodDeclaration node) {
+	override boolean visit(MethodDeclaration node) {
 		if (node.name.toString == FACTORY_INIT_METHOD_NAME) {
 			node.body.statements.removeIf[!(it instanceof ReturnStatement)]
 		}

@@ -23,15 +23,13 @@ import jce.util.PathHelper
 class PackageImplFactoryCorrectionVisitor extends ASTVisitor {
 	public static val PACKAGE_IMPL_SUFFIX = "PackageImpl";
 	public static val PACKAGE_SUFFIX = "Package";
-	private static val FACTORY_SUFFIX = "Factory";
-	private val String factoryName;
-	private val ICompilationUnit compilationUnit;
-	private val EcorificationProperties properties;
-	private val PathHelper pathHelper;
+	static val FACTORY_SUFFIX = "Factory";
+	val String factoryName;
+	val EcorificationProperties properties;
+	val PathHelper pathHelper;
 	
 	new(ICompilationUnit compilationUnit, EcorificationProperties properties) {
 		this.properties = properties;
-		this.compilationUnit = compilationUnit;
 		this.pathHelper = new PathHelper(".")
 		val compilationUnitName = pathHelper.cutLastSegment(compilationUnit.elementName);
 		this.factoryName = if (compilationUnit.elementName.contains(PACKAGE_IMPL_SUFFIX)) {

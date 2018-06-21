@@ -5,11 +5,9 @@ import java.io.File
 import jce.properties.EcorificationProperties
 import jce.util.PathHelper
 import jce.util.ResourceRefresher
-import jce.util.logging.MonitorFactory
 import org.apache.log4j.LogManager
 import org.apache.log4j.Logger
 import org.eclipse.core.resources.IProject
-import org.eclipse.core.runtime.IProgressMonitor
 import org.eclipse.emf.ecore.EPackage
 
 import static jce.properties.TextProperty.ECORE_PACKAGE
@@ -26,7 +24,6 @@ final class EcoreFactoryGenerator {
 	extension final EcorificationProperties properties
 	
 	static final Logger logger = LogManager.getLogger(EcoreFactoryGenerator.getName)
-	final IProgressMonitor monitor
 	final EFactoryGenerator factoryGenerator
 	final EFactoryImplementationGenerator factoryImplementationGenerator
 
@@ -37,7 +34,6 @@ final class EcoreFactoryGenerator {
 		this.properties = properties
 		factoryGenerator = new EFactoryGenerator(properties)
 		factoryImplementationGenerator = new EFactoryImplementationGenerator(properties)
-		monitor = MonitorFactory.createProgressMonitor(logger, properties)
 		pathUtil = new PathHelper(File.separatorChar)
 	}
 

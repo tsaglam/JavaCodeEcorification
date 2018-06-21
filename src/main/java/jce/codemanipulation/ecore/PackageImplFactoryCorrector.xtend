@@ -18,8 +18,8 @@ import static extension jce.util.EPackageUtil.*;
  * @author Heiko Klare
  */
 class PackageImplFactoryCorrector extends AbstractCodeManipulator {
-	private val extension PathHelper pathHelper;
-	private val GeneratedEcoreMetamodel metamodel;
+	val extension PathHelper pathHelper;
+	val GeneratedEcoreMetamodel metamodel;
 	
 	new(GeneratedEcoreMetamodel metamodel, EcorificationProperties properties) {
 		super(properties.get(TextProperty.ECORE_PACKAGE), properties)

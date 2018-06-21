@@ -31,7 +31,6 @@ class TypeRetentionVisitor extends ASTVisitor {
 	final String currentPackage
 	final IImportDeclaration[] imports
 	final PathHelper pathHelper
-	final EcorificationProperties properties
 
 	/** 
 	 * Basic constructor. Creates the visitor.
@@ -40,9 +39,8 @@ class TypeRetentionVisitor extends ASTVisitor {
 	 * @param properties are the {@link EcorificationProperties}.
 	 * @throws JavaModelException if there is a problem with the {@link ICompilationUnit}.
 	 */
-	new(ICompilationUnit compilationUnit, IImportDeclaration[] imports, EcorificationProperties properties) throws JavaModelException {
+	new(ICompilationUnit compilationUnit, IImportDeclaration[] imports) throws JavaModelException {
 		super()
-		this.properties = properties
 		this.imports = imports
 		currentPackage = compilationUnit.parent.elementName
 		pathHelper = new PathHelper('.')

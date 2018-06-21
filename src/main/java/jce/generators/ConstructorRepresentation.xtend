@@ -17,7 +17,6 @@ import org.eclipse.xtend.lib.annotations.Accessors
 @Accessors(PUBLIC_GETTER)
 class ConstructorRepresentation {
 	@Accessors(NONE) static final Logger logger = LogManager.getLogger(ConstructorRepresentation.getName)
-	@Accessors(NONE) MethodDeclaration declaration
 	@Accessors(NONE) List<SingleVariableDeclaration> parameters
 	List<String> imports
 	String content
@@ -27,7 +26,6 @@ class ConstructorRepresentation {
 	 * correlating compilation unit. 
 	 */
 	new(MethodDeclaration declaration, ICompilationUnit unit) {
-		this.declaration = declaration
 		parameters = new LinkedList
 		for (parameter : declaration.parameters) {
 			addParameter(parameter)
