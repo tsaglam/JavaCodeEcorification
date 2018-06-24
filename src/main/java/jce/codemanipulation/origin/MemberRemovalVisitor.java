@@ -15,7 +15,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import eme.generator.GeneratedEcoreMetamodel;
 import jce.properties.EcorificationProperties;
-import jce.util.MetamodelSearcher;
+import jce.util.EcoreUtil;
 import jce.util.PathHelper;
 import jce.util.logging.MonitorFactory;
 
@@ -72,7 +72,7 @@ public class MemberRemovalVisitor extends ASTVisitor {
     private boolean isGenerated(VariableDeclarationFragment fragment, TypeDeclaration type) {
         String typeName = type.getName().resolveTypeBinding().getQualifiedName(); // fully qualified name of class
         String fieldName = fragment.getName().getIdentifier(); // name of field
-        return MetamodelSearcher.findEStructuralFeature(fieldName, typeName, metamodel.getRoot()) != null;
+        return EcoreUtil.findEStructuralFeature(fieldName, typeName, metamodel.getRoot()) != null;
     }
 
     /**

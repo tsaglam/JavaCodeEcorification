@@ -23,7 +23,7 @@ import eme.generator.GeneratedEcoreMetamodel;
 import jce.codemanipulation.AbstractCodeManipulator;
 import jce.properties.EcorificationProperties;
 import jce.properties.TextProperty;
-import jce.util.MetamodelSearcher;
+import jce.util.EcoreUtil;
 import jce.util.PathHelper;
 
 /**
@@ -67,7 +67,7 @@ public class FactoryRelocator extends AbstractCodeManipulator {
         String packageName = nameUtil.getLastSegment(nameUtil.cutLastSegments(fullName, 2));
         if (fullName.endsWith(PathHelper.capitalize(packageName) + "FactoryImpl")) { // if has factory name
             String modelName = nameUtil.cutFirstSegment(fullName); // without ecore package
-            return MetamodelSearcher.findEClass(modelName, metamodel.getRoot()) == null; // search metamodel counterpart
+            return EcoreUtil.findEClass(modelName, metamodel.getRoot()) == null; // search metamodel counterpart
         }
         return false; // Does not have Ecore implementation name and package
     }

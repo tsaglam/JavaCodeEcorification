@@ -16,7 +16,7 @@ import eme.generator.GeneratedEcoreMetamodel;
 import jce.codemanipulation.AbstractCodeManipulator;
 import jce.properties.EcorificationProperties;
 import jce.properties.TextProperty;
-import jce.util.MetamodelSearcher;
+import jce.util.EcoreUtil;
 import jce.util.jdt.ASTUtil;
 
 /**
@@ -130,7 +130,7 @@ public class EcoreImportManipulator extends AbstractCodeManipulator {
         String typeName = nameUtil.cutFirstSegment(getPackageMemberName(unit));
         if (isEcoreImplementationName(typeName)) { // if has Ecore implementation name and package
             typeName = getInterfaceName(typeName); // get name of Ecore interface and EClass
-            return MetamodelSearcher.findEClass(typeName, metamodel.getRoot()) != null; // search metamodel counterpart
+            return EcoreUtil.findEClass(typeName, metamodel.getRoot()) != null; // search metamodel counterpart
         }
         return false; // Does not have Ecore implementation name and package
     }
@@ -148,7 +148,7 @@ public class EcoreImportManipulator extends AbstractCodeManipulator {
      */
     private boolean isEcoreInterface(ICompilationUnit unit) throws JavaModelException {
         String typeName = nameUtil.cutFirstSegment(getPackageMemberName(unit));
-        EClass potentialEClass = MetamodelSearcher.findEClass(typeName, metamodel.getRoot());
+        EClass potentialEClass = EcoreUtil.findEClass(typeName, metamodel.getRoot());
         return potentialEClass != null && potentialEClass.isInterface();
     }
 
@@ -158,7 +158,7 @@ public class EcoreImportManipulator extends AbstractCodeManipulator {
      */
     private boolean isInterfaceOfEcoreClass(ICompilationUnit unit) throws JavaModelException {
         String typeName = nameUtil.cutFirstSegment(getPackageMemberName(unit));
-        EClass potentialEClass = MetamodelSearcher.findEClass(typeName, metamodel.getRoot());
+        EClass potentialEClass = EcoreUtil.findEClass(typeName, metamodel.getRoot());
         // Ensure that the class is not the representation of an Ecore interface but only an interface of an
         // implementation class
         return potentialEClass != null && !potentialEClass.isInterface();
@@ -175,7 +175,7 @@ public class EcoreImportManipulator extends AbstractCodeManipulator {
             return false; // EMF imports the Ecore classes directly, not with .*
         }
         String typeName = nameUtil.cutFirstSegment(importDeclaration.getElementName());
-        return MetamodelSearcher.findEClass(typeName, metamodel.getRoot()) != null;
+        return EcoreUtil.findEClass(typeName, metamodel.getRoot()) != null;
     }
 
     /**

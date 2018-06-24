@@ -13,7 +13,7 @@ import org.eclipse.emf.ecore.EPackage
 import static jce.properties.TextProperty.ECORE_PACKAGE
 import static jce.properties.TextProperty.SOURCE_FOLDER
 
-import static extension jce.util.EPackageUtil.*;
+import static extension jce.util.EcoreUtil.*;
 
 /** 
  * Creates and manages custom EFactories. Every EFactory has an interface and an implementation class.
@@ -22,7 +22,7 @@ import static extension jce.util.EPackageUtil.*;
 final class EcoreFactoryGenerator {
 	extension final PathHelper pathUtil
 	extension final EcorificationProperties properties
-	
+
 	static final Logger logger = LogManager.getLogger(EcoreFactoryGenerator.getName)
 	final EFactoryGenerator factoryGenerator
 	final EFactoryImplementationGenerator factoryImplementationGenerator

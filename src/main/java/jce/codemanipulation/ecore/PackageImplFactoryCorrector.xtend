@@ -8,7 +8,7 @@ import jce.properties.TextProperty
 import jce.util.jdt.ASTUtil
 import jce.util.PathHelper
 import eme.generator.GeneratedEcoreMetamodel
-import static extension jce.util.EPackageUtil.*;
+import static extension jce.util.EcoreUtil.*
 
 /**
  * Code manipulator that correct references to factories in the package classes generated
@@ -37,7 +37,7 @@ class PackageImplFactoryCorrector extends AbstractCodeManipulator {
 			} else {
 				return;
 			}
-		val package = metamodel.root.findPackage(packageName);
+		val package =  metamodel.root.findEPackage(packageName);
 		// All packages containing classes got new factories that have to be referenced in package classes
 		if (!package.classNames.empty) {
 			val visitor = new PackageImplFactoryCorrectionVisitor(unit, properties);

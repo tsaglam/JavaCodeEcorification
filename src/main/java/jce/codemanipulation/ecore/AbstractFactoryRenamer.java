@@ -14,7 +14,7 @@ import eme.generator.GeneratedEcoreMetamodel;
 import jce.codemanipulation.AbstractCodeManipulator;
 import jce.properties.EcorificationProperties;
 import jce.properties.TextProperty;
-import jce.util.MetamodelSearcher;
+import jce.util.EcoreUtil;
 import jce.util.PathHelper;
 import jce.util.jdt.RefactoringUtil;
 
@@ -98,7 +98,7 @@ public abstract class AbstractFactoryRenamer extends AbstractCodeManipulator {
      */
     protected final boolean isInMetamodel(String fullName) {
         String modelName = nameUtil.cutFirstSegment(fullName); // remove leading ecore package
-        return MetamodelSearcher.findEClass(modelName, metamodel.getRoot()) != null; // search metamodel counterpart
+        return EcoreUtil.findEClass(modelName, metamodel.getRoot()) != null; // search metamodel counterpart
     }
 
     /**
