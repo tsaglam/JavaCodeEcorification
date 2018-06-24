@@ -24,3 +24,4 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.jdt.ui,
  org.eclipse.ltk.core.refactoring,
  org.eclipse.swt
+Automatic-Module-Name: JavaCodeEcorification
