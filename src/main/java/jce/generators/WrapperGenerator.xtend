@@ -49,12 +49,12 @@ final class WrapperGenerator extends ClassGenerator {
 	 * @param path is the current file path of the {@link EPackage}. Should be initially an empty string.
 	 */
 	def private void buildWrappers(EPackage ePackage, String path) {
-		if(containsEClass(ePackage)) { // avoids empty folders
+		if (containsEClass(ePackage)) { // avoids empty folders
 			createFolder(append(wrapperFolder, path), javaProject.project)
 		}
 		for (eClassifier : ePackage.EClassifiers) { // for every classifier
-			if(eClassifier instanceof EClass) { // if is EClass
-				if(!eClassifier.interface && !isRootContainer(eClassifier, path)) { // if is not interface or root
+			if (eClassifier instanceof EClass) { // if is EClass
+				if (!eClassifier.interface && !isRootContainer(eClassifier, path)) { // if is not interface or root
 					createXtendWrapper(eClassifier, path) // create wrapper class
 				}
 			}
