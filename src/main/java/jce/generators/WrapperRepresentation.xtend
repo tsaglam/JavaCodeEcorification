@@ -19,9 +19,9 @@ import static jce.properties.TextProperty.WRAPPER_SUFFIX
 import org.eclipse.emf.ecore.InternalEObject
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.common.notify.Notifier
-import jce.util.IntermediateModelSearcher
 import eme.model.IntermediateModel
 import org.eclipse.emf.ecore.EStructuralFeature
+import jce.util.IntermediateModelUtil
 
 /**
  * This class models a wrapper class which unifies an origin code type with its Ecore counterparts in the Ecore model
@@ -217,7 +217,7 @@ class WrapperRepresentation {
 
 	def private String getGenericArguments(EStructuralFeature feature) {
 		var String result = ""
-		for (argument : IntermediateModelSearcher.findField(feature, model).genericArguments) {
+		for (argument : IntermediateModelUtil.findField(feature, model).genericArguments) {
 			result += argument.typeString
 		}
 		return result

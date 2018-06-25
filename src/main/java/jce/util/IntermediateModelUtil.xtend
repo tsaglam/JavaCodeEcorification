@@ -12,7 +12,7 @@ import org.eclipse.emf.ecore.EPackage
 /**
  * Utility for finding the counterparts of Ecore elements in an intermediate model.
  */
-final class IntermediateModelSearcher {
+final class IntermediateModelUtil {
 
 	private new() {
 		throw new AssertionError("Suppress default constructor for noninstantiability")
