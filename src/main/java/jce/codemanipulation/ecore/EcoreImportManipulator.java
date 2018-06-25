@@ -1,5 +1,7 @@
 package jce.codemanipulation.ecore;
 
+import java.util.Arrays;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -76,7 +78,7 @@ public class EcoreImportManipulator extends AbstractCodeManipulator {
         String implementationName = getImplementationName(getPackageMemberName(unit));
         IType iType = project.findType(implementationName);
         if (iType == null) {
-           return unit; // return original, better than nothing TODO (HIGH) make this more elegant
+            return unit; // return original, better than nothing TODO (HIGH) make this more elegant
         }
         return iType.getCompilationUnit();
     }
@@ -91,9 +93,9 @@ public class EcoreImportManipulator extends AbstractCodeManipulator {
     }
 
     /**
-     * Checks for cases where the Ecore interface uses instances of itself. In those cases the import manipulation
-     * cannot change the type of the instances, because the origin code type import would clash with the Ecore interface
-     * itself. Therefore the correlating parameters are retyped manually.
+     * Checks for cases where the Ecore interface uses instances of itself. In those cases the import manipulation cannot
+     * change the type of the instances, because the origin code type import would clash with the Ecore interface itself.
+     * Therefore the correlating parameters are retyped manually.
      */
     private void fixSelfImports(ICompilationUnit ecoreInterface, IImportDeclaration importDeclaration) throws JavaModelException {
         String interfaceName = getPackageMemberName(ecoreInterface);
@@ -112,8 +114,8 @@ public class EcoreImportManipulator extends AbstractCodeManipulator {
     }
 
     /**
-     * Returns the name of the Ecore interface of an Ecore implementation class name. E.g. returns "model.Main" when
-     * given "model.impl.MainImpl".
+     * Returns the name of the Ecore interface of an Ecore implementation class name. E.g. returns "model.Main" when given
+     * "model.impl.MainImpl".
      */
     private String getInterfaceName(String typeName) {
         String interfaceName = nameUtil.append(nameUtil.cutLastSegments(typeName, 2), nameUtil.getLastSegment(typeName));
@@ -122,9 +124,9 @@ public class EcoreImportManipulator extends AbstractCodeManipulator {
 
     /**
      * Checks whether an {@link ICompilationUnit} is an Ecore implementation class. Ecore implementation classes are the
-     * classes that implement the Ecore interfaces. The Ecore implementation classes are the types whose imports should
-     * be edited. This method first checks the compilation unit on correct naming and then on the existence of a
-     * counterpart in the Ecore metamodel
+     * classes that implement the Ecore interfaces. The Ecore implementation classes are the types whose imports should be
+     * edited. This method first checks the compilation unit on correct naming and then on the existence of a counterpart in
+     * the Ecore metamodel
      */
     private boolean isEcoreImplementation(ICompilationUnit unit) throws JavaModelException {
         String typeName = nameUtil.cutFirstSegment(getPackageMemberName(unit));
@@ -136,8 +138,8 @@ public class EcoreImportManipulator extends AbstractCodeManipulator {
     }
 
     /**
-     * Checks whether a fully qualified type name identifies a type which could be part of an Ecore implementation
-     * package. That means the last package of the type name is called impl and the type name end with the suffix Impl.
+     * Checks whether a fully qualified type name identifies a type which could be part of an Ecore implementation package.
+     * That means the last package of the type name is called impl and the type name end with the suffix Impl.
      */
     private boolean isEcoreImplementationName(String typeName) {
         return nameUtil.getLastSegment(nameUtil.cutLastSegment(typeName)).equals("impl") && typeName.endsWith("Impl");
@@ -179,9 +181,9 @@ public class EcoreImportManipulator extends AbstractCodeManipulator {
     }
 
     /**
-     * Changes the imports of a compilation unit and its Ecore interface if it is an Ecore implementation class. The
-     * super interface declarations of the classes are retained, while the import declarations of the Ecore type are
-     * changed to the relating types of the origin code.
+     * Changes the imports of a compilation unit and its Ecore interface if it is an Ecore implementation class. The super
+     * interface declarations of the classes are retained, while the import declarations of the Ecore type are changed to
+     * the relating types of the origin code.
      * @param unit is the {@link ICompilationUnit}.
      * @throws JavaModelException if there are problems with the Java model.
      */
@@ -195,9 +197,9 @@ public class EcoreImportManipulator extends AbstractCodeManipulator {
 
     /**
      * Changes the imports in the same package of a compilation unit if it is an Ecore interface. The super interface
-     * declarations of the classes are retained, while the import declarations of the Ecore type are changed to the
-     * relating types of the origin code, which are not represented as imports, as the Ecore types of the interfaces
-     * reside in the same package.
+     * declarations of the classes are retained, while the import declarations of the Ecore type are changed to the relating
+     * types of the origin code, which are not represented as imports, as the Ecore types of the interfaces reside in the
+     * same package.
      * @param unit is the {@link ICompilationUnit}.
      * @throws JavaModelException if there are problems with the Java model.
      */
@@ -228,14 +230,17 @@ public class EcoreImportManipulator extends AbstractCodeManipulator {
      * Retains the super interface declarations and type parameter bounds of the Ecore interface and its implementation.
      */
     private void retainTypes(ICompilationUnit ecoreImplementation, ICompilationUnit ecoreInterface) throws JavaModelException {
-        // always use the implementation imports to resolve classes in the same package with the interface:
-        applyRetentionVisitor(ecoreImplementation, ecoreImplementation.getImports());
-        applyRetentionVisitor(ecoreInterface, ecoreImplementation.getImports());
+        IImportDeclaration[] implementationImports = ecoreImplementation.getImports();
+        IImportDeclaration[] interfaceImports = ecoreInterface.getImports();
+        IImportDeclaration[] combinedImports = Arrays.copyOf(implementationImports, implementationImports.length + interfaceImports.length);
+        System.arraycopy(interfaceImports, 0, combinedImports, implementationImports.length, interfaceImports.length);
+        applyRetentionVisitor(ecoreImplementation, implementationImports);
+        applyRetentionVisitor(ecoreInterface, combinedImports); // use combined imports for ecore interface
     }
 
     /**
-     * Edits an {@link IImportDeclaration} with the help of an {@link ImportRewrite} instance to refer to the origin
-     * code instead to the Ecore code.
+     * Edits an {@link IImportDeclaration} with the help of an {@link ImportRewrite} instance to refer to the origin code
+     * instead to the Ecore code.
      */
     private void rewriteImport(IImportDeclaration importDeclaration, ImportRewrite implementationRewrite, ImportRewrite interfaceRewrite) {
         String oldName = importDeclaration.getElementName();
@@ -267,9 +272,8 @@ public class EcoreImportManipulator extends AbstractCodeManipulator {
 
     /**
      * Changes the imports of a compilation unit and its Ecore interface if it is an Ecore implementation class and the
-     * imports of types in the same package if it is an Ecore interface. The super interface declarations of the classes
-     * are retained, while the import declarations of the Ecore type are changed to the relating types of the origin
-     * code.
+     * imports of types in the same package if it is an Ecore interface. The super interface declarations of the classes are
+     * retained, while the import declarations of the Ecore type are changed to the relating types of the origin code.
      * @param unit is the {@link ICompilationUnit}.
      * @throws JavaModelException if there are problems with the Java model.
      */

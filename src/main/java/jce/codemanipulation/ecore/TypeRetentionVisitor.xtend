@@ -103,8 +103,8 @@ class TypeRetentionVisitor extends ASTVisitor {
 	 */
 	@SuppressWarnings("unchecked") def private void retainSuperInterface(Type oldInterface, TypeDeclaration node, AST ast) {
 		var SimpleType interfaceType = TypeUtil.getSimpleType(oldInterface)
-		if(isNotEObject(interfaceType)) {
-			var String newName = resolveInterfaceName(interfaceType)
+		if (isNotEObject(interfaceType)) {
+			var newName = resolveInterfaceName(interfaceType)
 			var Type newSuperInterface = ast.newSimpleType(ast.newName(newName))
 			newSuperInterface = copyParameters(oldInterface, newSuperInterface, ast)
 			node.superInterfaceTypes.remove(oldInterface)
@@ -116,7 +116,7 @@ class TypeRetentionVisitor extends ASTVisitor {
 	 * Adds all type parameters the old super interface to the new super interface.
 	 */
 	@SuppressWarnings("unchecked") def private Type copyParameters(Type oldInterface, Type newInterface, AST ast) {
-		if(oldInterface.isParameterizedType) { // if interface has parameters
+		if (oldInterface.isParameterizedType) { // if interface has parameters
 			var ParameterizedType parameterizedType = ast.newParameterizedType(newInterface) // parameterized new interface
 			var ParameterizedType castedType = (oldInterface as ParameterizedType) // cast old interface
 			for (Type type : RawTypeUtil.castList(Type, castedType.typeArguments)) {
@@ -136,6 +136,7 @@ class TypeRetentionVisitor extends ASTVisitor {
 		if (type.name.qualifiedName) {
 			return type.name.fullyQualifiedName
 		}
+		// try to resolve name from imports, use current package + name as "last resort" (types in same package have no imports).
 		return nameFromImports(type) ?: pathHelper.append(currentPackage, type.name.fullyQualifiedName)
 	}
 
@@ -158,7 +159,7 @@ class TypeRetentionVisitor extends ASTVisitor {
 				return declaration.elementName
 			}
 		}
-		return null
+		return null // did not find type in imports
 	}
 
 	/** 
