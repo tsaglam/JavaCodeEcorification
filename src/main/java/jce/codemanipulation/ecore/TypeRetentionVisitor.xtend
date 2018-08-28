@@ -50,18 +50,13 @@ class TypeRetentionVisitor extends ASTVisitor {
 	 * Visits all type declarations and retains the super interface types.
 	 */
 	override boolean visit(TypeDeclaration node) {
-		for (Type superInterface : RawTypeUtil.castList(Type, node.superInterfaceTypes)) {
+		for (superInterface : RawTypeUtil.castList(Type, node.superInterfaceTypes)) {
 			retainSuperInterface(superInterface, node, node.AST)
 		}
-		return super.visit(node)
-	}
-
-	/**
-	 * Visits all type parameter declarations and retains bound types.
-	 */
-	override boolean visit(TypeParameter node) {
-		for (Type bound : RawTypeUtil.castList(Type, node.typeBounds)) {
-			retainBoundType(bound)
+		for (parameter : RawTypeUtil.castList(TypeParameter, node.typeParameters)) {
+			for (Type bound : RawTypeUtil.castList(Type, parameter.typeBounds)) {
+				retainBoundType(bound)
+			}
 		}
 		return super.visit(node)
 	}
