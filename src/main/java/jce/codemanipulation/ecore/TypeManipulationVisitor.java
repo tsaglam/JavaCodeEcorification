@@ -7,6 +7,7 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeParameter;
 
 import jce.util.PathHelper;
 import jce.util.RawTypeUtil;
@@ -25,8 +26,7 @@ public class TypeManipulationVisitor extends ASTVisitor {
 
     /**
      * Basic constructor. Sets the name of the origin type.
-     * @param originType is the fully qualified name of the correlating origin type of the Ecore interface which is
-     * visited.
+     * @param originType is the fully qualified name of the correlating origin type of the Ecore interface which is visited.
      */
     public TypeManipulationVisitor(String originType) {
         super();
@@ -36,19 +36,19 @@ public class TypeManipulationVisitor extends ASTVisitor {
 
     @Override
     public boolean visit(MethodDeclaration node) {
-        AST ast = node.getAST();
-        checkParameters(node, ast);
-        checkReturnType(node, ast);
+        checkParameters(node);
+        checkReturnType(node);
+        checkTypeParameters(node);
         return super.visit(node);
     }
 
     /**
      * Checks if parameters are self references and replaces them if they are.
      */
-    private void checkParameters(MethodDeclaration method, AST ast) {
+    private void checkParameters(MethodDeclaration method) {
         for (SingleVariableDeclaration parameter : RawTypeUtil.castList(SingleVariableDeclaration.class, method.parameters())) {
             if (isSelfReference(parameter.getType())) {
-                parameter.setType(createOriginType(ast));
+                parameter.setType(createOriginType(method.getAST()));
                 logger.info("Manually changed type of parameter " + parameter.getName() + " to " + originType);
             }
         }
@@ -57,10 +57,26 @@ public class TypeManipulationVisitor extends ASTVisitor {
     /**
      * Checks if the method return type is a self references and replaces it if it is.
      */
-    private void checkReturnType(MethodDeclaration method, AST ast) {
+    private void checkReturnType(MethodDeclaration method) {
         if (isSelfReference(method.getReturnType2())) {
-            method.setReturnType2(createOriginType(ast));
+            method.setReturnType2(createOriginType(method.getAST()));
             logger.info("Manually changed return type of method " + method.getName() + " to " + originType);
+        }
+    }
+
+    /**
+     * Checks if bounds of method type parameters are self references and replaces them if they are.
+     */
+    @SuppressWarnings("unchecked")
+    private void checkTypeParameters(MethodDeclaration method) {
+        for (TypeParameter parameter : RawTypeUtil.castList(TypeParameter.class, method.typeParameters())) {
+            for (Type bound : RawTypeUtil.castList(Type.class, parameter.typeBounds())) {
+                if (isSelfReference(bound)) {
+                    bound.delete();
+                    parameter.typeBounds().add(createOriginType(method.getAST()));
+                    logger.info("Manually changed bound of typ parameter " + parameter.getName() + " to " + originType);
+                }
+            }
         }
     }
 
