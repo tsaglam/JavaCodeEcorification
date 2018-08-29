@@ -74,12 +74,13 @@ class TypeParameterRepresentation {
 			checkGenericType(argument, importDeclaration, ecoreInterface)
 		}
 	}
-
+	
 	/**
 	 * Checks if a import declarations ends with the name of the EClassifier of an EGenericType (which is either a type parameter bound or a generic argument of a type parameter bound). If that is the case, the import will be added to the list of necessary imports.
 	 */
 	def private void checkImport(IImportDeclaration importDeclaration, EGenericType type) {
-		if(importDeclaration.elementName.endsWith(type.EClassifier.name)) {
+		val name = type.EClassifier?.name
+		if(name !== null && importDeclaration.elementName.endsWith(name)) { // TODO (MEDIUM) when does this fail? (Generic Self Reference Test)
 			imports.add(importDeclaration.elementName) // add to import string list.
 		}
 	}
