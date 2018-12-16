@@ -95,7 +95,7 @@ final class ASTUtil {
 	 */
 	def static CompilationUnit parse(ICompilationUnit unit, IProgressMonitor monitor) throws JavaModelException {
 		unit.becomeWorkingCopy(monitor)
-		var ASTParser parser = ASTParser.newParser(AST.JLS8) // TODO (MEDIUM) replace with AST.JLS10 eventually
+		var ASTParser parser = ASTParser.newParser(AST.JLS10)
 		var Map<String, String> options = JavaCore.options
 		JavaCore.setComplianceOptions(JavaCore.VERSION_1_8, options)
 		parser.setCompilerOptions(options)

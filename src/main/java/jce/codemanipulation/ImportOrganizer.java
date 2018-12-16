@@ -9,7 +9,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation;
+import org.eclipse.jdt.core.manipulation.OrganizeImportsOperation;
 import org.eclipse.text.edits.TextEdit;
 
 import jce.properties.EcorificationProperties;
@@ -20,7 +20,6 @@ import jce.util.logging.MonitorFactory;
  * Organizes the imports of the whole source code of a project.
  * @author Timur Saglam
  */
-@SuppressWarnings("restriction")  // TODO (LOW) This class uses LTK classes & methods that are not marked as API
 public class ImportOrganizer extends AbstractCodeManipulator {
     private static final Logger logger = LogManager.getLogger(AbstractCodeManipulator.class.getName());
     private IProgressMonitor monitor;
@@ -37,7 +36,7 @@ public class ImportOrganizer extends AbstractCodeManipulator {
     @Override
     protected void manipulate(ICompilationUnit unit) throws JavaModelException {
         unit.becomeWorkingCopy(monitor); // changes unit handle to working copy
-        CompilationUnit reconciledUnit = unit.reconcile(AST.JLS8, false, null, monitor); // TODO (MEDIUM) replace with AST.JLS10 eventually
+        CompilationUnit reconciledUnit = unit.reconcile(AST.JLS10, false, null, monitor);
         try {
             OrganizeImportsOperation operation = new OrganizeImportsOperation(unit, reconciledUnit, true, true, true, null);
             TextEdit edit = operation.createTextEdit(monitor);
