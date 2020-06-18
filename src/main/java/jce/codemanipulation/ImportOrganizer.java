@@ -36,7 +36,7 @@ public class ImportOrganizer extends AbstractCodeManipulator {
     @Override
     protected void manipulate(ICompilationUnit unit) throws JavaModelException {
         unit.becomeWorkingCopy(monitor); // changes unit handle to working copy
-        CompilationUnit reconciledUnit = unit.reconcile(AST.JLS10, false, null, monitor);
+        CompilationUnit reconciledUnit = unit.reconcile(AST.JLS14 , false, null, monitor);
         try {
             OrganizeImportsOperation operation = new OrganizeImportsOperation(unit, reconciledUnit, true, true, true, null);
             TextEdit edit = operation.createTextEdit(monitor);

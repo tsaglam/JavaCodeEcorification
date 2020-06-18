@@ -11,7 +11,7 @@ This process is depicted in the following diagram:
 ## How to install:
 1. Clone or download the project.
 2. Import as existing project into the Eclipse IDE.
-3. Do the steps one and two of the [EcoreMetamodelExtraction project](https://github.com/tsaglam/EcoreMetamodelExtraction) installation instructions (use Eclipse 2018-09 or newer, Oxygen is no longer supported).
-4. You need the Eclipse Modeling Framework, the Eclipse Java Development Tools, the Eclipse Plug-in Development Environment, the Xtend IDE and [XAnnotations](https://github.com/kit-sdq/XAnnotations). Make sure that all five are installed.
+3. Do the steps one and two of the [EcoreMetamodelExtraction project](https://github.com/tsaglam/EcoreMetamodelExtraction) installation instructions (use Eclipse 2018-09 or newer, Oxygen is no longer supported, tested up to Eclipse 2020-06).
+4. You need the Eclipse Modeling Framework, the Eclipse Java Development Tools, the Eclipse Plug-in Development Environment, the Xtend IDE, [XAnnotations](https://github.com/kit-sdq/XAnnotations), and log4j. Make sure that all of them are installed.
 5. Run the project as Eclipse Application.
 6. You can start the extraction from the context menu of a Java project (provisional UI).
